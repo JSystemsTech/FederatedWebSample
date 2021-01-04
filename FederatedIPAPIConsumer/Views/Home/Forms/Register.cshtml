@@ -1,0 +1,30 @@
+﻿@model FederatedIPAPIConsumer.Models.RegisterFormVM
+@using HtmlExtensions.Bootstrap4FormControl
+@Html.AntiForgeryToken()
+
+<div class="form-group">
+    @Html.BootstrapTextInputFormControlFor(m => m.FirstName, new { @aria_describedby = "FirstNameHelp" }).AddLabelAndValidation()
+    <small id="FirstNameHelp" class="form-text text-muted">We'll never share your email with anyone else.</small>
+</div>
+    <div class="form-group">
+        @Html.BootstrapTextInputFormControlFor(m => m.MiddleName, new { @aria_describedby = "MiddleNameHelp" }).AddLabelAndValidation()
+        <small id="MiddleNameHelp" class="form-text text-muted">We'll never share your email with anyone else.</small>
+    </div>
+    <div class="form-group">
+        @Html.BootstrapTextInputFormControlFor(m => m.LastName, new { @aria_describedby = "LastNameHelp" }).AddLabelAndValidation()
+        <small id="LastNameHelp" class="form-text text-muted">We'll never share your email with anyone else.</small>
+    </div>
+    <div class="form-group">
+        @Html.BootstrapEmailInputFormControlFor(m => m.Email, new { @aria_describedby = "EmailHelp" }).AddLabelAndValidation()
+        <small id="EmailHelp" class="form-text text-muted">We'll never share your email with anyone else.</small>
+    </div>
+    <div class="form-group">
+        @Html.BootstrapPasswordInputFormControlFor(m => m.Password, new { @aria_describedby = "PasswordHelp" }).AddLabelAndValidation()
+        <small id="PasswordHelp" class="form-text text-muted">We'll never share your email with anyone else.</small>
+    </div>
+    <div class="form-group">
+        @Html.BootstrapPasswordInputFormControlFor(m => m.ConfirmPassword, new { @aria_describedby = "ConfirmPasswordHelp" }).AddLabelAndValidation()
+        <small id="ConfirmPasswordHelp" class="form-text text-muted">We'll never share your email with anyone else.</small>
+    </div>
+    <button type="submit" class="btn btn-primary" data-form="submit">Submit Form</button>
+

@@ -1,0 +1,53 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.30114.105
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FederatedIPAPI", "FederatedIPAPI\FederatedIPAPI.csproj", "{EA5F2495-6B9B-4B76-9D63-DDB5C3D2AB64}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FederatedIPAPIConsumer", "FederatedIPAPIConsumer\FederatedIPAPIConsumer.csproj", "{6C215DF5-244E-4E05-851A-444B2ECAF728}"
+EndProject
+Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "FederatedIPAuthenticationService", "FederatedIPAuthenticationService\FederatedIPAuthenticationService.shproj", "{CF3B8EF4-F456-416C-9A78-9EB6FB4AE1E3}"
+EndProject
+Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "HtmlExtensionsShared", "HtmlExtensions\HtmlExtensionsShared.shproj", "{2EB9252A-AB19-4111-9589-5F743C8B0564}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FederatedIPAPIAuthenticationProviderWeb", "FederatedIPAPIAuthenticationProviderWeb\FederatedIPAPIAuthenticationProviderWeb.csproj", "{10C0726B-492D-45D4-BB27-188774B843EF}"
+EndProject
+Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "ServiceLayer", "ServiceLayer\ServiceLayer.shproj", "{28D7054F-5557-494C-BF43-75DC36F29F7F}"
+EndProject
+Global
+	GlobalSection(SharedMSBuildProjectFiles) = preSolution
+		FederatedIPAuthenticationService\FederatedIPAuthenticationService.projitems*{10c0726b-492d-45d4-bb27-188774b843ef}*SharedItemsImports = 4
+		HtmlExtensions\HtmlExtensions.projitems*{10c0726b-492d-45d4-bb27-188774b843ef}*SharedItemsImports = 4
+		ServiceLayer\ServiceLayer.projitems*{28d7054f-5557-494c-bf43-75dc36f29f7f}*SharedItemsImports = 13
+		HtmlExtensions\HtmlExtensions.projitems*{2eb9252a-ab19-4111-9589-5f743c8b0564}*SharedItemsImports = 13
+		FederatedIPAuthenticationService\FederatedIPAuthenticationService.projitems*{6c215df5-244e-4e05-851a-444b2ecaf728}*SharedItemsImports = 4
+		HtmlExtensions\HtmlExtensions.projitems*{6c215df5-244e-4e05-851a-444b2ecaf728}*SharedItemsImports = 4
+		ServiceLayer\ServiceLayer.projitems*{6c215df5-244e-4e05-851a-444b2ecaf728}*SharedItemsImports = 4
+		FederatedIPAuthenticationService\FederatedIPAuthenticationService.projitems*{cf3b8ef4-f456-416c-9a78-9eb6fb4ae1e3}*SharedItemsImports = 13
+	EndGlobalSection
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{EA5F2495-6B9B-4B76-9D63-DDB5C3D2AB64}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{EA5F2495-6B9B-4B76-9D63-DDB5C3D2AB64}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{EA5F2495-6B9B-4B76-9D63-DDB5C3D2AB64}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{EA5F2495-6B9B-4B76-9D63-DDB5C3D2AB64}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6C215DF5-244E-4E05-851A-444B2ECAF728}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6C215DF5-244E-4E05-851A-444B2ECAF728}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6C215DF5-244E-4E05-851A-444B2ECAF728}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6C215DF5-244E-4E05-851A-444B2ECAF728}.Release|Any CPU.Build.0 = Release|Any CPU
+		{10C0726B-492D-45D4-BB27-188774B843EF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{10C0726B-492D-45D4-BB27-188774B843EF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{10C0726B-492D-45D4-BB27-188774B843EF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{10C0726B-492D-45D4-BB27-188774B843EF}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {FD70151E-73EC-421D-AEA4-AF15B56A9032}
+	EndGlobalSection
+EndGlobal

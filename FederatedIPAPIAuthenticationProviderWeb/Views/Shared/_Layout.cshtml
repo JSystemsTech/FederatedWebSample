@@ -1,0 +1,85 @@
+﻿@using FederatedIPAuthenticationService.Extensions
+@using FederatedIPAuthenticationService.Configuration
+@{
+    ISiteMeta SiteMeta = ViewBag.SiteMeta as ISiteMeta;
+    ISiteMeta ConsumingApplicationSiteMeta = ViewBag.ConsumingApplicationSiteMeta as ISiteMeta;
+    bool ShowSpinner = ViewBag.ShowSpinner == true;
+}
+<!DOCTYPE html>
+<html class="h-100">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>@ConsumingApplicationSiteMeta.SiteName - Powered By - @SiteMeta.SiteName</title>
+    @Styles.Render("~/Content/css")
+    @Scripts.Render("~/bundles/modernizr")
+</head>
+<body class="d-flex flex-column h-100">
+    @Html.PageLoadLink()
+    @Html.AntiForgeryForm()
+    <main class="flex-shrink-0 py-5 my-5">
+        <div class="form-signin body-content text-center">
+           
+            <div class="card bg-light">
+                <div class="card-avatar card-avatar-primary">
+
+                    <i class="fa fa-user icon"></i>
+                    @if (ShowSpinner)
+                    {
+                        <div class="loader spin"></div>
+                    }
+                </div>
+                <div class="card-body text-dark text-center pt-5">
+                    <div class="row">
+                        <div class="col">
+                            <h4>@ConsumingApplicationSiteMeta.SiteName</h4>
+                            <p class="my-0">
+                                @ConsumingApplicationSiteMeta.SiteDescription
+                            </p>
+                            <p class="mb-0"><small class="ml-2 badge badge-primary">@ConsumingApplicationSiteMeta.SiteVersion - @ConsumingApplicationSiteMeta.SiteEnvironment</small></p>
+                        </div>
+                    </div>
+                    <hr>
+                    @RenderBody()
+                    <hr>
+                    <div class="row">
+                        <div class="col">
+                            <p class="my-0">
+                                Powered By
+                            </p>
+                            <p class="my-0">
+                                @SiteMeta.SiteName
+                            </p>
+                            <p class="mb-0"><small class="ml-2">@SiteMeta.SiteDescription</small></p>
+                            <p class="mb-0"><small class="ml-2 badge badge-primary">@SiteMeta.SiteVersion - @SiteMeta.SiteEnvironment</small></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+    @{
+        Html.RenderPartial("AlertModal", "default");
+    }
+    @if (ViewBag.IsAuthenticated)
+    {
+        Html.RenderPartial("AlertModal", "sessionTimeout");
+    }
+    @Scripts.Render("~/bundles/jquery")
+    @Scripts.Render("~/bundles/bootstrap")
+    @Scripts.Render("~/bundles/dataTables")
+    @Scripts.Render("~/bundles/client-libraries")
+
+
+
+    @Scripts.Render("~/bundles/site")
+    <script type="text/javascript">
+        $.siteInit({
+            authenticated: '@ViewBag.IsAuthenticated' === 'True',
+            siteMap: '@Html.Raw(ViewBag.SiteMap)',
+            sessionTimeout: parseFloat('@ViewBag.SessionTimeout')
+        });
+    </script>
+    @RenderSection("scripts", required: false)
+</body>
+</html>

@@ -1,0 +1,42 @@
+﻿@using FederatedIPAuthenticationService.Extensions
+@{
+    ViewBag.Title = "Login";
+    string action = ViewBag.IsPostback == true ? "SignIn" : "Flex";
+    string returnUrl = ViewBag.ReturnUrl.ToString();
+}
+
+<h2>Login</h2>
+@using (Html.BeginForm(action, "Home", FormMethod.Post, new {@id="LoginForm" }))
+{
+    @Html.AntiForgeryToken()
+    @Html.Hidden("returnUrl", returnUrl)
+    if (ViewBag.IsPostback == true)
+    {
+        @Html.FederatedIPAuthToken();
+        <button type="submit" id="LoginButton" class="btn btn-primry hidden">Login</button>
+    }
+    else
+    {
+        <button type="submit" id="LoginButton" class="btn btn-primry">Login</button>
+    }
+
+}
+@section scripts{
+    @if (ViewBag.IsPostback == true)
+    {
+        <script type="text/javascript">
+            document.getElementById("LoginButton").click();
+        </script>
+    }
+    else
+    {
+        <script type="text/javascript">
+            $.FlexLogin = function () {
+                var formData = $('#LoginForm').serializeArray();
+                console.log(formData);
+                return $.siteMap.Default.Home.FlexPOST.post(formData);
+            };
+        </script>
+    }
+
+}

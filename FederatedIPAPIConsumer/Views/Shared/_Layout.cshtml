@@ -1,0 +1,129 @@
+﻿@using FederatedIPAuthenticationService.Extensions
+@using FederatedIPAuthenticationService.Configuration
+@{
+    ISiteMeta SiteMeta = ViewBag.SiteMeta as ISiteMeta;
+    bool isDarkMode = ViewBag.CssMode is string cssMode && cssMode.ToLower() == "dark";
+}
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>@ViewBag.Title - My ASP.NET Application</title>
+    @if (isDarkMode)
+    {
+        @Styles.Render("~/Content/css-dark")
+    }
+    else
+    {
+        @Styles.Render("~/Content/css")
+    }
+
+    @Scripts.Render("~/bundles/modernizr")
+</head>
+<body>
+    @if (ViewBag.Logout == true)
+    {
+        <main>
+            <div class="container body-content">
+                @RenderBody()
+            </div>
+        </main>
+    }
+    else
+    {
+        @Html.PageLoadLink()
+        @Html.AntiForgeryForm()
+        <header>
+            @{ 
+                string navBarClasses = isDarkMode ? "navbar-dark bg-secondary" : "navbar-dark bg-dark";
+            }
+            <nav class="navbar navbar-expand-lg @(navBarClasses)">
+                <a class="navbar-brand" href="#">
+                    <span class="row">
+                        <span class="col-12">@SiteMeta.SiteName</span>
+                        <span class="col-12"><small>@SiteMeta.SiteDescription</small></span>
+                    </span>
+                </a>
+                <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+
+                <div class="collapse navbar-collapse" id="navbarSupportedContent">
+
+                    @if (ViewBag.IsAuthenticated)
+                    {
+                        <ul class="navbar-nav mr-auto">
+                            <li class="nav-item">
+                                @Html.ActionLink("Home", "Index", "Home", new { }, new { @class = "nav-link" })
+                            </li>
+                            <li class="nav-item">
+                                @Html.ActionLink("About", "About", "Home", new { }, new { @class = "nav-link" })
+                            </li>
+                            <li class="nav-item">
+                                @Html.ActionLink("Contact", "Contact", "Home", new { }, new { @class = "nav-link" })
+                            </li>
+
+                        </ul>
+                        <ul class="navbar-nav">
+                            <li class="nav-item mr-2">
+                                <div class="navbar-text">@ViewBag.CurrentUserName</div>
+                            </li>
+                            <li class="nav-item">
+                                <div class="navbar-text logout-countdown"></div>
+                            </li>
+                            
+                            <li class="nav-item">
+                                @Html.ActionLink("Logout", "Logout", "Home", new { }, new { @class = "nav-link" })
+                            </li>
+                            <li class="nav-item">
+
+                                @if (isDarkMode)
+                                {
+                                    @Html.ActionLink("View Light Mode", "ChangeCss", "Home", new { }, new { @class = "nav-link" })
+                                }
+                                else
+                                {
+                                    @Html.ActionLink("View Dark Mode", "ChangeCss", "Home", new { cssMode = "dark" }, new { @class = "nav-link" })
+                                }
+                            </li>
+                        </ul>
+                    }
+
+                </div>
+            </nav>
+        </header>
+        <main>
+            <div class="container body-content">
+                @RenderBody()
+            </div>
+        </main>
+        <hr />
+        <footer>
+            <p>&copy; @DateTime.Now.Year - My ASP.NET Application</p>
+        </footer>
+        
+        Html.RenderPartial("AlertModal", "default");
+        if (ViewBag.IsAuthenticated)
+        {
+            Html.RenderPartial("AlertModal", "sessionTimeout");
+        }
+        @Scripts.Render("~/bundles/jquery")
+        @Scripts.Render("~/bundles/bootstrap")
+        @Scripts.Render("~/bundles/dataTables")
+
+
+
+        @Scripts.Render("~/bundles/site")
+        <script type="text/javascript">
+        $.siteInit({
+            authenticated: '@ViewBag.IsAuthenticated' === 'True',
+            siteMap: '@Html.Raw(ViewBag.SiteMap)',
+            sessionTimeout: parseFloat('@ViewBag.SessionTimeout')
+        });
+        </script>
+    }
+
+    @RenderSection("scripts", required: false)
+</body>
+</html>

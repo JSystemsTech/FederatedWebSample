@@ -1,0 +1,30 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <MSBuildAllProjects Condition="'$(MSBuildVersion)' == '' Or '$(MSBuildVersion)' &lt; '16.0'">$(MSBuildAllProjects);$(MSBuildThisFileFullPath)</MSBuildAllProjects>
+    <HasSharedItems>true</HasSharedItems>
+    <SharedGUID>2eb9252a-ab19-4111-9589-5f743c8b0564</SharedGUID>
+  </PropertyGroup>
+  <PropertyGroup Label="Configuration">
+    <Import_RootNamespace>HtmlExtensions</Import_RootNamespace>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="$(MSBuildThisFileDirectory)Bootstrap4FormControl\Bootstrap4CheckboxFormControlForExtensions.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Bootstrap4FormControl\Bootstrap4FormControlExtensions.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Bootstrap4FormControl\Bootstrap4InputFormControlForExtensions.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Bootstrap4FormControl\Bootstrap4RadioFormControlForExtensions.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Bootstrap4FormControl\Bootstrap4SelectFormControlForExtensions.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Bootstrap4FormControl\Bootstrap4TextareaFormControlControlForExtensions.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Bootstrap4FormControl\Bootstrap4ValidationSummary.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)FormControl\FormControlExtensions.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)FormControl\InputFormControlForExtensions.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)FormControl\MultiSelectListForExtensions.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)FormControl\SingleSelectListForExtensions.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)FormControl\TextareaFormControlForExtensions.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)ModelStateExtensions.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)StringExtensions.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)TemplateExtensions.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)ViewContextExtensions.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)ViewExtensions.cs" />
+  </ItemGroup>
+</Project>

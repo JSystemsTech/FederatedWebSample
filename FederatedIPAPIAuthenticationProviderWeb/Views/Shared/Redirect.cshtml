@@ -1,0 +1,21 @@
+﻿@using FederatedIPAuthenticationService.Extensions
+
+@if (ViewBag.IsPostback == true)
+{
+<form action="@ViewBag.PostBackAction" method="post">
+    @Html.FederatedIPAuthToken()
+    <button type="submit" id="RedirectAction" class="d-none"></button>
+</form>
+}
+else
+{
+    <a href="@ViewBag.PostBackAction" id="RedirectAction" class="d-none"></a>
+}
+
+@section scripts{
+    <script type="text/javascript">
+        document.getElementById("RedirectAction").click();
+    </script>
+}
+
+

@@ -1,0 +1,26 @@
+﻿
+@{
+    ViewBag.Title = "CACService";
+}
+<form action="@ViewBag.PostBackAction" class="mt-5 mb-2" id="PostBack" method="post">
+    @if (ViewBag.PostBackValues is IDictionary<string, string> postBackValues)
+    {
+        foreach (var param in postBackValues)
+        {
+            @Html.Hidden(param.Key, param.Value)
+        }
+    }
+    @Html.Hidden("token", Guid.NewGuid())
+    <div class="form-row">
+        <div class="col">
+            <p>CAC Service</p>
+            <p><small>Mock up of a CAC (FOR DEMO ONLY. DO NOT USE IN PRODUCTION)</small></p>
+            <button type="submit" class="btn btn-primary w-100" data-toggle="popover" title="Complete CAC Request" data-content="Complete Request for Common Access Card (CAC)" data-trigger="hover" data-container="body" data-placement="top">
+                <span class="ml-1"><i class="fa fa-sign-in-alt"></i></span>
+                <span class="ml-1">Complete CAC Request</span>
+            </button>
+        </div>
+    </div>
+</form>
+
+

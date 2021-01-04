@@ -1,0 +1,21 @@
+﻿@model FederatedIPAuthenticationService.Configuration.ISiteMeta
+
+<div class="jumbotron m-5">
+    <div class="row">
+        <div class="col">
+            <h1>@Model.SiteName</h1>
+            <p class="lead">
+                @Model.SiteDescription
+            </p>
+            <p>
+                Logging Out
+            </p>
+        </div>
+    </div>
+</div>
+<a href="@ViewBag.RedirectUrl" id="RedirectAction" class="d-none"></a>
+@section scripts{
+    <script type="text/javascript">
+        document.getElementById("RedirectAction").click();
+    </script>
+}

@@ -1,0 +1,17 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <MSBuildAllProjects>$(MSBuildAllProjects);$(MSBuildThisFileFullPath)</MSBuildAllProjects>
+    <HasSharedItems>true</HasSharedItems>
+    <SharedGUID>3cd6f391-6d0d-4e5d-824e-86c9bd55ff01</SharedGUID>
+  </PropertyGroup>
+  <PropertyGroup Label="Configuration">
+    <Import_RootNamespace>WebApiClientShared</Import_RootNamespace>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="$(MSBuildThisFileDirectory)ApiClientFactory.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)ApiEndpoint.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)ApiClient.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Models\ApiResponse.cs" />
+  </ItemGroup>
+</Project>

@@ -1,0 +1,236 @@
+﻿@model FederatedIPAPIAuthenticationProviderWeb.Models.LoginVM
+@using FederatedIPAuthenticationService.Configuration
+@using FederatedIPAuthenticationService.Extensions
+@using HtmlExtensions.Bootstrap4FormControl
+@using FederatedIPAuthenticationService.Web
+@{
+    ISiteMeta SiteMeta = ViewBag.SiteMeta as ISiteMeta;
+    ISiteMeta ConsumingApplicationSiteMeta = ViewBag.ConsumingApplicationSiteMeta as ISiteMeta;
+    string controller = ConsumingApplicationSiteMeta.SiteId;
+}
+
+@if (Model.ConsumingApplicationSiteMeta.AuthenticationModes.Contains(AuthenticationMode.CAC))
+{
+    using (Html.BeginForm("Login", "Home", new { Mode = AuthenticationMode.CAC }, FormMethod.Post, new { @id = "LoginFormCAC" }))
+    {
+        @Html.AntiForgeryToken()
+        <div class="form-row mb-2">
+            <div class="col">
+                <button type="submit" class="btn btn-primary w-100" data-toggle="popover" title="Common Access Card" data-content="Login to @(Model.ConsumingApplicationSiteMeta.SiteName) with Common Access Card (CAC)" data-trigger="hover" data-container="body" data-placement="top">
+                    <span class="ml-1"><i class="fa fa-sim-card"></i></span>
+                    <span class="ml-1">CAC Login</span>
+                </button>
+            </div>
+        </div>
+    }
+}
+
+@if (Model.ConsumingApplicationSiteMeta.AuthenticationModes.Contains(AuthenticationMode.Test))
+{
+    using (Html.BeginForm("Login", "Home", new { Mode = AuthenticationMode.Test }, FormMethod.Post, new { @id = "LoginFormTest" }))
+    {
+        @Html.AntiForgeryToken()
+        <div class="form-row">
+            <div class="col">
+                <div class="dropdown w-100">
+                    <button class="btn btn-secondary dropdown-toggle w-100" type="button" id="TestUsersDropdown" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                        <span class="ml-1"><i class="fa fa-user-alt"></i></span>
+                        <span class="ml-1">Test Login</span>
+                    </button>
+                    <div class="dropdown-menu w-100" aria-labelledby="TestUsersDropdown">
+                        @foreach (var user in Model.TestUsers)
+                        {
+                            <button class="dropdown-item" type="button" data-form-action="@Url.Action("Login", "Home", new { Mode=AuthenticationMode.Test, TestUserGuid = user.Guid})" data-toggle="tooltip" title="@string.Join(", ", user.Roles)">@user.Name</button>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+}
+
+@if (Model.ConsumingApplicationSiteMeta.AuthenticationModes.Contains(AuthenticationMode.Basic))
+{
+    using (Html.BeginForm("Login", "Home", new { Mode = AuthenticationMode.Basic }, FormMethod.Post, new { @id = "LoginFormBasic" }))
+    {
+        @Html.AntiForgeryToken()
+        <div class="form-row">
+            <div class="col-12 text-left">
+                @Html.BootstrapTextInputFormControlFor(m => m.Username).AddLabelAndValidation()
+            </div>
+        </div>
+        <div class="form-row">
+            <div class="col-12 text-left">
+                @Html.BootstrapPasswordInputFormControlFor(m => m.Password).AddLabelAndValidation()
+            </div>
+        </div>
+        <div class="form-row mt-1">
+            <div class="col-12 text-left">
+                <button type="submit" class="btn btn-primary w-100" data-toggle="popover" title="Login" data-content="Login to @(ConsumingApplicationSiteMeta.SiteName) with username and password" data-trigger="hover" data-container="body" data-placement="top">
+                    <span class="ml-1"><i class="fa fa-sign-in-alt"></i></span>
+                    <span class="ml-1">Login</span>
+                </button>
+            </div>
+        </div>
+    }
+}
+else if (Model.ConsumingApplicationSiteMeta.AuthenticationModes.Contains(AuthenticationMode.Email))
+{
+    using (Html.BeginForm("Login", "Home", new { Mode = AuthenticationMode.Email }, FormMethod.Post, new { @id = "LoginFormEmail" }))
+    {
+        @Html.AntiForgeryToken()
+        <div class="form-row">
+            <div class="col-12 text-left">
+                @Html.BootstrapEmailInputFormControlFor(m => m.Email, new { required = true }).AddLabelAndValidation()
+            </div>
+        </div>
+        <div class="form-row">
+            <div class="col-12 text-left">
+                @Html.BootstrapPasswordInputFormControlFor(m => m.Password, new { required=true}).AddLabelAndValidation()
+            </div>
+        </div>
+        <div class="form-row mt-1">
+            <div class="col-12 text-left">
+                <button type="submit" class="btn btn-primary w-100" data-toggle="popover" title="Login" data-content="Login to @(ConsumingApplicationSiteMeta.SiteName) with email and password" data-trigger="hover" data-container="body" data-placement="top">
+                    <span class="ml-1"><i class="fa fa-sign-in-alt"></i></span>
+                    <span class="ml-1">Login</span>
+                </button>
+            </div>
+        </div>
+    }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+@*<div class="row">
+        <div class="col-12 col-lg-8">
+            <h1>@Model.ConsumingApplicationSiteMeta.SiteName</h1>
+            <p class="lead my-0">
+                @Model.ConsumingApplicationSiteMeta.SiteDescription
+            </p>
+
+            <div class="alert alert-secondary mt-2" role="alert">
+                <h4 class="alert-heading">Privacy Notice</h4>
+                <p>
+                    Lorem ipsum dolor sit amet, ei viderer suscipit vim, at aliquid ullamcorper his. Sed ad eleifend vulputate, an eam ancillae percipit. Cu nihil ornatus volutpat est. Vulputate consetetur his at, eirmod accusam ex cum. Ne vide natum sit. Sit te apeirian constituam scriptorem, sale molestiae instructior vis ut. Homero munere vel et.
+
+                    In eos mollis euismod, quas indoctum usu cu, sea soleat ubique ea. Quo luptatum instructior no, eos probo facilis legendos et, primis pertinax atomorum eum te. Eum wisi soleat posidonium in, ut eam dolorum intellegat. Oporteat adipisci referrentur at cum, mei alterum nominati pericula an. Ad commodo corrumpit usu, sed cu alia maluisset, an veritus platonem efficiantur sed. Te everti eruditi albucius nam. Ocurreret patrioque at quo.
+
+                    His ad homero dissentias. His iudico mollis ex, vel errem noster commune no, quas falli delicata ea ius. Eum cu clita salutandi intellegebat. Vis bonorum scriptorem id, id duo elitr veniam, ad ius nemore aperiam. Tritani percipitur ad per, cum ea quando urbanitas. Te idque tibique appetere duo.
+
+                    Duo ei audiam salutandi, congue tritani cu eum, cu vide eius singulis cum. Graece sententiae pri te, ea justo erant instructior duo. Has rebum oblique ocurreret te, ea iriure deseruisse elaboraret eos. Qui novum singulis at. Quaestio mandamus incorrupte nec id, nisl pertinax invenire ex vix.
+
+                    Vide veritus ei vis, in integre gloriatur mea. Timeam neglegentur mediocritatem an mei, porro aeque has no. Ea his vidit debet gloriatur. Eu eum debet consequat.
+                </p>
+                <hr>
+                <p class="mb-0">Vide veritus ei vis, in integre gloriatur mea. Timeam neglegentur mediocritatem an mei, porro aeque has no. Ea his vidit debet gloriatur. Eu eum debet consequat.</p>
+            </div>
+        </div>
+        <div class="col-12 col-lg-4 my-5">
+            <div class="card bg-light">
+                <div class="card-avatar card-avatar-primary"><i class="fa fa-user"></i></div>
+                <div class="card-body h-100 py-5 text-dark text-center">
+                    <h3 class="display-5">Login to @Model.ConsumingApplicationSiteMeta.SiteName</h3>
+                    @using (Html.BeginForm("Login", "Home", FormMethod.Post, new { @id = "LoginForm", @class = "mt-5 mb-2" }))
+                    {
+                        @Html.AntiForgeryToken()
+                        if (Model.ConsumingApplicationSiteMeta.AuthenticationModes.Contains(AuthenticationMode.CAC))
+                        {
+                            <div class="form-row mb-2">
+                                <div class="col">
+                                    <button type="submit" formaction="@Url.Action("Login", "Home", new {Mode=AuthenticationMode.CAC})" class="btn btn-primary w-100" data-toggle="popover" title="Common Access Card" data-content="Login to @(Model.ConsumingApplicationSiteMeta.SiteName) with Common Access Card (CAC)" data-trigger="hover" data-container="body" data-placement="top">
+                                        <span class="ml-1"><i class="fa fa-sim-card"></i></span>
+                                        <span class="ml-1">CAC Login</span>
+                                    </button>
+                                </div>
+                            </div>
+                        }
+                        if (Model.ConsumingApplicationSiteMeta.AuthenticationModes.Contains(AuthenticationMode.Test))
+                        {
+                            <div class="form-row">
+                                <div class="col">
+                                    <div class="dropdown w-100">
+                                        <button class="btn btn-secondary dropdown-toggle w-100" type="button" id="TestUsersDropdown" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                            <span class="ml-1"><i class="fa fa-user-alt"></i></span>
+                                            <span class="ml-1">Test Login</span>
+                                        </button>
+                                        <div class="dropdown-menu w-100" aria-labelledby="TestUsersDropdown">
+                                            @foreach (var user in Model.TestUsers)
+                                            {
+                                                <button class="dropdown-item" type="submit" formaction="@Url.Action("Login", "Home", new { Mode=AuthenticationMode.Test, TestUserGuid = user.Guid})" data-toggle="tooltip" title="@string.Join(", ", user.Roles)">@user.Name</button>
+                                            }
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                        if (Model.ConsumingApplicationSiteMeta.AuthenticationModes.Contains(AuthenticationMode.Basic))
+                        {
+                            <div class="form-row">
+                                <div class="col-12 text-left">
+                                    @Html.BootstrapTextInputFormControlFor(m => m.Username).AddLabelAndValidation()
+                                </div>
+                            </div>
+                            <div class="form-row">
+                                <div class="col-12 text-left">
+                                    @Html.BootstrapPasswordInputFormControlFor(m => m.Password).AddLabelAndValidation()
+                                </div>
+                            </div>
+                            <div class="form-row mt-1">
+                                <div class="col-12 text-left">
+                                    <button type="submit" formaction="@Url.Action("Login", "Home", new {Mode=AuthenticationMode.Basic})" class="btn btn-primary w-100" data-toggle="popover" title="Login" data-content="Login to @(Model.ConsumingApplicationSiteMeta.SiteName) with username and password" data-trigger="hover" data-container="body" data-placement="top">
+                                        <span class="ml-1"><i class="fa fa-sign-in-alt"></i></span>
+                                        <span class="ml-1">Login</span>
+                                    </button>
+                                </div>
+                            </div>
+                        }
+                        else if (Model.ConsumingApplicationSiteMeta.AuthenticationModes.Contains(AuthenticationMode.Email))
+                        {
+                            <div class="form-row">
+                                <div class="col-12 text-left">
+                                    @Html.BootstrapEmailInputFormControlFor(m => m.Email).AddLabelAndValidation()
+                                </div>
+                            </div>
+                            <div class="form-row">
+                                <div class="col-12 text-left">
+                                    @Html.BootstrapPasswordInputFormControlFor(m => m.Password).AddLabelAndValidation()
+                                </div>
+                            </div>
+                            <div class="form-row mt-1">
+                                <div class="col-12 text-left">
+                                    <button type="submit" formaction="@Url.Action("Login", "Home", new {Mode=AuthenticationMode.Email})" class="btn btn-primary w-100" data-toggle="popover" title="Login" data-content="Login to @(Model.ConsumingApplicationSiteMeta.SiteName) with email and password" data-trigger="hover" data-container="body" data-placement="top">
+                                        <span class="ml-1"><i class="fa fa-sign-in-alt"></i></span>
+                                        <span class="ml-1">Login</span>
+                                    </button>
+                                </div>
+                            </div>
+                        }
+
+
+
+
+
+                    }
+
+                </div>
+            </div>
+        </div>
+    </div>
+
+    @section scripts{
+        <script type="text/javascript">
+                //new QRCode(document.getElementById("qrcode"), "http://jindo.dev.naver.com/collie");
+        </script>
+    }*@
+
+
