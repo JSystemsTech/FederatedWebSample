@@ -15,9 +15,6 @@
     <Compile Include="$(MSBuildThisFileDirectory)Attributes\FederatedAuthenticationFilter.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Attributes\FederatedAuthenticationProvider.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Attributes\FederatedExternalPostbackAttribute.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Configuration\ApplicationSettings.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Configuration\ConfigurationSectionConfig.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Configuration\ConnectionStringSettings.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Configuration\EncryptionServiceSettings.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Configuration\FederatedSettings.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Configuration\FederatedConsumerSettings.cs" />
@@ -32,11 +29,9 @@
     <Compile Include="$(MSBuildThisFileDirectory)Models\CACAuthorizedUser.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Models\Collection\CollectionModel.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Models\ProviderAuthenticationCredentials.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)ServiceProvider\ServiceCollection.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Web\AuthenticationMode.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Web\ConsumerAPI\ConsumerApi.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Services\MailService.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Services\Service.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Services\TokenProvider.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Models\TokenClaim.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Principal\FederatedPrincipal.cs" />
@@ -47,7 +42,6 @@
     <Compile Include="$(MSBuildThisFileDirectory)WebApiClient\ApiClientFactory.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)WebApiClient\ApiEndpoint.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)WebApiClient\Models\ApiResponse.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Web\Application\MvcServiceApplication.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Web\ConsumerAPI\ConsumerApiAuthenticateResponse.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Web\ConsumerAPI\ConsumerAPIController.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Web\ConsumerAPI\ConsumerUser.cs" />

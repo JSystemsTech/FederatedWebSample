@@ -40,7 +40,7 @@
                     <div class="dropdown-menu w-100" aria-labelledby="TestUsersDropdown">
                         @foreach (var user in Model.TestUsers)
                         {
-                            <button class="dropdown-item" type="button" data-form-action="@Url.Action("Login", "Home", new { Mode=AuthenticationMode.Test, TestUserGuid = user.Guid})" data-toggle="tooltip" title="@string.Join(", ", user.Roles)">@user.Name</button>
+                            <button class="dropdown-item" type="submit" formaction="@Url.Action("Login", "Home", new { Mode=AuthenticationMode.Test, TestUserGuid = user.Guid})" data-toggle="tooltip" title="@string.Join(", ", user.Roles)">@user.Name</button>
                         }
                     </div>
                 </div>

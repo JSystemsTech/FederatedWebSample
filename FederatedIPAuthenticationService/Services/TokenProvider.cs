@@ -1,5 +1,6 @@
 ﻿using FederatedIPAuthenticationService.Configuration;
 using FederatedIPAuthenticationService.Models;
+using ServiceProvider.Services;
 using System;
 using System.Collections.Generic;
 using System.Linq;

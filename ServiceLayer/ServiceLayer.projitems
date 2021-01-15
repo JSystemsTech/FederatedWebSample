@@ -10,6 +10,14 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="$(MSBuildThisFileDirectory)AuthNAuthZ\FederatedAuthorizeAttribute.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)DomainLayer\DbConnection\ConsumingApplicationDbConnection.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)DomainLayer\DbConnection\DbConnectionConfigService.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)DomainLayer\DbMethods\ConsumingApplicationDbMethods.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)DomainLayer\DomainFacadeBase.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)DomainLayer\Models\Data\TestUser.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Services\UserManagmentService.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="$(MSBuildThisFileDirectory)DomainLayer\Models\Parameters\" />
   </ItemGroup>
 </Project>

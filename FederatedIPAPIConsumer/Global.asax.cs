@@ -2,10 +2,13 @@
 using System.Web.Mvc;
 using System.Web.Optimization;
 using System.Web.Routing;
-using FederatedIPAuthenticationService.Web.Application;
 using FederatedIPAuthenticationService.Services;
-using FederatedIPAuthenticationService.ServiceProvider;
 using ServiceLayer.Services;
+using ServiceLayer.DomainLayer.DbConnection;
+using ServiceLayer.DomainLayer;
+using ServiceProvider.Web;
+using ServiceProvider.ServiceProvider;
+using ServiceProvider.Services;
 
 namespace FederatedIPAPIConsumer
 {
@@ -19,7 +22,10 @@ namespace FederatedIPAPIConsumer
             services.AddConnectionStringConfig();
             services.ConfigureAsFederatedConsumer();
             services.AddTokenProvider();
+            services.AddService<DbConnectionConfigService>();
+            services.AddService<IDomainFacade, DomainFacade>();
             services.AddService<IUserManagmentService, UserManagmentService>();
+            
         }
         //public override void Init()
         //{

@@ -1,6 +1,5 @@
 ﻿using FederatedIPAuthenticationService.Configuration;
 using FederatedIPAuthenticationService.Services;
-using FederatedIPAuthenticationService.Web.Application;
 using FederatedIPAuthenticationService.Extensions;
 using System;
 using System.Collections.Generic;
@@ -10,8 +9,8 @@ using System.Web.Mvc.Filters;
 using System.Web.Mvc;
 using System.Reflection;
 using System.Linq;
-using System.Collections.Specialized;
-using FederatedIPAuthenticationService.ServiceProvider;
+using ServiceProvider.ServiceProvider;
+using ServiceProvider.Web;
 
 namespace FederatedIPAuthenticationService.Attributes
 {

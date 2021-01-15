@@ -1,9 +1,9 @@
 ﻿using FederatedIPAuthenticationService.Configuration;
 using FederatedIPAuthenticationService.Extensions;
 using FederatedIPAuthenticationService.Principal;
-using FederatedIPAuthenticationService.ServiceProvider;
 using FederatedIPAuthenticationService.Services;
-using FederatedIPAuthenticationService.Web.Application;
+using ServiceProvider.ServiceProvider;
+using ServiceProvider.Web;
 using System;
 using System.Collections.Generic;
 using System.Security.Principal;

@@ -1,4 +1,6 @@
-﻿namespace FederatedIPAuthenticationService.Configuration
+﻿using ServiceProvider.Configuration;
+
+namespace FederatedIPAuthenticationService.Configuration
 {
     public interface IFederatedConsumerSettings : IConfigurationSectionConfig
     {

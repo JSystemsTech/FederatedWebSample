@@ -7,6 +7,7 @@ using FederatedIPAuthenticationService.Models;
 using FederatedIPAuthenticationService.Services;
 using FederatedIPAuthenticationService.Web;
 using FederatedIPAuthenticationService.Web.ConsumerAPI;
+using ServiceProvider.Configuration;
 using System;
 using System.Collections.Generic;
 using System.Linq;

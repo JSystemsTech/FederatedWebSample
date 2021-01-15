@@ -1,4 +1,5 @@
 ﻿using FederatedIPAuthenticationService.Configuration;
+using ServiceProvider.Services;
 using System;
 using System.IO;
 using System.Security.Cryptography;

@@ -3,12 +3,11 @@ using FederatedIPAuthenticationService.Attributes;
 using FederatedIPAuthenticationService.Configuration;
 using FederatedIPAuthenticationService.Extensions;
 using FederatedIPAuthenticationService.Principal;
-using FederatedIPAuthenticationService.ServiceProvider;
 using FederatedIPAuthenticationService.Services;
-using FederatedIPAuthenticationService.Web.Application;
 using FederatedIPAuthenticationService.Web.ConsumerAPI;
 using FederatedIPAuthenticationService.Web.SiteMap;
 using Newtonsoft.Json;
+using ServiceProvider.Web;
 using System;
 using System.Collections.Generic;
 using System.Dynamic;
@@ -21,9 +20,8 @@ using System.Web.Routing;
 
 namespace WebApiClientShared.Web
 {
-    public abstract class FederatedWebController: Controller
+    public abstract class FederatedWebController: ServiceProviderController
     {
-        protected IServices Services { get => HttpContext.ApplicationInstance is IMvcServiceApplication app ? app.Services : null; }
         protected IFederatedConsumerSettings FederatedConsumerSettings => Services.Get<IFederatedConsumerSettings>();
         protected IFederatedProviderSettings FederatedProviderSettings => Services.Get<IFederatedProviderSettings>();
         protected ISiteMeta SiteMeta => Services.Get<ISiteMeta>();

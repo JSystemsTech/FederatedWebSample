@@ -1,4 +1,5 @@
-﻿using System;
+﻿using ServiceProvider.Configuration;
+using System;
 using System.Collections.Generic;
 
 namespace FederatedIPAuthenticationService.Configuration
