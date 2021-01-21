@@ -11,6 +11,8 @@ using System.Reflection;
 using System.Linq;
 using ServiceProvider.ServiceProvider;
 using ServiceProvider.Web;
+using Newtonsoft.Json;
+using FederatedIPAuthenticationService.Web.ConsumerAPI;
 
 namespace FederatedIPAuthenticationService.Attributes
 {
@@ -56,6 +58,7 @@ namespace FederatedIPAuthenticationService.Attributes
             ISiteMeta siteMeta = FederatedSettings.GetSiteMeta(tokenClaims);
             HttpContext.Session.Add("AuthenticationRequestToken", authenticationRequestToken);
             HttpContext.Session.Add("SiteMeta", siteMeta);
+            
             SetAuthenticationRequestTokenCookie(AuthenticationRequestCookieName, authenticationRequestToken, (DateTime)TokenProvider.GetExpirationDate(authenticationRequestToken));
             return authenticationRequestToken;
         }

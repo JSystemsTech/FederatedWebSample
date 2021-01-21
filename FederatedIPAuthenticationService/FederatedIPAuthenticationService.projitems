@@ -30,7 +30,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)Models\Collection\CollectionModel.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Models\ProviderAuthenticationCredentials.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Web\AuthenticationMode.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Web\ConsumerAPI\ConsumerApi.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Web\ConsumerAPI\ConsumerAuthenticationApi.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Services\MailService.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Services\TokenProvider.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Models\TokenClaim.cs" />
@@ -42,8 +42,8 @@
     <Compile Include="$(MSBuildThisFileDirectory)WebApiClient\ApiClientFactory.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)WebApiClient\ApiEndpoint.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)WebApiClient\Models\ApiResponse.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Web\ConsumerAPI\ConsumerApiAuthenticateResponse.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Web\ConsumerAPI\ConsumerAPIController.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Web\ConsumerAPI\ConsumerApiAuthenticationResponse.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Web\ConsumerAPI\ConsumerAuthenticationApiController.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Web\ConsumerAPI\ConsumerUser.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Web\FederatedWebController.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Web\SiteMap\SiteMapAction.cs" />

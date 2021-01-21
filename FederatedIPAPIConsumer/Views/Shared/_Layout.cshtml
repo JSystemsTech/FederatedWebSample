@@ -38,18 +38,20 @@
             @{ 
                 string navBarClasses = isDarkMode ? "navbar-dark bg-secondary" : "navbar-dark bg-dark";
             }
-            <nav class="navbar navbar-expand-lg @(navBarClasses)">
+            <nav class="py-lg-0 navbar navbar-expand-lg @(navBarClasses)">
                 <a class="navbar-brand" href="#">
                     <span class="row">
-                        <span class="col-12">@SiteMeta.SiteName</span>
-                        <span class="col-12"><small>@SiteMeta.SiteDescription</small></span>
+                        <span class="col lead">@SiteMeta.SiteName</span>
+                    </span>
+                    <span class="row">
+                        <span class="col lead-sm">@SiteMeta.SiteDescription</span>
                     </span>
                 </a>
                 <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
                     <span class="navbar-toggler-icon"></span>
                 </button>
 
-                <div class="collapse navbar-collapse" id="navbarSupportedContent">
+                <div class="collapse navbar-collapse font-weight-light" id="navbarSupportedContent">
 
                     @if (ViewBag.IsAuthenticated)
                     {
@@ -94,13 +96,13 @@
             </nav>
         </header>
         <main>
-            <div class="container body-content">
+            <div class="container body-content my-4">
                 @RenderBody()
             </div>
         </main>
         <hr />
-        <footer>
-            <p>&copy; @DateTime.Now.Year - My ASP.NET Application</p>
+        <footer class="text-center">
+            <p>@SiteMeta.SiteName -version @SiteMeta.SiteVersion @SiteMeta.SiteEnvironment </p>
         </footer>
         
         Html.RenderPartial("AlertModal", "default");

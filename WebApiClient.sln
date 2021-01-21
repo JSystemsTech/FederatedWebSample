@@ -3,8 +3,6 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.30114.105
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FederatedIPAPI", "FederatedIPAPI\FederatedIPAPI.csproj", "{EA5F2495-6B9B-4B76-9D63-DDB5C3D2AB64}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FederatedIPAPIConsumer", "FederatedIPAPIConsumer\FederatedIPAPIConsumer.csproj", "{6C215DF5-244E-4E05-851A-444B2ECAF728}"
 EndProject
 Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "FederatedIPAuthenticationService", "FederatedIPAuthenticationService\FederatedIPAuthenticationService.shproj", "{CF3B8EF4-F456-416C-9A78-9EB6FB4AE1E3}"
@@ -31,10 +29,6 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{EA5F2495-6B9B-4B76-9D63-DDB5C3D2AB64}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{EA5F2495-6B9B-4B76-9D63-DDB5C3D2AB64}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{EA5F2495-6B9B-4B76-9D63-DDB5C3D2AB64}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{EA5F2495-6B9B-4B76-9D63-DDB5C3D2AB64}.Release|Any CPU.Build.0 = Release|Any CPU
 		{6C215DF5-244E-4E05-851A-444B2ECAF728}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{6C215DF5-244E-4E05-851A-444B2ECAF728}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{6C215DF5-244E-4E05-851A-444B2ECAF728}.Release|Any CPU.ActiveCfg = Release|Any CPU

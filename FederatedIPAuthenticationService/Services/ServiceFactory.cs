@@ -15,6 +15,10 @@ namespace FederatedIPAuthenticationService.Services
         }
         public static void AddTokenProvider(this IServiceCollection services)
         {
+            services.AddService<ITokenProvider, TokenProvider>();
+        }
+        public static void AddStandaloneTokenProvider(this IServiceCollection services)
+        {
             services.AddConfiguration<ITokenProviderSettings, TokenProviderSettings>();
             services.AddService<ITokenProvider, TokenProvider>();
         }

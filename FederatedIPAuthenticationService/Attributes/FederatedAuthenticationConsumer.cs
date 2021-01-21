@@ -2,10 +2,13 @@
 using FederatedIPAuthenticationService.Extensions;
 using FederatedIPAuthenticationService.Principal;
 using FederatedIPAuthenticationService.Services;
+using FederatedIPAuthenticationService.Web.ConsumerAPI;
+using Newtonsoft.Json;
 using ServiceProvider.ServiceProvider;
 using ServiceProvider.Web;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Security.Principal;
 using System.Web;
 using System.Web.Mvc;
@@ -60,7 +63,7 @@ namespace FederatedIPAuthenticationService.Attributes
          */
         private void OnLogoutRequest(AuthenticationContext filterContext) 
         {
-            HttpContext.Session.Add("LogoutRedirectUrl", FederatedConsumerSettings.AuthenticationProviderUrl);
+            HttpContext.Session.Add("LogoutRedirectUrl", $"{FederatedConsumerSettings.AuthenticationProviderUrl}/{SiteMeta.SiteId}");
             RemoveAuthenticationCookie();
             HttpContext.User = FederatedPrincipal.CreateLogout();
             string authenticationRequestToken = TokenProvider.CreateToken(claims => {

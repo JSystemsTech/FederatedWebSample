@@ -9,6 +9,8 @@ using ServiceLayer.DomainLayer;
 using ServiceProvider.Web;
 using ServiceProvider.ServiceProvider;
 using ServiceProvider.Services;
+using System.Web.Http;
+using FederatedIPAuthenticationService.Web.ConsumerAPI;
 
 namespace FederatedIPAPIConsumer
 {
@@ -27,12 +29,9 @@ namespace FederatedIPAPIConsumer
             services.AddService<IUserManagmentService, UserManagmentService>();
             
         }
-        //public override void Init()
-        //{
-        //    base.Init();
-        //}
         protected void Application_Start()
         {
+            GlobalConfiguration.Configure(ConsumerAuthenticationApiConfig.Register);
             AreaRegistration.RegisterAllAreas();
             FilterConfig.RegisterGlobalFilters(GlobalFilters.Filters);
             RouteConfig.RegisterRoutes(RouteTable.Routes);

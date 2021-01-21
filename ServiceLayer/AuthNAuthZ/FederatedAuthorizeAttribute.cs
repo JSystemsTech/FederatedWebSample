@@ -2,6 +2,7 @@
 using FederatedIPAuthenticationService.Attributes;
 using FederatedIPAuthenticationService.Attributes.Common;
 using FederatedIPAuthenticationService.Extensions;
+using FederatedIPAuthenticationService.Web.ConsumerAPI;
 using ServiceLayer.Services;
 using System;
 using System.Collections.Generic;
@@ -41,6 +42,6 @@ namespace ServiceLayer.AuthNAuthZ
         {
             return tokenClaims.ParseFirst<Guid?>("UserGuid") is Guid guid ? UserManagmentService.GetUserRoles(guid) : new string[0];
         }
-            
+
     }
 }

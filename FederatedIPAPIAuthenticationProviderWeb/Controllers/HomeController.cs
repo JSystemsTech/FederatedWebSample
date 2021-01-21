@@ -25,14 +25,16 @@ namespace FederatedIPAPIAuthenticationProviderWeb.Controllers
         protected IApplicationSettings ApplicationSettings => Services.Get<IApplicationSettings>();
         private IAuthenticationRequestCache AuthenticationRequestCache { get => Services.Get<IAuthenticationRequestCache>(); }
         private IEncryptionService EncryptionService => Services.Get<IEncryptionService>();
-        protected IConsumerApi ConsumerAPI { get; private set; }
+        protected IConsumerAuthenticationApi ConsumerAPI { get; private set; }
         protected override void OnActionExecuting(ActionExecutingContext filterContext)
         {
             base.OnActionExecuting(filterContext);
-            ConsumerAPI = new ConsumerApi(ConsumingApplicationSiteMeta.ConsumerApiUrlBase);
+            ConsumerAPI = new ConsumerAuthenticationApi(TokenProvider, ConsumingApplicationSiteMeta.ConsumerApiUrlBase);
         }
         private LoginVM GetSessionLoginVM() {
-            var vm = new LoginVM() { ConsumingApplicationSiteMeta = ConsumingApplicationSiteMeta, TestUsers = ConsumerAPI.GetTestUsers(AuthenticationRequestToken) };
+
+            var vm = new LoginVM() { ConsumingApplicationSiteMeta = ConsumingApplicationSiteMeta, TestUsers = ConsumerAPI.GetTestUsers() };
+
             return vm;
         }
         public ActionResult Index()
@@ -54,7 +56,7 @@ namespace FederatedIPAPIAuthenticationProviderWeb.Controllers
                     claims.AddUpdate("externalAuthAuthorizedUser", externalAuthAuthorizedUser);
                 }
             });
-            ConsumerApiAuthenticateResponse response = ConsumerAPI.Authenticate(LoginModelToken);
+            ConsumerApiAuthenticationResponse response = ConsumerAPI.Authenticate(LoginModelToken);
             if (TryValidateAuthentication(response))
             {
                 vm.OnAuthenticationMessage = response.Message;
@@ -71,7 +73,7 @@ namespace FederatedIPAPIAuthenticationProviderWeb.Controllers
                 ModelState.AddModelError("Email", "Invalid Email or password");
                 ModelState.AddModelError("Password", "Invalid Email or password");
             }
-            vm.TestUsers = ConsumerAPI.GetTestUsers(AuthenticationRequestToken);
+            vm.TestUsers = ConsumerAPI.GetTestUsers();
             return View("Index",vm);
         }
 
@@ -121,7 +123,7 @@ namespace FederatedIPAPIAuthenticationProviderWeb.Controllers
             if (!ModelState.IsValid)
             {
                 vm.ConsumingApplicationSiteMeta = ConsumingApplicationSiteMeta;
-                vm.TestUsers = ConsumerAPI.GetTestUsers(AuthenticationRequestToken);
+                vm.TestUsers = ConsumerAPI.GetTestUsers();
                 return View("Index", vm);
             }
             if(vm.Mode == AuthenticationMode.CAC)

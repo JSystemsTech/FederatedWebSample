@@ -2,7 +2,10 @@
     content: ' *';
     color: $danger;
 }
-
+.lead-sm {
+    font-size: $font-size-sm;
+    font-weight: $font-weight-light;
+}
 @each $color, $value in $theme-colors {
     .text-#{$color}-inverse {
         color: color-yiq($value);

@@ -1,7 +1,8 @@
 ﻿@model FederatedIPAPIAuthenticationProviderWeb.Models.LoginVM
 @using FederatedIPAuthenticationService.Extensions
 
-<h3 class="display-5">Loging in @Model.OnAuthenticationMessage to @Model.ConsumingApplicationSiteMeta.SiteName</h3>
+<h3 class="display-5">Welcome @Model.OnAuthenticationMessage</h3>
+<h3 class="lead">Redirecting to @Model.ConsumingApplicationSiteMeta.SiteName</h3>
 <a id="RedirectAction" href="@Model.ConsumingApplicationSiteMeta.SiteRhealm" class="d-none"></a>
 @section scripts{
     <script type="text/javascript">

@@ -9,6 +9,9 @@ namespace FederatedIPAuthenticationService.Configuration
         string AuthenticationProviderId { get; }
         string AuthenticationProviderUrl { get; }       
         string RedirectUrl { get; }
+        string TokenProviderAuthenticationEndpoint { get; }
+        string TokenProviderUsername { get; }
+        string TokenProviderPassword { get; }
     }
 
     public sealed class FederatedConsumerSettings : ConfigurationSectionConfig, IFederatedConsumerSettings
@@ -19,6 +22,10 @@ namespace FederatedIPAuthenticationService.Configuration
         public string AuthenticationProviderId { get; set; }
         public string AuthenticationProviderUrl { get; set; }
         public string RedirectUrl { get; set; }
+
+        public string TokenProviderAuthenticationEndpoint { get; set; }
+        public string TokenProviderUsername { get; set; }
+        public string TokenProviderPassword { get; set; }
         public FederatedConsumerSettings() : base() { }
         protected override void Init()
         {
@@ -27,6 +34,9 @@ namespace FederatedIPAuthenticationService.Configuration
             AuthenticationProviderId = GetValue("AuthenticationProviderId", true);
             AuthenticationProviderUrl = GetValue("AuthenticationProviderUrl",true);
             RedirectUrl = GetValue("RedirectUrl", true);
+            TokenProviderAuthenticationEndpoint = GetValue("TokenProviderAuthenticationEndpoint", true);
+            TokenProviderUsername = GetValue("TokenProviderUsername", true);
+            TokenProviderPassword = GetValue("TokenProviderPassword", true);
         }
     }
 

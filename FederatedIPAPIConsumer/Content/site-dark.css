@@ -12773,6 +12773,10 @@ table.dataTable tbody tr.selected a, table.dataTable tbody th.selected a, table.
   content: ' *';
   color: #e74c3c; }
 
+.lead-sm {
+  font-size: 0.825rem;
+  font-weight: 300; }
+
 .text-primary-inverse {
   color: #fff; }
 

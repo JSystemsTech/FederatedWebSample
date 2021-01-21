@@ -29,8 +29,18 @@ namespace FederatedIPAuthenticationService.Services
 
         protected override void Init()
         {
-            ITokenProviderSettings config = Services.Get<ITokenProviderSettings>();
-            Client = ApiClientFactory.Create(config.Url, config.AuthenticationEndpoint, config.Username, config.Password);
+            
+            IFederatedConsumerSettings config = Services.Get<IFederatedConsumerSettings>();
+            if (config == null)
+            {
+                ITokenProviderSettings standAloneConfig = Services.Get<ITokenProviderSettings>();
+                Client = ApiClientFactory.Create(standAloneConfig.Url, standAloneConfig.AuthenticationEndpoint, standAloneConfig.Username, standAloneConfig.Password);
+            }
+            else
+            {
+                Client = ApiClientFactory.Create(config.AuthenticationProviderUrl, config.TokenProviderAuthenticationEndpoint, config.TokenProviderUsername, config.TokenProviderPassword);
+            }
+            
             RequestEndpoint = Client.CreateEndpoint("api/Request");
             RenewEndpoint = Client.CreateEndpoint("api/Renew");
             ClaimsEndpoint = Client.CreateEndpoint("api/Claims");
@@ -40,7 +50,8 @@ namespace FederatedIPAuthenticationService.Services
         public string CreateToken(Action<IDictionary<string, IEnumerable<string>>> tokenClaimHandler) {
             IDictionary<string, IEnumerable<string>> claims = new Dictionary<string, IEnumerable<string>>();
             tokenClaimHandler(claims);
-            return RequestEndpoint.Post(new { Claims = ToClaimsParams(claims) }).Deserialize<string>(); 
+            var response = RequestEndpoint.Post(new { Claims = ToClaimsParams(claims) });
+            return response.Deserialize<string>(); 
         }
 
         public string RenewToken(string token, Action<IDictionary<string, IEnumerable<string>>> tokenClaimHandler)

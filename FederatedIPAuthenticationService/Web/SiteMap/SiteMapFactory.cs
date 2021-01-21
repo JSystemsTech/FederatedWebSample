@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Text;
+using System.Web.Http;
 using System.Web.Mvc;
 using System.Web.Routing;
 
@@ -53,12 +54,12 @@ namespace FederatedIPAuthenticationService.Web.SiteMap
                             validAction = false;
                             break;
                         }
-                        if (filter is HttpGetAttribute)
+                        if (filter is System.Web.Mvc.HttpGetAttribute)
                         {
                             isHttpPost = false;
                             break;
                         }
-                        if (filter is HttpPostAttribute)
+                        if (filter is System.Web.Mvc.HttpPostAttribute)
                         {
                             isHttpPost = true;
                         }
@@ -94,7 +95,7 @@ namespace FederatedIPAuthenticationService.Web.SiteMap
         }
         public static IEnumerable<SiteMapArea> BuildSiteMap(string defaultNamespace, bool IsAuthenticated, UrlHelper Url)
         {
-            var list = GetSubClasses<Controller>().Where(c => !c.IsAbstract && !typeof(ConsumerAPIController).IsAssignableFrom(c)); /*ignore base classes*/
+            var list = GetSubClasses<Controller>().Where(c => !c.IsAbstract && !typeof(ApiController).IsAssignableFrom(c)); /*ignore base classes*/
 
 
             // Get all controllers with their actions
