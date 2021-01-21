@@ -13,7 +13,9 @@ namespace FederatedIPAuthenticationService.Configuration
         string SiteVersion { get; }
         string SiteEnvironment { get; }
         string SiteDescription { get; }        
-        string ConsumerApiUrlBase { get; }
+        string ConsumerAuthenticationApiUrl { get; }
+        string Theme { get; }
+        bool RequirePrivacyNotice { get;}
         IEnumerable<string> AuthenticationModes { get; }
     }
 
@@ -27,7 +29,9 @@ namespace FederatedIPAuthenticationService.Configuration
         public string SiteVersion { get; set; }
         public string SiteEnvironment { get; set; }
         public string SiteDescription { get; set; }
-        public string ConsumerApiUrlBase { get; set; }
+        public string ConsumerAuthenticationApiUrl { get; set; }
+        public string Theme { get; set; }
+        public bool RequirePrivacyNotice { get; set; }
         public IEnumerable<string> AuthenticationModes { get; set; }
         public SiteMeta() : base() { }
         public SiteMeta(IDictionary<string, string> collection) : base() { Collection = collection; Init(); }
@@ -42,7 +46,12 @@ namespace FederatedIPAuthenticationService.Configuration
             SiteEnvironment = GetValue("SiteEnvironment", true);
             SiteDescription = GetValue("SiteDescription", true);
 
-            ConsumerApiUrlBase = GetValue("ConsumerApiUrlBase");
+            ConsumerAuthenticationApiUrl = GetValue("ConsumerAuthenticationApiUrl");
+            Theme = GetValue("Theme");
+            if(bool.TryParse(GetValue("RequirePrivacyNotice"), out bool requirePrivacyNotice))
+            {
+                RequirePrivacyNotice = requirePrivacyNotice;
+            }
             AuthenticationModes = GetValue("AuthenticationModes").Split(',');
         }
     }

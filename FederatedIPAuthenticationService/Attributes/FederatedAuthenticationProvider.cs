@@ -1,18 +1,16 @@
 ﻿using FederatedIPAuthenticationService.Configuration;
-using FederatedIPAuthenticationService.Services;
 using FederatedIPAuthenticationService.Extensions;
-using System;
-using System.Collections.Generic;
-using System.Text;
-using System.Web;
-using System.Web.Mvc.Filters;
-using System.Web.Mvc;
-using System.Reflection;
-using System.Linq;
+using FederatedIPAuthenticationService.Services;
+using FederatedIPAuthenticationService.Web.ConsumerAPI;
 using ServiceProvider.ServiceProvider;
 using ServiceProvider.Web;
-using Newtonsoft.Json;
-using FederatedIPAuthenticationService.Web.ConsumerAPI;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Reflection;
+using System.Web;
+using System.Web.Mvc;
+using System.Web.Mvc.Filters;
 
 namespace FederatedIPAuthenticationService.Attributes
 {
@@ -24,6 +22,7 @@ namespace FederatedIPAuthenticationService.Attributes
         
         private ITokenProvider TokenProvider => Services.Get<ITokenProvider>();
         private ISiteMeta SiteMeta => Services.Get<ISiteMeta>();
+        protected IConsumerAuthenticationApi ConsumerAPI { get; private set; }
         private string AuthenticationRequestCookieName { get => $"{FederatedSettings.FederatedAuthenticationRequestTokenCookiePrefix}{SiteMeta.SiteId}"; }
 
         private string AuthenticationRequestKey => Request.Form["AuthenticationRequest"];
@@ -54,10 +53,8 @@ namespace FederatedIPAuthenticationService.Attributes
             string authenticationRequestToken = TokenProvider.RenewToken(token, claims => {
                 claims.AddUpdate("AuthenticationProviderId", "FederatedIPAPIAuthenticationProviderWeb");
             });
-            var tokenClaims = TokenProvider.GetTokenClaims(authenticationRequestToken);
-            ISiteMeta siteMeta = FederatedSettings.GetSiteMeta(tokenClaims);
             HttpContext.Session.Add("AuthenticationRequestToken", authenticationRequestToken);
-            HttpContext.Session.Add("SiteMeta", siteMeta);
+            HttpContext.Session.Add("ConsumerAuthenticationApiUrl", TokenProvider.GetTokenClaims(authenticationRequestToken)["ConsumerAuthenticationApiUrl"].FirstOrDefault());
             
             SetAuthenticationRequestTokenCookie(AuthenticationRequestCookieName, authenticationRequestToken, (DateTime)TokenProvider.GetExpirationDate(authenticationRequestToken));
             return authenticationRequestToken;

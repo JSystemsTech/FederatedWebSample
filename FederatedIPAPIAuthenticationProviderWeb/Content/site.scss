@@ -5,6 +5,7 @@
 @import 'fontawesome-custom/fontawesome.scss';
 @import 'datatables-style-loader.scss';
 
+
 .form-signin {
     width: 100%;
     max-width: 430px;
@@ -18,6 +19,19 @@
 @each $color, $value in $theme-colors {
     .text-#{$color}-inverse {
         color: color-yiq($value);
+    }
+}
+$font-size-privacy-notice: $font-size-base * .75 !default;
+.card.card-privacy-notice {
+    background-color: rgba($white, 0.7);
+
+    > .card-body {
+        max-height: 200px;
+        overflow-y: auto;
+
+        > p.card-text {
+            font-size: $font-size-privacy-notice;
+        }
     }
 }
 

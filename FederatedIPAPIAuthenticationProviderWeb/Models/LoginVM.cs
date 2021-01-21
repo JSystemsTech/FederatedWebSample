@@ -15,5 +15,6 @@ namespace FederatedIPAPIAuthenticationProviderWeb.Models
         public IEnumerable<ConsumerUser> TestUsers { get; set; }
         public string Mode { get; set; }
         public string OnAuthenticationMessage { get; set; }
+        public string PrivacyNotice { get; set; }
     }
 }

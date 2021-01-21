@@ -67,10 +67,7 @@ namespace FederatedIPAuthenticationService.Attributes
             RemoveAuthenticationCookie();
             HttpContext.User = FederatedPrincipal.CreateLogout();
             string authenticationRequestToken = TokenProvider.CreateToken(claims => {
-                foreach (KeyValuePair<string, string> siteMetaItem in SiteMeta.Collection)
-                {
-                    claims.AddUpdate(siteMetaItem.Key, siteMetaItem.Value.ToString());
-                }
+                claims.AddUpdate("ConsumerAuthenticationApiUrl", SiteMeta.ConsumerAuthenticationApiUrl);
             });
             SetAuthenticationRequestTokenCookie(AuthenticationRequestCookieName, authenticationRequestToken, (DateTime)TokenProvider.GetExpirationDate(authenticationRequestToken));
         }

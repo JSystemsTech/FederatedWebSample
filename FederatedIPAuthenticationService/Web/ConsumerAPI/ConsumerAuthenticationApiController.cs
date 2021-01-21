@@ -81,6 +81,17 @@ namespace FederatedIPAuthenticationService.Web.ConsumerAPI
         public IEnumerable<ConsumerUser> Get() => SiteMeta.AuthenticationModes.Contains("Test") ? ResolveTestUsers() : new ConsumerUser[0];
         protected abstract IEnumerable<ConsumerUser> ResolveTestUsers();
     }
+    public abstract class ConsumerAuthenticationApiPrivacyNoticeController : ConsumerAuthenticationApiControllerBase
+    {
+        [System.Web.Http.HttpGet]
+        public HttpResponseMessage Get() => TextResponse(GetPrivacyNotice());
+        protected abstract string GetPrivacyNotice();
+    }
+    public abstract class ConsumerAuthenticationApiSiteMetaController : ConsumerAuthenticationApiControllerBase
+    {
+        [System.Web.Http.HttpGet]
+        public ISiteMeta Get() => SiteMeta;
+    }
     internal class ConsumerApiIdentity : IIdentity
     {
         public string Name { get; private set; }

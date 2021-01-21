@@ -690,6 +690,7 @@
     <Content Include="Views\Shared\Redirect.cshtml" />
     <Content Include="Views\Home\ExternalAuthenticationPostback.cshtml" />
     <Content Include="Views\Home\SessionEnd.cshtml" />
+    <Content Include="Views\Home\PrivacyNotice.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />

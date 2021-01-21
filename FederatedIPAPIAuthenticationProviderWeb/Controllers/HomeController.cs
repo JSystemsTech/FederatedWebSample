@@ -25,12 +25,9 @@ namespace FederatedIPAPIAuthenticationProviderWeb.Controllers
         protected IApplicationSettings ApplicationSettings => Services.Get<IApplicationSettings>();
         private IAuthenticationRequestCache AuthenticationRequestCache { get => Services.Get<IAuthenticationRequestCache>(); }
         private IEncryptionService EncryptionService => Services.Get<IEncryptionService>();
-        protected IConsumerAuthenticationApi ConsumerAPI { get; private set; }
-        protected override void OnActionExecuting(ActionExecutingContext filterContext)
-        {
-            base.OnActionExecuting(filterContext);
-            ConsumerAPI = new ConsumerAuthenticationApi(TokenProvider, ConsumingApplicationSiteMeta.ConsumerApiUrlBase);
-        }
+        protected bool AcknowlagedPrivacyNotice => AuthenticationRequestClaims.ContainsKey("AcknowlagedPrivacyNotice") && 
+            bool.TryParse(AuthenticationRequestClaims["AcknowlagedPrivacyNotice"].FirstOrDefault(), out bool acknowlagedPrivacyNotice) ? acknowlagedPrivacyNotice: false;
+
         private LoginVM GetSessionLoginVM() {
 
             var vm = new LoginVM() { ConsumingApplicationSiteMeta = ConsumingApplicationSiteMeta, TestUsers = ConsumerAPI.GetTestUsers() };
@@ -38,7 +35,32 @@ namespace FederatedIPAPIAuthenticationProviderWeb.Controllers
             return vm;
         }
         public ActionResult Index()
-            =>View(GetSessionLoginVM());
+        { 
+            if (ConsumingApplicationSiteMeta.RequirePrivacyNotice && !AcknowlagedPrivacyNotice) {
+                return RedirectToAction("PrivacyNotice"); 
+            } 
+            return View(GetSessionLoginVM()); 
+        }
+
+        public ActionResult PrivacyNotice()
+        {
+            if (!ConsumingApplicationSiteMeta.RequirePrivacyNotice)
+            {
+                return RedirectToAction("Index");
+            }
+            var vm = new LoginVM() { PrivacyNotice = ConsumerAPI.GetPrivacyNotice()};
+            return View(vm);
+        }
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public ActionResult PrivacyNoticeAckowlage()
+        {
+            var token = TokenProvider.RenewToken(AuthenticationRequestToken,clms => {
+                clms.Add("AcknowlagedPrivacyNotice", new string[] { $"{true}" });
+            });
+            UpdateAuthenticationRequestTokenCookie(token);
+            return RedirectToAction("Index");
+        }
 
 
         [HttpPost]

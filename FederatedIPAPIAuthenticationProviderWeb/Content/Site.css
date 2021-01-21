@@ -12803,6 +12803,14 @@ table.dataTable tbody tr.selected a, table.dataTable tbody th.selected a, table.
 .text-dark-inverse {
   color: #fff; }
 
+.card.card-privacy-notice {
+  background-color: rgba(255, 255, 255, 0.7); }
+  .card.card-privacy-notice > .card-body {
+    max-height: 200px;
+    overflow-y: auto; }
+    .card.card-privacy-notice > .card-body > p.card-text {
+      font-size: 0.70313rem; }
+
 .card > .card-avatar {
   position: absolute;
   margin: 0 auto;
