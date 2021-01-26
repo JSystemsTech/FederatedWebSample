@@ -7,7 +7,10 @@ using FederatedIPAuthenticationService.Models;
 using FederatedIPAuthenticationService.Services;
 using FederatedIPAuthenticationService.Web;
 using FederatedIPAuthenticationService.Web.ConsumerAPI;
+using Newtonsoft.Json;
+using ServiceLayer.DomainLayer.Models.Data;
 using ServiceProvider.Configuration;
+using ServiceProvider.Web;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -18,45 +21,78 @@ using WebApiClientShared.Web;
 
 namespace FederatedIPAPIAuthenticationProviderWeb.Controllers
 {
+    
+    
     [FederatedProvider]
-    public class HomeController : FederatedProviderWebController
+    [NoCache]
+    public class HomeController : BaseController
     {
         protected override string GetDeafaultNamespace() => typeof(HomeController).Namespace;
         protected IApplicationSettings ApplicationSettings => Services.Get<IApplicationSettings>();
-        private IAuthenticationRequestCache AuthenticationRequestCache { get => Services.Get<IAuthenticationRequestCache>(); }
-        private IEncryptionService EncryptionService => Services.Get<IEncryptionService>();
+        
+        private ICssThemeService CssThemeService => Services.Get<ICssThemeService>();
+
+        protected override void OnActionExecuting(ActionExecutingContext filterContext)
+        {
+            base.OnActionExecuting(filterContext);
+            ViewBag.ThemeBundle = CssThemeService.GetTheme(ConsumingApplicationFederatedApplicationSettings.Theme).Path;
+        }
         protected bool AcknowlagedPrivacyNotice => AuthenticationRequestClaims.ContainsKey("AcknowlagedPrivacyNotice") && 
             bool.TryParse(AuthenticationRequestClaims["AcknowlagedPrivacyNotice"].FirstOrDefault(), out bool acknowlagedPrivacyNotice) ? acknowlagedPrivacyNotice: false;
+        protected bool AcceptedCookies => AuthenticationRequestClaims.ContainsKey("AcceptedCookies") &&
+            bool.TryParse(AuthenticationRequestClaims["AcceptedCookies"].FirstOrDefault(), out bool acceptedCookies) ? acceptedCookies : false;
 
         private LoginVM GetSessionLoginVM() {
 
-            var vm = new LoginVM() { ConsumingApplicationSiteMeta = ConsumingApplicationSiteMeta, TestUsers = ConsumerAPI.GetTestUsers() };
+            var vm = new LoginVM() { ConsumingApplicationFederatedApplicationSettings = ConsumingApplicationFederatedApplicationSettings, TestUsers = ConsumingApplicationTestUsers };
 
             return vm;
         }
+        
         public ActionResult Index()
         { 
-            if (ConsumingApplicationSiteMeta.RequirePrivacyNotice && !AcknowlagedPrivacyNotice) {
-                return RedirectToAction("PrivacyNotice"); 
-            } 
+            if (!AcceptedCookies) {
+                return RedirectToAction("CookiePolicy"); 
+            }
+            if (ConsumingApplicationFederatedApplicationSettings.RequirePrivacyPolicy && !AcknowlagedPrivacyNotice)
+            {
+                return RedirectToAction("PrivacyPolicy");
+            }
             return View(GetSessionLoginVM()); 
         }
 
-        public ActionResult PrivacyNotice()
+        public ActionResult PrivacyPolicy()
         {
-            if (!ConsumingApplicationSiteMeta.RequirePrivacyNotice)
+            if (!ConsumingApplicationFederatedApplicationSettings.RequirePrivacyPolicy)
             {
                 return RedirectToAction("Index");
             }
-            var vm = new LoginVM() { PrivacyNotice = ConsumerAPI.GetPrivacyNotice()};
-            return View(vm);
+            ViewBag.DisplayAsWarning = true;
+            ViewBag.MainIcon = "fa-exclamation-triangle";
+            return View();
+        }
+        public ActionResult CookiePolicy()
+        {
+            ViewBag.MainIcon = "fa-exclamation";
+            ViewBag.DisplayAsWarning = true;
+            return View();
         }
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult PrivacyNoticeAckowlage()
+        public ActionResult PrivacyPolicyAckowlage()
         {
             var token = TokenProvider.RenewToken(AuthenticationRequestToken,clms => {
                 clms.Add("AcknowlagedPrivacyNotice", new string[] { $"{true}" });
+            });
+            UpdateAuthenticationRequestTokenCookie(token);
+            return RedirectToAction("Index");
+        }
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public ActionResult AcceptCookies()
+        {
+            var token = TokenProvider.RenewToken(AuthenticationRequestToken, clms => {
+                clms.Add("AcceptedCookies", new string[] { $"{true}" });
             });
             UpdateAuthenticationRequestTokenCookie(token);
             return RedirectToAction("Index");
@@ -67,22 +103,38 @@ namespace FederatedIPAPIAuthenticationProviderWeb.Controllers
         public override ActionResult ExternalAuthenticationPostback(string token) => Authenticate(GetSessionLoginVM(), token);
         private ActionResult Authenticate(LoginVM vm, string externalAuthToken = null)
         {
-            vm.ConsumingApplicationSiteMeta = ConsumingApplicationSiteMeta;
-            
-            
-            string LoginModelToken = TokenProvider.RenewToken(AuthenticationRequestToken, claims => {                
-                claims.AddUpdate("providerAuthenticationCredentials", ProviderAuthenticationCredentials.BuildProviderAuthenticationCredentialsData(vm.Username, vm.Email, vm.Password, vm.TestUserGuid).Select(i => i != null ? i.ToString(): null));
-                if (!string.IsNullOrWhiteSpace(externalAuthToken))
+            vm.ConsumingApplicationFederatedApplicationSettings = ConsumingApplicationFederatedApplicationSettings;
+
+            ConsumerApiAuthenticationResponse response;
+            if (!string.IsNullOrWhiteSpace(externalAuthToken))
+            {
+                ICACUser UserData = AuthenticationProviderDomainFacade.GetCACLoginRequestUser(externalAuthToken);
+                response = ConsumerAPI.Authenticate(new
                 {
-                    IEnumerable<string> externalAuthAuthorizedUser = new object[] { externalAuthToken, 1234567890 }.Select(i => i != null ? i.ToString() : null); /*this would be the get login user CAC service call*/
-                    claims.AddUpdate("externalAuthAuthorizedUser", externalAuthAuthorizedUser);
-                }
-            });
-            ConsumerApiAuthenticationResponse response = ConsumerAPI.Authenticate(LoginModelToken);
+                    vm.Username,
+                    vm.Password,
+                    vm.Email,
+                    vm.TestUserGuid,
+                    UserData = JsonConvert.SerializeObject(UserData)//presserialize before API serializes to keep it as a string
+                });
+            }
+            else
+            {                
+                response = ConsumerAPI.Authenticate(new
+                {
+                    vm.Username,
+                    vm.Password,
+                    vm.Email,
+                    vm.TestUserGuid
+                });
+            }
+            
+            
             if (TryValidateAuthentication(response))
             {
                 vm.OnAuthenticationMessage = response.Message;
                 ViewBag.ShowSpinner = true;
+                ViewBag.MainIcon = "fa-user-check";
                 return View("ExternalAuthenticationPostback", vm);
             }
             if(vm.Mode == AuthenticationMode.Basic)
@@ -95,14 +147,18 @@ namespace FederatedIPAPIAuthenticationProviderWeb.Controllers
                 ModelState.AddModelError("Email", "Invalid Email or password");
                 ModelState.AddModelError("Password", "Invalid Email or password");
             }
-            vm.TestUsers = ConsumerAPI.GetTestUsers();
+            vm.TestUsers = ConsumingApplicationTestUsers;
             return View("Index",vm);
         }
 
 
         private void ValidateLoginModel(LoginVM vm)
         {
-            if (vm.Mode == AuthenticationMode.Basic)
+            if(vm.Mode == AuthenticationMode.Test && (FederatedApplicationSettings.IsProductionEnvironment() || ConsumingApplicationFederatedApplicationSettings.IsProductionEnvironment()))
+            {
+                ModelState.AddModelError("Mode", $"Cannot Use Authenticate with test users in '{FederatedApplicationSettings.SiteEnvironment}' Environment");
+            }
+            else if (vm.Mode == AuthenticationMode.Basic)
             {
                 if (string.IsNullOrEmpty(vm.Username))
                 {
@@ -133,10 +189,6 @@ namespace FederatedIPAPIAuthenticationProviderWeb.Controllers
             }
         }
 
-        protected override string SaveAuthenticationRequest(string authenticationRequestToken) {
-            Guid authenticationRequestGuid = AuthenticationRequestCache.Add(authenticationRequestToken);
-            return EncryptionService.Encrypt(authenticationRequestGuid.ToString());
-        }
         [HttpPost]
         [ValidateAntiForgeryToken]
         public ActionResult Login(LoginVM vm)
@@ -144,8 +196,8 @@ namespace FederatedIPAPIAuthenticationProviderWeb.Controllers
             ValidateLoginModel(vm);
             if (!ModelState.IsValid)
             {
-                vm.ConsumingApplicationSiteMeta = ConsumingApplicationSiteMeta;
-                vm.TestUsers = ConsumerAPI.GetTestUsers();
+                vm.ConsumingApplicationFederatedApplicationSettings = ConsumingApplicationFederatedApplicationSettings;
+                vm.TestUsers = ConsumingApplicationTestUsers;
                 return View("Index", vm);
             }
             if(vm.Mode == AuthenticationMode.CAC)

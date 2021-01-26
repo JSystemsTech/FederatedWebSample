@@ -10,11 +10,17 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="$(MSBuildThisFileDirectory)AuthNAuthZ\FederatedAuthorizeAttribute.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)DomainLayer\AuthenticationProviderDomainFacade.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)DomainLayer\DbConnection\AuthenticationProviderDbConnection.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)DomainLayer\DbConnection\ConsumingApplicationDbConnection.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)DomainLayer\DbConnection\DbConnectionConfigService.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)DomainLayer\DbMethods\AuthenticationProviderDbMethods.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)DomainLayer\DbMethods\ConsumingApplicationDbMethods.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)DomainLayer\DomainFacadeBase.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)DomainLayer\Models\Data\CACUser.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)DomainLayer\Models\Data\AuthenticationProviderApiUser.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)DomainLayer\Models\Data\TestUser.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)DomainLayer\Models\Data\WebAuthenticationCacheRecord.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Services\UserManagmentService.cs" />
   </ItemGroup>
   <ItemGroup>

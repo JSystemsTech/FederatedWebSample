@@ -1,16 +1,15 @@
-﻿using FederatedIPAuthenticationService.Configuration;
+﻿using FederatedIPAuthenticationService.Services;
+using FederatedIPAuthenticationService.Web.ConsumerAPI;
+using ServiceLayer.DomainLayer;
+using ServiceLayer.DomainLayer.DbConnection;
+using ServiceLayer.Services;
+using ServiceProvider.ServiceProvider;
+using ServiceProvider.Services;
+using ServiceProvider.Web;
+using System.Web.Http;
 using System.Web.Mvc;
 using System.Web.Optimization;
 using System.Web.Routing;
-using FederatedIPAuthenticationService.Services;
-using ServiceLayer.Services;
-using ServiceLayer.DomainLayer.DbConnection;
-using ServiceLayer.DomainLayer;
-using ServiceProvider.Web;
-using ServiceProvider.ServiceProvider;
-using ServiceProvider.Services;
-using System.Web.Http;
-using FederatedIPAuthenticationService.Web.ConsumerAPI;
 
 namespace FederatedIPAPIConsumer
 {
@@ -22,12 +21,12 @@ namespace FederatedIPAPIConsumer
         {
             services.AddApplicationSettings();
             services.AddConnectionStringConfig();
-            services.ConfigureAsFederatedConsumer();
-            services.AddTokenProvider();
+            services.ConfigureFederatedApplication();            
             services.AddService<DbConnectionConfigService>();
             services.AddService<IDomainFacade, DomainFacade>();
             services.AddService<IUserManagmentService, UserManagmentService>();
-            
+            services.AddService<ICssThemeService, CssThemeService>();
+
         }
         protected void Application_Start()
         {

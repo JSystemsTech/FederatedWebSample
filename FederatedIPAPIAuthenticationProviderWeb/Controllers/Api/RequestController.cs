@@ -1,6 +1,7 @@
 ﻿using FederatedIPAPIAuthenticationProviderWeb.Services;
 using FederatedIPAPIAuthenticationProviderWeb.TokenProviderApi.Filters;
 using FederatedIPAuthenticationService.Services;
+using Newtonsoft.Json;
 using ServiceProvider.ServiceProvider;
 using ServiceProvider.Web;
 using System;
@@ -22,6 +23,7 @@ namespace FederatedIPAPIAuthenticationProviderWeb.Controllers.Api
         protected ITokenProviderService TokenProviderService => Services.Get<ITokenProviderService>();
         protected ITokenProvider TokenProvider => Services.Get<ITokenProvider>();
 
+        private IEncryptionService EncryptionService => Services.Get<IEncryptionService>();
         protected HttpResponseMessage TextResponse(string value)
         {
             var response = new HttpResponseMessage(HttpStatusCode.OK);
@@ -29,6 +31,17 @@ namespace FederatedIPAPIAuthenticationProviderWeb.Controllers.Api
             response.Content.Headers.ContentType = new MediaTypeHeaderValue("text/plain");
             return response;
         }
+        protected HttpResponseMessage EncryptedResponse<T>(T model)
+        {
+            string value = EncryptionService.DateSaltEncrypt(model is string strModel ? strModel : JsonConvert.SerializeObject(model));
+            return TextResponse(value);
+        }
+        protected string DecryptBody(EncryptedPostBody body) => EncryptionService.DateSaltDecrypt(body.Content, true);
+        protected TokenParameters GetBodyAsTokenParameters(EncryptedPostBody body)=> JsonConvert.DeserializeObject<TokenParameters>(DecryptBody(body));
+    }
+    public class EncryptedPostBody
+    {
+        public string Content { get; set; }
     }
     public class AuthenticationController : ApiControllerBase
     {
@@ -36,7 +49,7 @@ namespace FederatedIPAPIAuthenticationProviderWeb.Controllers.Api
         [HttpPost]
         public HttpResponseMessage Post()
         {
-            return TextResponse(TokenProvider.CreateToken(claims=> {
+            return EncryptedResponse(TokenProvider.CreateToken(claims=> {
                 claims.Add("Name", new string[] { HttpContext.Current.User.Identity.Name });
             }));
         }
@@ -44,21 +57,24 @@ namespace FederatedIPAPIAuthenticationProviderWeb.Controllers.Api
     public class RequestController : ApiControllerBase
     {
         [HttpPost]
-        public HttpResponseMessage Post([FromBody] TokenParameters model) => TextResponse(TokenProviderService.Create(model.GetClaims()));
+        public HttpResponseMessage Post([FromBody] EncryptedPostBody body) => EncryptedResponse(TokenProviderService.Create(GetBodyAsTokenParameters(body).GetClaims()));
     }
     public class ClaimsController : ApiControllerBase
     {
         [HttpPost]
-        public IEnumerable<TokenClaim> Post([FromBody] TokenParameters model) => TokenProviderService.GetClaims(model.Token);
+        public HttpResponseMessage Post([FromBody] EncryptedPostBody body) => EncryptedResponse(TokenProviderService.GetClaims(GetBodyAsTokenParameters(body).Token));
     }
     public class RenewController : ApiControllerBase
     {
         [HttpPost]
-        public HttpResponseMessage Post([FromBody] TokenParameters model) => TextResponse(TokenProviderService.Renew(model.Token, model.GetClaims()));
+        public HttpResponseMessage Post([FromBody] EncryptedPostBody body) {
+            TokenParameters model = GetBodyAsTokenParameters(body);
+            return EncryptedResponse(TokenProviderService.Renew(model.Token, model.GetClaims())); 
+        }
     }
     public class ExpiresController : ApiControllerBase
     {
         [HttpPost]
-        public DateTime? Post([FromBody] TokenParameters model) => TokenProviderService.GetExpirationDate(model.Token);
+        public HttpResponseMessage Post([FromBody] EncryptedPostBody body) => EncryptedResponse(TokenProviderService.GetExpirationDate(GetBodyAsTokenParameters(body).Token));
     }
 }

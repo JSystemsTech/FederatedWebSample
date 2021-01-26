@@ -2,6 +2,8 @@
 using FederatedIPAPIAuthenticationProviderWeb.Configuration;
 using FederatedIPAPIAuthenticationProviderWeb.Services;
 using FederatedIPAuthenticationService.Services;
+using ServiceLayer.DomainLayer;
+using ServiceLayer.DomainLayer.DbConnection;
 using ServiceProvider.ServiceProvider;
 using ServiceProvider.Services;
 using ServiceProvider.Web;
@@ -19,15 +21,14 @@ namespace FederatedIPAPIAuthenticationProviderWeb
             services.AddApplicationSettings();
             services.AddConnectionStringConfig();
             services.AddConfiguration<ITokenProviderServiceSettings, TokenProviderServiceSettings>();
-
-            services.ConfigureAsFederatedProvider();
+            services.ConfigureFederatedApplication<SelfContainedTokenProvider>();
             services.AddAuthenticationRequestCache();
-            //services.AddTokenProvider();
-            services.AddEncryptionService();
+            services.AddService<AuthenticationProviderDbConnectionConfigService>();
+            services.AddService<IAuthenticationProviderDomainFacade, AuthenticationProviderDomainFacade>();
             services.AddMailService();
             services.AddService<ITokenProviderService, Saml2TokenProviderService>();
-            services.AddService<ITokenProvider, SelfContainedTokenProvider>();
-            
+            services.AddService<ICssThemeService, CssThemeService>();
+
         }
         protected void Application_Start()
         {

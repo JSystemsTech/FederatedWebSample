@@ -1,4 +1,4 @@
-// Darkly 4.5.3
+// Flatly 4.6.0
 // Bootswatch
 
 
@@ -7,17 +7,47 @@
 $web-font-path: "https://fonts.googleapis.com/css2?family=Lato:ital,wght@0,400;0,700;1,400&display=swap" !default;
 @import url($web-font-path);
 
-// Typography ==================================================================
+// Navbar =======================================================================
 
-.blockquote {
-  &-footer {
-    color: $gray-600;
+.bg-primary {
+  .navbar-nav .active > .nav-link {
+    color: $success !important;
+  }
+}
+
+.bg-dark {
+  &.navbar-dark .navbar-nav {
+    .nav-link:focus,
+    .nav-link:hover,
+    .active > .nav-link {
+      color: $primary !important;
+    }
+  }
+}
+
+// Buttons =====================================================================
+
+.btn {
+  &-secondary,
+  &-secondary:hover,
+  &-warning,
+  &-warning:hover {
+    color: $white;
   }
 }
 
 // Tables ======================================================================
 
 .table {
+  &-primary,
+  &-secondary,
+  &-success,
+  &-info,
+  &-warning,
+  &-danger {
+    color: $white;
+  }
+
   &-primary {
     &,
     > th,
@@ -166,29 +196,17 @@ $web-font-path: "https://fonts.googleapis.com/css2?family=Lato:ital,wght@0,400;0
   }
 }
 
-// Forms =======================================================================
-
-.input-group-addon {
-  color: $white;
-}
-
 // Navs ========================================================================
 
-.nav-tabs,
-.nav-pills {
-  .nav-link,
+.nav-tabs {
   .nav-link.active,
   .nav-link.active:focus,
   .nav-link.active:hover,
   .nav-item.open .nav-link,
   .nav-item.open .nav-link:focus,
   .nav-item.open .nav-link:hover {
-    color: $white;
+    color: $primary;
   }
-}
-
-.breadcrumb a {
-  color: $white;
 }
 
 .pagination {
@@ -200,11 +218,19 @@ $web-font-path: "https://fonts.googleapis.com/css2?family=Lato:ital,wght@0,400;0
 // Indicators ==================================================================
 
 .close {
+  text-decoration: none;
   opacity: .4;
 
   &:hover,
   &:focus {
     opacity: 1;
+  }
+}
+
+.badge {
+  &-secondary,
+  &-warning {
+    color: $white;
   }
 }
 
@@ -221,26 +247,32 @@ $web-font-path: "https://fonts.googleapis.com/css2?family=Lato:ital,wght@0,400;0
   @each $color, $value in $theme-colors {
     &-#{$color} {
       @if $enable-gradients {
-        background: $value linear-gradient(180deg, mix($white, $value, 15%), $value) repeat-x;
+        background: $value linear-gradient(180deg, mix($body-bg, $value, 15%), $value) repeat-x;
       } @else {
         background-color: $value;
       }
+    }
+  }
+
+  &-light {
+    &,
+    a,
+    .alert-link {
+      color: $body-color;
     }
   }
 }
 
 // Containers ==================================================================
 
-.list-group-item-action {
-  color: $white;
+.modal,
+.toast {
+  .close {
+    color: $black;
 
-  &:hover,
-  &:focus {
-    background-color: $gray-700;
-    color: $white;
-  }
-
-  .list-group-item-heading {
-    color: $white;
+    &:not(:disabled):not(.disabled):hover,
+    &:not(:disabled):not(.disabled):focus {
+      color: $black;
+    }
   }
 }

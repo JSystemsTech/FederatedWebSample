@@ -2,10 +2,12 @@
 using FederatedIPAuthenticationService.Extensions;
 using FederatedIPAuthenticationService.Models;
 using FederatedIPAuthenticationService.Services;
+using Newtonsoft.Json;
 using ServiceProvider.ServiceProvider;
 using ServiceProvider.Web;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
@@ -24,8 +26,8 @@ namespace FederatedIPAuthenticationService.Web.ConsumerAPI
     {
         protected IServices Services => HttpContext.Current.ApplicationInstance is IMvcServiceApplication app ? app.Services : null;
         protected ITokenProvider TokenProvider => Services.Get<ITokenProvider>();
-        protected ISiteMeta SiteMeta => Services.Get<ISiteMeta>();
-
+        protected IFederatedApplicationSettings FederatedApplicationSettings => Services.Get<IFederatedApplicationSettings>();
+        private IEncryptionService EncryptionService => Services.Get<IEncryptionService>();
         protected HttpResponseMessage TextResponse(string value)
         {
             var response = new HttpResponseMessage(HttpStatusCode.OK);
@@ -33,38 +35,43 @@ namespace FederatedIPAuthenticationService.Web.ConsumerAPI
             response.Content.Headers.ContentType = new MediaTypeHeaderValue("text/plain");
             return response;
         }
+        protected HttpResponseMessage EncryptedResponse<T>(T model)
+        {
+            string value = EncryptionService.DateSaltEncrypt(model is string strModel ? strModel : JsonConvert.SerializeObject(model));
+            return TextResponse(value);
+        }
+        protected string DecryptBody(string bodyValue) => EncryptionService.DateSaltDecrypt(bodyValue, true);
+    }
+    public class EncryptedPostBody
+    {
+        public string Content { get; set; }
     }
     public abstract class ConsumerAuthenticationApiAuthenticationController : ConsumerAuthenticationApiControllerBase
     {
         [System.Web.Http.HttpPost]
-        public ConsumerApiAuthenticationResponse Post([FromBody] string authReuestToken)
+        public HttpResponseMessage Post([FromBody] EncryptedPostBody body)
         {
-            IDictionary<string, IEnumerable<string>> authReuestTokenClaims = TokenProvider.GetTokenClaims(authReuestToken);
-            IEnumerable<string> providerAuthenticationCredentialsClaim = authReuestTokenClaims.ContainsKey("providerAuthenticationCredentials") ? authReuestTokenClaims["providerAuthenticationCredentials"] : null;
-            IEnumerable<string> externalAuthAuthorizedUser = authReuestTokenClaims.ContainsKey("externalAuthAuthorizedUser") ? authReuestTokenClaims["externalAuthAuthorizedUser"] : null;
+            string decryptedBody = DecryptBody(body.Content);
 
-
-            if (providerAuthenticationCredentialsClaim == null && externalAuthAuthorizedUser == null)
+            ConsumerApiAuthenticationResponse responseObj = new ConsumerApiAuthenticationResponse() { Message = "No User Credentials" };
+            if (decryptedBody.TryDeserializeObject(out ProviderAuthenticationCredentials authRequest) && 
+                (authRequest.Username != null || 
+                authRequest.Password != null || 
+                authRequest.Email != null ||
+                authRequest.TestUserGuid != null || 
+                authRequest.UserData != null))
             {
-                return new ConsumerApiAuthenticationResponse() { Message = "No User Credentials" };
+                responseObj = ResolveAuthenticatedUser(authRequest) is ConsumerUser authenticatedUser ? CreateConsumerAPISuccessResponse(authenticatedUser) : 
+                    new ConsumerApiAuthenticationResponse() { Message = "Invalid User" };                
             }
-            ProviderAuthenticationCredentials providerAuthenticationCredentials = new ProviderAuthenticationCredentials(providerAuthenticationCredentialsClaim);
-            ConsumerUser authenticatedUser = ResolveAuthenticatedUser(providerAuthenticationCredentials, externalAuthAuthorizedUser);
 
-            if (authenticatedUser != null)
-            {
-                return CreateConsumerAPISuccessResponse(authenticatedUser);
-            }
-            return new ConsumerApiAuthenticationResponse() { Message = "Invalid User" };
+            return EncryptedResponse(responseObj);
         }
         private ConsumerApiAuthenticationResponse CreateConsumerAPISuccessResponse(ConsumerUser authenticatedUser)
         {
             var token = TokenProvider.CreateToken(authTokenClaims => {
                 authTokenClaims.AddUpdate("UserGuid", authenticatedUser.Guid.ToString());
-                foreach (KeyValuePair<string, string> siteMetaItem in SiteMeta.Collection)
-                {
-                    authTokenClaims.AddUpdate(siteMetaItem.Key, siteMetaItem.Value.ToString());
-                }
+                FederatedApplicationSettings.UpdateConsumerTokenClaims(authTokenClaims);
             });
             return new ConsumerApiAuthenticationResponse()
             {
@@ -73,24 +80,51 @@ namespace FederatedIPAuthenticationService.Web.ConsumerAPI
                 AuthenticationTokenExpiration = TokenProvider.GetExpirationDate(token)
             };
         }
-        protected abstract ConsumerUser ResolveAuthenticatedUser(ProviderAuthenticationCredentials providerAuthenticationCredentials, IEnumerable<string> externalAuthAuthorizedUser);
+        protected abstract ConsumerUser ResolveAuthenticatedUser(ProviderAuthenticationCredentials providerAuthenticationCredentials);
     }
-    public abstract class ConsumerAuthenticationApiTestUsersController : ConsumerAuthenticationApiControllerBase
+
+    public interface IConsumerApplicationSettingsResponse
     {
-        [System.Web.Http.HttpGet]
-        public IEnumerable<ConsumerUser> Get() => SiteMeta.AuthenticationModes.Contains("Test") ? ResolveTestUsers() : new ConsumerUser[0];
-        protected abstract IEnumerable<ConsumerUser> ResolveTestUsers();
+        IEnumerable<ConsumerUser> TestUsers { get; set; }
+        FederatedApplicationSettings FederatedApplicationSettings { get; }
+        string LogoImage { get; }
     }
-    public abstract class ConsumerAuthenticationApiPrivacyNoticeController : ConsumerAuthenticationApiControllerBase
+    public class ConsumerApplicationSettingsResponse: IConsumerApplicationSettingsResponse
     {
-        [System.Web.Http.HttpGet]
-        public HttpResponseMessage Get() => TextResponse(GetPrivacyNotice());
-        protected abstract string GetPrivacyNotice();
+        public IEnumerable<ConsumerUser> TestUsers { get; set; }
+        public FederatedApplicationSettings FederatedApplicationSettings { get; set; }
+        public string LogoImage { get; set; }
     }
-    public abstract class ConsumerAuthenticationApiSiteMetaController : ConsumerAuthenticationApiControllerBase
+    public abstract class ConsumerAuthenticationApiConsumerApplicationSettingsController : ConsumerAuthenticationApiControllerBase
     {
+        private static IEnumerable<ConsumerUser> EmptyTestUsers = new ConsumerUser[0];
         [System.Web.Http.HttpGet]
-        public ISiteMeta Get() => SiteMeta;
+        public HttpResponseMessage Get() => EncryptedResponse(new ConsumerApplicationSettingsResponse() { 
+            TestUsers = FederatedApplicationSettings.AuthenticationModes.Contains("Test") ? GetTestUsers() : EmptyTestUsers,
+            FederatedApplicationSettings = new FederatedApplicationSettings(FederatedApplicationSettings),
+            LogoImage = GetLogoImage()
+        });
+        protected virtual IEnumerable<ConsumerUser> GetTestUsers() => EmptyTestUsers;
+        protected virtual string GetLogoImage() => null;
+        protected string LoadImageFromFile(string path)
+        {
+            try
+            {                
+                string fullPath = HttpContext.Current.Server.MapPath(path);
+                System.Drawing.Image image = System.Drawing.Image.FromFile(fullPath);
+                using (var ms = new System.IO.MemoryStream())
+                {
+                    image.Save(ms, image.RawFormat);
+                    var base64 = Convert.ToBase64String(ms.ToArray());
+                    return $"data:image/gif;base64,{base64}";
+                }
+            }
+            catch(Exception e)
+            {
+                return null;
+            }
+            
+        }
     }
     internal class ConsumerApiIdentity : IIdentity
     {

@@ -1,5 +1,6 @@
 ﻿using FederatedIPAuthenticationService.Configuration;
 using ServiceProvider.ServiceProvider;
+using ServiceProvider.Services;
 
 namespace FederatedIPAuthenticationService.Services
 {
@@ -8,33 +9,42 @@ namespace FederatedIPAuthenticationService.Services
         public static void AddAuthenticationRequestCache(this IServiceCollection services) {
             services.AddService<IAuthenticationRequestCache, AuthenticationRequestCache>();
         }
-        public static void AddEncryptionService(this IServiceCollection services)
+        public static void AddEncryptionService<TEncryptionService>(this IServiceCollection services)
+            where TEncryptionService : EncryptionServiceBase, IService
         {
             services.AddConfiguration<IEncryptionServiceSettings, EncryptionServiceSettings>();
-            services.AddService<IEncryptionService, EncryptionService>();
+            services.AddService<TEncryptionService>();
         }
-        public static void AddTokenProvider(this IServiceCollection services)
+
+        private static void AddTokenProvider<TTokenProvider>(this IServiceCollection services)
+            where TTokenProvider: class, ITokenProvider, IService
         {
-            services.AddService<ITokenProvider, TokenProvider>();
+            services.AddService<ITokenProvider, TTokenProvider>();
         }
-        public static void AddStandaloneTokenProvider(this IServiceCollection services)
+        private static void AddTokenProvider(this IServiceCollection services)
         {
-            services.AddConfiguration<ITokenProviderSettings, TokenProviderSettings>();
-            services.AddService<ITokenProvider, TokenProvider>();
+            services.AddTokenProvider<TokenProvider>();
         }
         public static void AddMailService(this IServiceCollection services)
         {
             services.AddService<IMailService, MailService>();
         }
-        public static void ConfigureAsFederatedProvider(this IServiceCollection services)
+        public static void ConfigureIndependantFederatedTokenProvider(this IServiceCollection services)
         {
-            services.AddConfiguration<ISiteMeta, SiteMeta>();
-            services.AddConfiguration<IFederatedProviderSettings, FederatedProviderSettings>();
+            services.AddConfiguration<ITokenProviderSettings, TokenProviderSettings>();
+            services.AddTokenProvider();
         }
-        public static void ConfigureAsFederatedConsumer(this IServiceCollection services)
+        public static void ConfigureFederatedApplication(this IServiceCollection services)
         {
-            services.AddConfiguration<ISiteMeta, SiteMeta>();
-            services.AddConfiguration<IFederatedConsumerSettings, FederatedConsumerSettings>();
+            services.ConfigureFederatedApplication<TokenProvider>();
+        }
+        public static void ConfigureFederatedApplication<TTokenProvider>(this IServiceCollection services)
+            where TTokenProvider : class, ITokenProvider, IService
+        {
+            services.AddConfiguration<IFederatedApplicationSettings, FederatedApplicationSettingsConfig>();
+            services.AddService<IEncryptionService, FederatedApplicationBasicEncryptionService>();
+            services.AddTokenProvider<TTokenProvider>();
+            
         }
     }
 }

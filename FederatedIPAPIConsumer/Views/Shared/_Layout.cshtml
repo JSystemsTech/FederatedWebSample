@@ -1,23 +1,18 @@
 ﻿@using FederatedIPAuthenticationService.Extensions
 @using FederatedIPAuthenticationService.Configuration
 @{
-    ISiteMeta SiteMeta = ViewBag.SiteMeta as ISiteMeta;
-    bool isDarkMode = ViewBag.CssMode is string cssMode && cssMode.ToLower() == "dark";
+    IFederatedApplicationSettings FederatedApplicationSettings = ViewBag.FederatedApplicationSettings as IFederatedApplicationSettings;
+    bool isDarkMode = ViewBag.IsDarkMode == true;
 }
 <!DOCTYPE html>
-<html>
+<html lang="en-us">
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>@ViewBag.Title - My ASP.NET Application</title>
-    @if (isDarkMode)
-    {
-        @Styles.Render("~/Content/css-dark")
-    }
-    else
-    {
-        @Styles.Render("~/Content/css")
-    }
+    <link href="~/favicon.ico" rel="shortcut icon" type="image/x-icon" />
+    <title>@FederatedApplicationSettings.SiteName</title>
+    @Styles.Render(ViewBag.ThemeBundle as string)
+
 
     @Scripts.Render("~/bundles/modernizr")
 </head>
@@ -35,17 +30,24 @@
         @Html.PageLoadLink()
         @Html.AntiForgeryForm()
         <header>
-            @{ 
-                string navBarClasses = isDarkMode ? "navbar-dark bg-secondary" : "navbar-dark bg-dark";
-            }
-            <nav class="py-lg-0 navbar navbar-expand-lg @(navBarClasses)">
-                <a class="navbar-brand" href="#">
+            <nav class="py-lg-0 navbar navbar-expand-lg @(isDarkMode ? "navbar-dark bg-primary" : "navbar-dark bg-primary")">
+                <a class="py-lg-1 navbar-brand" href="#">
                     <span class="row">
-                        <span class="col lead">@SiteMeta.SiteName</span>
+                        <span class="col-auto px-1 align-self-center">
+                            <span class="col-auto px-1">
+                                <img src="~/Content/Images/logo.png" alt="@FederatedApplicationSettings.SiteName Logo" width="40" height="40" />
+                            </span>
+                        </span>
+                        <span class="col-auto px-1 align-self-center">
+                            <span class="row">
+                                <span class="col lead">@FederatedApplicationSettings.SiteName</span>
+                            </span>
+                            <span class="row">
+                                <span class="col lead-sm">@FederatedApplicationSettings.SiteDescription</span>
+                            </span>
+                        </span>
                     </span>
-                    <span class="row">
-                        <span class="col lead-sm">@SiteMeta.SiteDescription</span>
-                    </span>
+                    
                 </a>
                 <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
                     <span class="navbar-toggler-icon"></span>
@@ -82,11 +84,11 @@
 
                                 @if (isDarkMode)
                                 {
-                                    @Html.ActionLink("View Light Mode", "ChangeCss", "Home", new { }, new { @class = "nav-link" })
+                                    @Html.ActionLink("Dark Mode (on)", "ChangeTheme", "Home", new { theme = FederatedApplicationSettings.Theme }, new { @class = "nav-link" })
                                 }
                                 else
                                 {
-                                    @Html.ActionLink("View Dark Mode", "ChangeCss", "Home", new { cssMode = "dark" }, new { @class = "nav-link" })
+                                    @Html.ActionLink("Dark Mode (off)", "ChangeTheme", "Home", new { theme = FederatedApplicationSettings.DarkTheme }, new { @class = "nav-link" })
                                 }
                             </li>
                         </ul>
@@ -100,9 +102,21 @@
                 @RenderBody()
             </div>
         </main>
-        <hr />
-        <footer class="text-center">
-            <p>@SiteMeta.SiteName -version @SiteMeta.SiteVersion @SiteMeta.SiteEnvironment </p>
+        <footer class="text-center container-fluid border-top">
+            <div class="row">
+                <div class="col align-self-center py-2">
+                    <p class="mb-0">@FederatedApplicationSettings.Display()</p>
+                </div>
+            </div>
+            <div class="row @(FederatedApplicationSettings.NetworkIs("Classified") ? "bg-text-danger": "bg-text-success")" style="font-size:0.7em;">
+                <div class="col align-self-center py-0">
+                    <div class="mb-0 text-uppercase">@FederatedApplicationSettings.GetNetworkDisplay()</div>
+                    @if (FederatedApplicationSettings.HasNetworkDescription())
+                    {
+                        <div class="mb-0"><small>@FederatedApplicationSettings.SiteNetworkDescription</small></div>
+                    }
+                </div>
+            </div>
         </footer>
         
         Html.RenderPartial("AlertModal", "default");

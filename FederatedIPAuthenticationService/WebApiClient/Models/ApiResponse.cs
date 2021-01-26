@@ -24,7 +24,7 @@ namespace WebApiClient.Models
         internal bool IsUnauthorized { get => StatusCode == HttpStatusCode.Unauthorized; }
         internal bool IsForbidden { get => StatusCode == HttpStatusCode.Forbidden; }
 
-        internal static async Task<ApiResponse> BuildAsync(HttpResponseMessage httpResponse)
+        internal static async Task<ApiResponse> BuildAsync(HttpResponseMessage httpResponse, Func<string, Task<string>> decryptionHandlerAsync = null)
         {
             ApiResponse apiResponse = new ApiResponse()
             {
@@ -32,11 +32,15 @@ namespace WebApiClient.Models
                 Content = httpResponse.IsSuccessStatusCode ? await httpResponse.Content.ReadAsStringAsync() : null,
                 Error = !httpResponse.IsSuccessStatusCode ? $"{httpResponse.StatusCode}: {httpResponse.ReasonPhrase}" : null
             };
+            if(decryptionHandlerAsync != null && !string.IsNullOrWhiteSpace(apiResponse.Content))
+            {
+                apiResponse.Content = await decryptionHandlerAsync(apiResponse.Content);
+            }
             await Task.CompletedTask;
             return apiResponse;
         }
 
-        internal static ApiResponse Build(HttpResponseMessage httpResponse)
+        internal static ApiResponse Build(HttpResponseMessage httpResponse, Func<string, string> decryptionHandler = null)
         {
             ApiResponse apiResponse = new ApiResponse()
             {
@@ -44,6 +48,10 @@ namespace WebApiClient.Models
                 Content = httpResponse.IsSuccessStatusCode ? httpResponse.Content.ReadAsStringAsync().GetAwaiter().GetResult() : null,
                 Error = !httpResponse.IsSuccessStatusCode ? $"{httpResponse.StatusCode}: {httpResponse.ReasonPhrase}" : null
             };
+            if (decryptionHandler != null && !string.IsNullOrWhiteSpace(apiResponse.Content))
+            {
+                apiResponse.Content = decryptionHandler(apiResponse.Content);
+            }
             return apiResponse;
         }
         public T Deserialize<T>()

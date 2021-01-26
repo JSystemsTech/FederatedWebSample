@@ -28,6 +28,11 @@ namespace WebApiClient
         Func<T, IApiResponse> CreatePatchMethod<T>(string endpoint);
         Func<T, IApiResponse> CreateGetMethod<T>(string endpoint);
         Func<T, IApiResponse> CreateDeleteMethod<T>(string endpoint);
+
+        Func<string, string> DecryptionHandler { get; set; }
+        Func<string, string> EncryptionHandler { get; set; }
+        Func<string, Task<string>> DecryptionHandlerAsync { get; set; }
+        Func<string, Task<string>> EncryptionHandlerAsync { get; set; }
     }
     internal class ApiClient : IApiClient
     {
@@ -41,22 +46,25 @@ namespace WebApiClient
         internal ApiClient(string apiUrl) {
             ApiUrl = apiUrl;
         }
+        private string BasicAuthenticationString { get; set; }
         private ApiClient(string apiUrl, string authenticationString)
         {
             ApiUrl = apiUrl;
-            var base64EncodedAuthenticationString = Convert.ToBase64String(Encoding.ASCII.GetBytes(authenticationString));
-            InitialAuthenticationHeader = new AuthenticationHeaderValue(AuthenticationSchemes.Basic.ToString(), base64EncodedAuthenticationString);
+            BasicAuthenticationString = authenticationString;            
         }
         public static ApiClient Create(string apiUrl, string authenticationEndpoint, string authenticationHeader)
         {
             ApiClient apiClient = new ApiClient(apiUrl, authenticationHeader);
             apiClient.AuthenticationEndpoint = apiClient.CreateEndpoint(authenticationEndpoint);
-            apiClient.Authenticate();
             return apiClient;
         }
         protected virtual void Authenticate()
         {
             CallingAPIAuthenticaion = true;
+            InitialAuthenticationHeader = new AuthenticationHeaderValue(AuthenticationSchemes.Basic.ToString(), EncryptionHandler != null ? EncryptionHandler(BasicAuthenticationString) : 
+                Convert.ToBase64String(Encoding.ASCII.GetBytes(BasicAuthenticationString)));
+
+
             IApiResponse authResponse = AuthenticationEndpoint.Post(string.Empty);
             TokenAuthenticationHeader = new AuthenticationHeaderValue("Bearer", authResponse.Content);
             CallingAPIAuthenticaion = false;
@@ -64,6 +72,8 @@ namespace WebApiClient
         protected virtual async Task AuthenticateAsync()
         {
             CallingAPIAuthenticaion = true;
+            InitialAuthenticationHeader = new AuthenticationHeaderValue(AuthenticationSchemes.Basic.ToString(), EncryptionHandlerAsync != null ? await EncryptionHandlerAsync(BasicAuthenticationString) : 
+                Convert.ToBase64String(Encoding.ASCII.GetBytes(BasicAuthenticationString)));
             IApiResponse authResponse = await AuthenticationEndpoint.PostAsync(string.Empty);
             TokenAuthenticationHeader = new AuthenticationHeaderValue("Bearer", authResponse.Content);
             CallingAPIAuthenticaion = false;
@@ -72,7 +82,6 @@ namespace WebApiClient
         {
             ApiClient apiClient = new ApiClient(apiUrl, authenticationHeader);
             apiClient.AuthenticationEndpoint = await apiClient.CreateEndpointAsync(authenticationEndpoint);
-            await apiClient.AuthenticateAsync();
             await Task.CompletedTask;
             return apiClient;
         }
@@ -142,10 +151,12 @@ namespace WebApiClient
                 return new HttpResponseMessage();
             }
         }
+        public Func<string, Task<string>> DecryptionHandlerAsync { get; set; }
+        public Func<string, Task<string>> EncryptionHandlerAsync { get; set; }
         private Func<string, string, Task<HttpResponseMessage>> GetSendAsync(HttpMethod method)
-        => async (url, httpContent) =>
+        => async (url, serializedContent) =>
         {
-            return await ExecuteClientMethodAsync(url, method, httpContent);
+            return await ExecuteClientMethodAsync(url, method, EncryptionHandlerAsync != null ? await EncryptionHandlerAsync(serializedContent) : serializedContent);
         };
         private Func<string, Task<HttpResponseMessage>> GetSendAsyncNoData(HttpMethod method)
         => async (url) =>
@@ -203,6 +214,8 @@ namespace WebApiClient
                 return new HttpResponseMessage();
             }
         }
+        public Func<string, string> DecryptionHandler { get; set; }
+        public Func<string, string> EncryptionHandler { get; set; }
         private Func<string, string, HttpResponseMessage> GetSend(HttpMethod method)
         => (url, serializedContent) =>
         {
@@ -274,16 +287,24 @@ namespace WebApiClient
 
         private async Task<IApiResponse> CallApiAsync<T>(Func<string, string,Task<HttpResponseMessage>> request, string url, T content)
         {
-            string serializedContent = JsonConvert.SerializeObject(content);
-            
+            string serializedContent;
+            if (content is string contentStr)
+            {
+                serializedContent = EncryptionHandlerAsync != null ? JsonConvert.SerializeObject(new { content = await EncryptionHandlerAsync(contentStr) }) : JsonConvert.SerializeObject(contentStr);
+            }
+            else
+            {
+                serializedContent = EncryptionHandlerAsync != null ? JsonConvert.SerializeObject(new { content = await EncryptionHandlerAsync(JsonConvert.SerializeObject(content)) }) : JsonConvert.SerializeObject(content);
+            }
+
             HttpResponseMessage httpResponse = await request(url, serializedContent);
 
-            ApiResponse response = await ApiResponse.BuildAsync(httpResponse);
+            ApiResponse response = await ApiResponse.BuildAsync(httpResponse, DecryptionHandlerAsync);
             if (response.IsUnauthorized && !CallingAPIAuthenticaion)
             {
                 await AuthenticateAsync();
                 httpResponse = await request(url, serializedContent);
-                response = await ApiResponse.BuildAsync(httpResponse);
+                response = await ApiResponse.BuildAsync(httpResponse, DecryptionHandlerAsync);
             }
             await Task.CompletedTask;
             return response;
@@ -293,12 +314,12 @@ namespace WebApiClient
 
             string requestUrl = BuildUrlWithQueryParams(url, data);
             HttpResponseMessage httpResponse = await request(requestUrl);
-            ApiResponse response = await ApiResponse.BuildAsync(httpResponse);
+            ApiResponse response = await ApiResponse.BuildAsync(httpResponse, DecryptionHandlerAsync);
             if (response.IsUnauthorized && !CallingAPIAuthenticaion)
             {
                 await AuthenticateAsync();
                 httpResponse = await request(requestUrl);
-                response = await ApiResponse.BuildAsync(httpResponse);
+                response = await ApiResponse.BuildAsync(httpResponse, DecryptionHandlerAsync);
             }
             await Task.CompletedTask;
             return response;
@@ -327,15 +348,24 @@ namespace WebApiClient
 
         private IApiResponse CallApi<T>(Func<string, string, HttpResponseMessage> request, string url, T content)
         {
-            string serializedContent = JsonConvert.SerializeObject(content);
+            string serializedContent;
+            if (content is string contentStr)
+            {
+                serializedContent = EncryptionHandler != null ? JsonConvert.SerializeObject(new { content = EncryptionHandler(contentStr) }) : JsonConvert.SerializeObject(contentStr);
+            }
+            else
+            {
+                serializedContent = EncryptionHandler != null ? JsonConvert.SerializeObject(new { content = EncryptionHandler(JsonConvert.SerializeObject(content)) }) : JsonConvert.SerializeObject(content);
+            }
+            
             HttpResponseMessage httpResponse = request(url, serializedContent);
 
-            ApiResponse response = ApiResponse.Build(httpResponse);
+            ApiResponse response = ApiResponse.Build(httpResponse, DecryptionHandler);
             if (response.IsUnauthorized && !CallingAPIAuthenticaion)
             {
                 Authenticate();
                 httpResponse = request(url, serializedContent);
-                response = ApiResponse.Build(httpResponse);
+                response = ApiResponse.Build(httpResponse, DecryptionHandler);
             }
             return response;
         }
@@ -344,12 +374,12 @@ namespace WebApiClient
         {
             string requestUrl = BuildUrlWithQueryParams(url, data);
             HttpResponseMessage httpResponse = request(requestUrl);
-            ApiResponse response = ApiResponse.Build(httpResponse);
+            ApiResponse response = ApiResponse.Build(httpResponse, DecryptionHandler);
             if (response.IsUnauthorized && !CallingAPIAuthenticaion)
             {
                 Authenticate();
                 httpResponse = request(requestUrl);
-                response = ApiResponse.Build(httpResponse);
+                response = ApiResponse.Build(httpResponse, DecryptionHandler);
             }
             return response;
         }

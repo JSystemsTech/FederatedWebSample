@@ -8,6 +8,7 @@ using System.Web.Routing;
 
 namespace FederatedIPAuthenticationService.Attributes
 {
+    [AttributeUsage(AttributeTargets.Class | AttributeTargets.Method)]
     public abstract class FederatedAuthenticationFilter : ActionFilterAttribute, IAuthenticationFilter
     {
         protected AuthenticationContext AuthenticationContext { get; set; }

@@ -19,14 +19,12 @@ namespace FederatedIPAuthenticationService.Attributes
     public abstract class FederatedAuthenticationConsumer : FederatedAuthenticationFilter
     {
         protected IServices Services { get => HttpContext.ApplicationInstance is IMvcServiceApplication app? app.Services : null; }
-        private IFederatedConsumerSettings FederatedConsumerSettings => Services.Get<IFederatedConsumerSettings>();
-        private ISiteMeta SiteMeta => Services.Get<ISiteMeta>();
-        private bool UseRhealm { get => !string.IsNullOrWhiteSpace(SiteMeta.SiteRhealmId); }
+        private IFederatedApplicationSettings FederatedApplicationSettings => Services.Get<IFederatedApplicationSettings>();
         private ITokenProvider TokenProvider => Services.Get<ITokenProvider>();
-        private Uri LogoutUri => GetUri(FederatedConsumerSettings.LogoutUrl);
+        private Uri LogoutUri => GetUri(FederatedApplicationSettings.LogoutUrl);
         private bool IsLogoutRequest { get => Request.Url.GetLeftPart(UriPartial.Path) == LogoutUri.GetLeftPart(UriPartial.Path); }
-        private string AuthenticationCookieName { get => $"{FederatedSettings.FederatedAuthenticationTokenCookiePrefix}{(UseRhealm ? SiteMeta.SiteRhealmId : SiteMeta.SiteId)}"; }
-        private string AuthenticationRequestCookieName { get => $"{FederatedSettings.FederatedAuthenticationRequestTokenCookiePrefix}{FederatedConsumerSettings.AuthenticationProviderId}"; }
+        private string AuthenticationCookieName { get => $"{FederatedSettings.FederatedAuthenticationTokenCookiePrefix}{FederatedApplicationSettings.GetCookieSuffix()}"; }
+        private string AuthenticationRequestCookieName { get => $"{FederatedSettings.FederatedAuthenticationRequestTokenCookiePrefix}{FederatedApplicationSettings.AuthenticationProviderId}"; }
         public FederatedAuthenticationConsumer(bool isAuthenticatedRoute = true) : base(isAuthenticatedRoute) { }
 
         protected abstract IIdentity CreateAuthenticatedPrincipalIdentity(IDictionary<string, IEnumerable<string>> tokenClaims);
@@ -63,11 +61,11 @@ namespace FederatedIPAuthenticationService.Attributes
          */
         private void OnLogoutRequest(AuthenticationContext filterContext) 
         {
-            HttpContext.Session.Add("LogoutRedirectUrl", $"{FederatedConsumerSettings.AuthenticationProviderUrl}/{SiteMeta.SiteId}");
+            HttpContext.Session.Add("LogoutRedirectUrl", $"{FederatedApplicationSettings.AuthenticationProviderUrl}/{FederatedApplicationSettings.SiteId}");
             RemoveAuthenticationCookie();
             HttpContext.User = FederatedPrincipal.CreateLogout();
             string authenticationRequestToken = TokenProvider.CreateToken(claims => {
-                claims.AddUpdate("ConsumerAuthenticationApiUrl", SiteMeta.ConsumerAuthenticationApiUrl);
+                claims.AddUpdate("ConsumerAuthenticationApiUrl", FederatedApplicationSettings.ConsumerAuthenticationApiUrl);
             });
             SetAuthenticationRequestTokenCookie(AuthenticationRequestCookieName, authenticationRequestToken, (DateTime)TokenProvider.GetExpirationDate(authenticationRequestToken));
         }
@@ -89,18 +87,15 @@ namespace FederatedIPAuthenticationService.Attributes
             if (!string.IsNullOrWhiteSpace(token) && 
                 TokenProvider.IsValidToken(token) && 
                 TokenProvider.GetTokenClaims(token) is IDictionary<string,IEnumerable<string>> tokenClaims &&
-                FederatedSettings.GetSiteMeta(tokenClaims) is SiteMeta siteMetaFromToken &&
-                (siteMetaFromToken.SiteRhealmId == SiteMeta.SiteRhealmId || siteMetaFromToken.SiteId == SiteMeta.SiteId))
+                FederatedApplicationSettings.ValidateConsumerTokenClaims(tokenClaims)
+                )
             {
                 try {
                     IIdentity identity = CreateAuthenticatedPrincipalIdentity(tokenClaims);
                     string updatedToken = TokenProvider.RenewToken(token, (claims) =>
                     {
                         claims.AddUpdate("Roles", GetRoles(tokenClaims, tokenClaims.Get<string>("Roles")));
-                        foreach (KeyValuePair<string, string> siteMetaItem in SiteMeta.Collection)
-                        {
-                            claims.AddUpdate(siteMetaItem.Key, siteMetaItem.Value.ToString());
-                        }
+                        FederatedApplicationSettings.UpdateConsumerTokenClaims(tokenClaims);
                         SetTokenUpdateClaims(identity, claims);
                     });
                     var updatedTokenClaims = TokenProvider.GetTokenClaims(updatedToken);
@@ -138,13 +133,13 @@ namespace FederatedIPAuthenticationService.Attributes
         /*Authentication still checks for valid experation date in token*/
         private void SetAuthenticationCookie(string value, DateTime? expires = null)
         {
-            if (FederatedConsumerSettings.UseSessionCookie)
+            if (FederatedApplicationSettings.UseSessionCookie)
             {
-                SetHttpCookie(CreateSessionCookie(AuthenticationCookieName, value, !UseRhealm));
+                SetHttpCookie(CreateSessionCookie(AuthenticationCookieName, value, !FederatedApplicationSettings.UseRhealm()));
             }
             else if (expires is DateTime expirationDate)
             {
-                SetHttpCookie(CreateCookie(AuthenticationCookieName, value, expirationDate, !UseRhealm));
+                SetHttpCookie(CreateCookie(AuthenticationCookieName, value, expirationDate, !FederatedApplicationSettings.UseRhealm()));
             }
         }
     }

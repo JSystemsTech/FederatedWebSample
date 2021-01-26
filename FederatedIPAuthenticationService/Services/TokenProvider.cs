@@ -30,17 +30,22 @@ namespace FederatedIPAuthenticationService.Services
         protected override void Init()
         {
             
-            IFederatedConsumerSettings config = Services.Get<IFederatedConsumerSettings>();
-            if (config == null)
+            IFederatedApplicationSettings FederatedApplicationSettings = Services.Get<IFederatedApplicationSettings>();
+            IEncryptionService encryptionService;
+            if (FederatedApplicationSettings == null)
             {
                 ITokenProviderSettings standAloneConfig = Services.Get<ITokenProviderSettings>();
                 Client = ApiClientFactory.Create(standAloneConfig.Url, standAloneConfig.AuthenticationEndpoint, standAloneConfig.Username, standAloneConfig.Password);
+                encryptionService = new FederatedApplicationBasicEncryptionService(standAloneConfig);
             }
             else
             {
-                Client = ApiClientFactory.Create(config.AuthenticationProviderUrl, config.TokenProviderAuthenticationEndpoint, config.TokenProviderUsername, config.TokenProviderPassword);
+                encryptionService = Services.Get<IEncryptionService>();
+                Client = ApiClientFactory.Create(FederatedApplicationSettings.AuthenticationProviderUrl, FederatedApplicationSettings.TokenProviderAuthenticationEndpoint, FederatedApplicationSettings.TokenProviderUsername, FederatedApplicationSettings.TokenProviderPassword);                
             }
-            
+            Client.EncryptionHandler = str => encryptionService.DateSaltEncrypt(str);
+            Client.DecryptionHandler = str => encryptionService.DateSaltDecrypt(str, true);
+
             RequestEndpoint = Client.CreateEndpoint("api/Request");
             RenewEndpoint = Client.CreateEndpoint("api/Renew");
             ClaimsEndpoint = Client.CreateEndpoint("api/Claims");

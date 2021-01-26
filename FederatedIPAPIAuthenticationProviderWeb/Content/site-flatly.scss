@@ -1,0 +1,21 @@
+﻿$dark: #7b8a8b !default;
+// Links
+
+$link-color: $dark !default;
+// Navbar
+
+$navbar-dark-hover-color: $dark !default;
+
+// Pagination
+
+$pagination-bg: $dark !default;
+$pagination-hover-bg: darken($dark, 15%) !default;
+$pagination-disabled-bg: lighten($dark, 15%) !default;
+
+
+
+$enable-responsive-font-sizes: true;
+@import 'bootswatch/flatly/_variables.scss';
+@import 'bootstrap/bootstrap.scss';
+@import 'bootswatch/flatly/_bootswatch.scss';;
+@import 'site-base.scss';

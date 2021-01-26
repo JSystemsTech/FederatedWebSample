@@ -1,4 +1,6 @@
 ﻿using FederatedIPAPIAuthenticationProviderWeb.Services;
+using FederatedIPAuthenticationService.Services;
+using ServiceLayer.DomainLayer;
 using ServiceProvider.ServiceProvider;
 using ServiceProvider.Web;
 using System;
@@ -57,7 +59,8 @@ namespace FederatedIPAPIAuthenticationProviderWeb.TokenProviderApi.Filters
 
         private IServices Services => HttpContext.Current.ApplicationInstance is IMvcServiceApplication app ? app.Services : null;
         private ITokenProviderService TokenProviderService => Services.Get<ITokenProviderService>();
-        
+        private IAuthenticationProviderDomainFacade AuthenticationProviderDomainFacade => Services.Get<IAuthenticationProviderDomainFacade>();
+        private IEncryptionService EncryptionService => Services.Get<IEncryptionService>();
 
         public override void OnAuthorization(HttpActionContext actionContext)
         {
@@ -100,8 +103,9 @@ namespace FederatedIPAPIAuthenticationProviderWeb.TokenProviderApi.Filters
         {
             if (string.IsNullOrEmpty(username) || string.IsNullOrEmpty(password))
                 return null;
+            var user = AuthenticationProviderDomainFacade.AuthenticationApiUser(username, password);
 
-            return ApiIdentity.Create("Test Basic","Basic");
+            return user != null ? ApiIdentity.Create(user.Name, "Basic"): null;
         }
         private IIdentity OnTokenAuthorizeUser(string token)
         {
@@ -112,9 +116,9 @@ namespace FederatedIPAPIAuthenticationProviderWeb.TokenProviderApi.Filters
         }
         protected virtual (string username, string password) GetBasicCredentials(string authHeader)
         {
-            authHeader = Encoding.Default.GetString(Convert.FromBase64String(authHeader));
+            string authCredentialStr = EncryptionService.DateSaltDecrypt(authHeader, true);
 
-            var tokens = authHeader.Split(new char[] { ':' }, StringSplitOptions.RemoveEmptyEntries);
+            var tokens = authCredentialStr.Split(new char[] { ':' }, StringSplitOptions.RemoveEmptyEntries);
             if (tokens.Length < 2)
                 return (null, null);
 

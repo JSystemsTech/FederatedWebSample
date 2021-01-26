@@ -1,9 +1,6 @@
 ﻿using DbFacade.DataLayer.ConnectionService;
 using DbFacade.Services;
-using System;
-using System.Collections.Generic;
 using System.Configuration;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace ServiceLayer.DomainLayer.DbConnection
@@ -28,5 +25,7 @@ namespace ServiceLayer.DomainLayer.DbConnection
         }
         public static void RegisterConnection(ConnectionStringSettings connectionStringSettings) => DbConnectionService.Register(new ConsumingApplicationDbConnection(connectionStringSettings));
         public static IDbCommandConfig GetTestUsers = CreateFetchCommand("[dbo].[GetTestUsers]", "Get Test Users");
+        
     }
+    
 }

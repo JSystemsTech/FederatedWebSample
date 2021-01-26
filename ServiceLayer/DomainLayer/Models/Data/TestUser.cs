@@ -18,7 +18,7 @@ namespace ServiceLayer.DomainLayer.Models.Data
         public string LastName { get; private set; }
 
         [DbColumn("MiddleInitial")]
-        public char MiddleInitial { get; private set; }
+        public char? MiddleInitial { get; private set; }
 
         [DbColumn("Roles")]
         public IEnumerable<string> Roles { get; private set; }

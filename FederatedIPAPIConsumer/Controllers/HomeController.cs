@@ -1,18 +1,25 @@
 ﻿using FederatedIPAPIConsumer.Models;
-using FederatedIPAuthenticationService.Attributes.Common;
-using FederatedIPAuthenticationService.Extensions;
-using System;
+using ServiceLayer.AuthNAuthZ;
 using System.Web.Mvc;
 
 namespace FederatedIPAPIConsumer.Controllers
 {
     public class HomeController : BaseController
     {
+        [FederatedAuthorize(false)]
+        public ActionResult PrivacyPolicy()
+        {
+            return View();
+        }
+        [FederatedAuthorize(false)]
+        public ActionResult CookiePolicy()
+        {
+            return View();
+        }
 
-        
         public ActionResult Index()
         {
-            return View(SiteMeta);
+            return View(FederatedApplicationSettings);
         }
         public ActionResult About()
         {

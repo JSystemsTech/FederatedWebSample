@@ -1,0 +1,29 @@
+﻿@using FederatedIPAuthenticationService.Configuration
+@{
+    IFederatedApplicationSettings ConsumingApplicationFederatedApplicationSettings = ViewBag.ConsumingApplicationFederatedApplicationSettings as IFederatedApplicationSettings;
+}
+<h2 class="lead mb-0">Privacy Policy</h2>
+
+<div class="card card-privacy-notice my-2">
+    <div class="card-body p-2">
+        <p class="card-text text-left">@ConsumingApplicationFederatedApplicationSettings.SiteName has a privacy policy which must be acknowlaged before loging in.</p>
+        <a href="@ConsumingApplicationFederatedApplicationSettings.PrivacyPolicyUrl" title="View Privacy Policy" class="card-link" target=”_blank” rel=”noopener noreferrer”>
+            <small>
+                <i class="fa fa-info-circle"></i>
+                <span>View Privacy Policy</span>
+            </small>
+        </a>
+    </div>
+</div>
+
+
+
+@using (Html.BeginForm("PrivacyPolicyAckowlage", "Home", new { }, FormMethod.Post, new { @id = "LoginFormCAC" }))
+{
+    @Html.AntiForgeryToken()
+    <button type="submit" class="btn btn-primary w-100" data-toggle="popover" title="Acknowlage" data-content="Acknowlage Privacy Notice" data-trigger="hover" data-container="body" data-placement="top">
+        <span class="ml-1"><i class="fa fa-check"></i></span>
+        <span class="ml-1">Acknowlage</span>
+    </button>
+}
+

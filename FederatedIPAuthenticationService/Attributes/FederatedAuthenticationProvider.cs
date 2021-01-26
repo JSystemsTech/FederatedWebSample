@@ -18,14 +18,14 @@ namespace FederatedIPAuthenticationService.Attributes
     {
 
         protected IServices Services { get => HttpContext.ApplicationInstance is IMvcServiceApplication app ? app.Services : null; }
-        private IFederatedProviderSettings FederatedProviderSettings => Services.Get<IFederatedProviderSettings>();
         
         private ITokenProvider TokenProvider => Services.Get<ITokenProvider>();
-        private ISiteMeta SiteMeta => Services.Get<ISiteMeta>();
-        protected IConsumerAuthenticationApi ConsumerAPI { get; private set; }
-        private string AuthenticationRequestCookieName { get => $"{FederatedSettings.FederatedAuthenticationRequestTokenCookiePrefix}{SiteMeta.SiteId}"; }
+        private IEncryptionService EncryptionService => Services.Get<IEncryptionService>();
+        private IFederatedApplicationSettings FederatedApplicationSettings => Services.Get<IFederatedApplicationSettings>();
+        private string AuthenticationRequestCookieName { get => $"{FederatedSettings.FederatedAuthenticationRequestTokenCookiePrefix}{FederatedApplicationSettings.SiteId}"; }
 
         private string AuthenticationRequestKey => Request.Form["AuthenticationRequest"];
+        private string  ConsumerAuthenticationApiUrl { get; set; }
         private bool IsExternalAuthenticationPostbackRequest
         {
             get => AuthenticationContext.ActionDescriptor.GetCustomAttributes(typeof(FederatedExternalPostbackAttribute), true).Length>0  &&
@@ -33,14 +33,14 @@ namespace FederatedIPAuthenticationService.Attributes
                 AuthenticationRequestKey is string postToken &&
                 !string.IsNullOrWhiteSpace(postToken);
         }
-        protected abstract string GetSavedAuthenticationRequest(string key);
+        protected abstract string GetSavedConsumerAuthenticationApiUrl(string key);
 
         public FederatedAuthenticationProvider(bool isAuthenticatedRoute = true) : base(isAuthenticatedRoute) { }
         private void OnAuthenticationError(AuthenticationContext filterContext, string error, string details)
         {
-            if (!string.IsNullOrWhiteSpace(FederatedProviderSettings.DefaultConsumerUrl))
+            if (!string.IsNullOrWhiteSpace(FederatedApplicationSettings.AuthenticationErrorUrl))
             {
-                filterContext.Result = new RedirectResult(GetUri(FederatedProviderSettings.DefaultConsumerUrl).AbsoluteUri);
+                filterContext.Result = new RedirectResult(GetUri(FederatedApplicationSettings.AuthenticationErrorUrl).AbsoluteUri);
             }
             else
             {
@@ -50,14 +50,18 @@ namespace FederatedIPAuthenticationService.Attributes
         }
         private string RenewAuthenticationRequestToken(string token)
         {
-            string authenticationRequestToken = TokenProvider.RenewToken(token, claims => {
-                claims.AddUpdate("AuthenticationProviderId", "FederatedIPAPIAuthenticationProviderWeb");
-            });
-            HttpContext.Session.Add("AuthenticationRequestToken", authenticationRequestToken);
-            HttpContext.Session.Add("ConsumerAuthenticationApiUrl", TokenProvider.GetTokenClaims(authenticationRequestToken)["ConsumerAuthenticationApiUrl"].FirstOrDefault());
-            
+            string authenticationRequestToken = TokenProvider.RenewToken(token, claims => { });
+            ConsumerAuthenticationApiUrl = TokenProvider.GetTokenClaims(authenticationRequestToken)["ConsumerAuthenticationApiUrl"].FirstOrDefault();
             SetAuthenticationRequestTokenCookie(AuthenticationRequestCookieName, authenticationRequestToken, (DateTime)TokenProvider.GetExpirationDate(authenticationRequestToken));
             return authenticationRequestToken;
+        }
+        private void ValidateRequestingSite(AuthenticationContext filterContext)
+        {
+            IConsumerAuthenticationApi ConsumerAPI = new ConsumerAuthenticationApi(EncryptionService, TokenProvider, ConsumerAuthenticationApiUrl);
+            if (!ConsumerAPI.GetConsumerApplicationSettings().FederatedApplicationSettings.IsSameNetwork(FederatedApplicationSettings))
+            {
+                OnAuthenticationError(filterContext, "Invalid Authentication Request", "Requesting Site is not on the same network");
+            }
         }
         /* Process Request 
          * 1.If Request is a logout request handle that request
@@ -78,13 +82,12 @@ namespace FederatedIPAuthenticationService.Attributes
                     }
                     try
                     {
-                        string authenticationRequestToken = GetSavedAuthenticationRequest(AuthenticationRequestKey);
-                        if (!TokenProvider.IsValidToken(authenticationRequestToken))
-                        {
-                            OnAuthenticationError(filterContext, "Invalid Authentication Request Token", "Token External Authentication Pastback is not valid");
-                            return;
-                        }
+                        string authenticationRequestToken =  TokenProvider.CreateToken(claims => {
+                            claims.Add("ConsumerAuthenticationApiUrl", new string[] { GetSavedConsumerAuthenticationApiUrl(AuthenticationRequestKey) });
+                        });
+
                         RenewAuthenticationRequestToken(authenticationRequestToken);
+                        ValidateRequestingSite(filterContext);
                     }
                     catch (Exception e)
                     {
@@ -100,6 +103,7 @@ namespace FederatedIPAuthenticationService.Attributes
                         return;
                     }
                     RenewAuthenticationRequestToken(token);
+                    ValidateRequestingSite(filterContext);
                 }              
                 
             }            

@@ -17,6 +17,7 @@ Global
 	GlobalSection(SharedMSBuildProjectFiles) = preSolution
 		FederatedIPAuthenticationService\FederatedIPAuthenticationService.projitems*{10c0726b-492d-45d4-bb27-188774b843ef}*SharedItemsImports = 4
 		HtmlExtensions\HtmlExtensions.projitems*{10c0726b-492d-45d4-bb27-188774b843ef}*SharedItemsImports = 4
+		ServiceLayer\ServiceLayer.projitems*{10c0726b-492d-45d4-bb27-188774b843ef}*SharedItemsImports = 4
 		ServiceLayer\ServiceLayer.projitems*{28d7054f-5557-494c-bf43-75dc36f29f7f}*SharedItemsImports = 13
 		HtmlExtensions\HtmlExtensions.projitems*{2eb9252a-ab19-4111-9589-5f743c8b0564}*SharedItemsImports = 13
 		FederatedIPAuthenticationService\FederatedIPAuthenticationService.projitems*{6c215df5-244e-4e05-851a-444b2ecaf728}*SharedItemsImports = 4

@@ -1,4 +1,4 @@
-﻿using System.Web;
+﻿using FederatedIPAuthenticationService.Services;
 using System.Web.Optimization;
 
 namespace FederatedIPAPIAuthenticationProviderWeb
@@ -59,8 +59,19 @@ namespace FederatedIPAPIAuthenticationProviderWeb
                         "~/Scripts/site/site.init.js"
                         ));
 
-            bundles.Add(new StyleBundle("~/Content/css").Include(
-                      "~/Content/site.min.css"));
+            
+            bundles.Add(new ThemeBundle().Include(
+               "~/Content/site.min.css"
+               ));
+            bundles.Add(new ThemeBundle("slate",true).Include(
+                "~/Content/site-slate.min.css"
+                ));
+            bundles.Add(new ThemeBundle("flatly").Include(
+                "~/Content/site-flatly.min.css"
+                ));
+            bundles.Add(new ThemeBundle("cerulean").Include(
+                "~/Content/site-cerulean.min.css"
+                ));
         }
     }
 }

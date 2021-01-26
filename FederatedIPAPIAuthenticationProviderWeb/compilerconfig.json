@@ -2,5 +2,21 @@
   {
     "outputFile": "Content/site.css",
     "inputFile": "Content/site.scss"
+  },
+  {
+    "outputFile": "Content/site-dark.css",
+    "inputFile": "Content/site-dark.scss"
+  },
+  {
+    "outputFile": "Content/site-flatly.css",
+    "inputFile": "Content/site-flatly.scss"
+  },
+  {
+    "outputFile": "Content/site-cerulean.css",
+    "inputFile": "Content/site-cerulean.scss"
+  },
+  {
+    "outputFile": "Content/site-slate.css",
+    "inputFile": "Content/site-slate.scss"
   }
 ]

@@ -23,7 +23,7 @@ namespace FederatedIPAPIAuthenticationProviderWeb.Services
     {
         private ITokenProviderServiceSettings Settings => Services.Get<ITokenProviderServiceSettings>();
         private IEncryptionService EncryptionService => Services.Get<IEncryptionService>();
-        
+
         private static Saml2SecurityTokenHandler SamlTokenHandler = new Saml2SecurityTokenHandler();
         private static IEnumerable<TokenClaim> DefaultClaims = new TokenClaim[0];
 
@@ -101,20 +101,20 @@ namespace FederatedIPAPIAuthenticationProviderWeb.Services
             AddUpdateSaml2Attribute(saml2Token, claim.Name, claim.GetValue());
             return saml2Token;
         }
-
+        
         private string Serialize(Saml2SecurityToken token)
         {
             var sw = new System.IO.StringWriter();
             using (var xmlWriter = new System.Xml.XmlTextWriter(sw))
             {
                 SamlTokenHandler.WriteToken(xmlWriter, token);
-                return EncryptionService.Encrypt(sw.ToString());
+                return EncryptionService.DateSaltEncrypt(sw.ToString());
             }
 
         }
         private Saml2SecurityToken Deserialize(string tokenStr)
         {
-            string decryptedValue = EncryptionService.Decrypt(tokenStr);
+            string decryptedValue = EncryptionService.DateSaltDecrypt(tokenStr,true);
             return SamlTokenHandler.CanReadToken(decryptedValue) ? SamlTokenHandler.ReadSaml2Token(decryptedValue) : null;
         }
 

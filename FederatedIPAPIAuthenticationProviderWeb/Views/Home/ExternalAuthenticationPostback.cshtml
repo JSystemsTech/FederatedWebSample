@@ -2,8 +2,8 @@
 @using FederatedIPAuthenticationService.Extensions
 
 <h3 class="display-5">Welcome @Model.OnAuthenticationMessage</h3>
-<h3 class="lead">Redirecting to @Model.ConsumingApplicationSiteMeta.SiteName</h3>
-<a id="RedirectAction" href="@Model.ConsumingApplicationSiteMeta.SiteRhealm" class="d-none"></a>
+<h3 class="lead">Redirecting to @Model.ConsumingApplicationFederatedApplicationSettings.SiteName</h3>
+<a id="RedirectAction" href="@Model.ConsumingApplicationFederatedApplicationSettings.SiteReturnUrl" class="d-none"></a>
 @section scripts{
     <script type="text/javascript">
         document.getElementById("RedirectAction").click();

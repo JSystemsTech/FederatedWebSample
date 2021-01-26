@@ -37,32 +37,27 @@ namespace FederatedIPAuthenticationService.Web.ConsumerAPI
 
     public interface IConsumerAuthenticationApi
     {
-        IEnumerable<ConsumerUser> GetTestUsers();
-        ConsumerApiAuthenticationResponse Authenticate(string token);
-        string GetPrivacyNotice();
-        ISiteMeta GetSiteMeta();
+        IConsumerApplicationSettingsResponse GetConsumerApplicationSettings();
+        ConsumerApiAuthenticationResponse Authenticate<T>(T data);
     }
     public sealed class ConsumerAuthenticationApi : IConsumerAuthenticationApi
     {
 
         private ConsumerApiClient Client { get; set; }
-        private IApiEndpoint TestUsersEndpoint { get; set; }
-        private IApiEndpoint AuthenticateEndpoint { get; set; }
-        private IApiEndpoint PrivacyNoticeEndpoint { get; set; }
-        private IApiEndpoint SiteMetaEndpoint { get; set; }
+        private IApiEndpoint ConsumerApplicationSettingsEndpoint { get; set; }
+        private IApiEndpoint AuthenticateEndpoint { get; set; } 
 
-        public ConsumerAuthenticationApi(ITokenProvider tokenProvider, string url)
+        public ConsumerAuthenticationApi(IEncryptionService encryptionService, ITokenProvider tokenProvider, string url)
         {
             Client = new ConsumerApiClient(tokenProvider, url);
-            TestUsersEndpoint = Client.CreateEndpoint("authenticationApi/TestUsers");
+            ConsumerApplicationSettingsEndpoint = Client.CreateEndpoint("authenticationApi/ConsumerApplicationSettings");
             AuthenticateEndpoint = Client.CreateEndpoint("authenticationApi/Authentication");
-            PrivacyNoticeEndpoint = Client.CreateEndpoint("authenticationApi/PrivacyNotice");
-            SiteMetaEndpoint = Client.CreateEndpoint("authenticationApi/SiteMeta");
+
+            Client.EncryptionHandler = str => encryptionService.DateSaltEncrypt(str);
+            Client.DecryptionHandler = str => encryptionService.DateSaltDecrypt(str, true);
         }
-        public IEnumerable<ConsumerUser> GetTestUsers() => TestUsersEndpoint.Get(new { }).Deserialize<IEnumerable<ConsumerUser>>();
-        public ConsumerApiAuthenticationResponse Authenticate(string token) => AuthenticateEndpoint.Post(token).Deserialize<ConsumerApiAuthenticationResponse>();
-        public string GetPrivacyNotice() => PrivacyNoticeEndpoint.Get(new { }).Content;
-        public ISiteMeta GetSiteMeta() => SiteMetaEndpoint.Get(new { }).Deserialize<SiteMeta>();
+        public IConsumerApplicationSettingsResponse GetConsumerApplicationSettings()=>ConsumerApplicationSettingsEndpoint.Get(new { }).Deserialize<ConsumerApplicationSettingsResponse>();
+        public ConsumerApiAuthenticationResponse Authenticate<T>(T data) => AuthenticateEndpoint.Post(data).Deserialize<ConsumerApiAuthenticationResponse>();
     }
 
 }

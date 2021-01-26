@@ -1,18 +1,50 @@
-﻿@model FederatedIPAuthenticationService.Configuration.ISiteMeta
+﻿@model FederatedIPAuthenticationService.Configuration.IFederatedApplicationSettings
+@using FederatedIPAuthenticationService.Configuration
 
-<div class="jumbotron m-5">
-    <div class="row">
-        <div class="col">
-            <h1>@Model.SiteName</h1>
-            <p class="lead">
-                @Model.SiteDescription
-            </p>
-            <p>
-                Logging Out
-            </p>
+<div class="row justify-content-center pt-5 py-lg-5 my-lg-5">
+    <div class="col" style="max-width:30rem;">
+        <div class="text-center">
+            <div class="card bg-light shadow-border-primary">
+                <div class="card-avatar card-avatar-primary">
+
+                    <i class="fa fa-sign-out-alt icon"></i>
+                    <div class="loader spin"></div>
+                </div>
+                <div class="card-body text-dark text-center pt-5">
+                    <div class="row justify-content-center">
+                        <div class="col-auto px-1">
+                            <img src="~/Content/Images/logo.png" alt="@Model.SiteName Logo" width="75" height="75" />
+                        </div>
+                        <div class="col-auto px-1 text-left">
+                            <h4 class="mb-0">@Model.SiteName</h4>
+                            <p class="my-0">
+                                @Model.SiteDescription
+                            </p>
+                            <p class="mb-0"><small class="badge badge-primary">@Model.SiteVersion - @Model.SiteEnvironment</small></p>
+                        </div>
+                    </div>
+                    <hr>
+                    <p>Redirecting to Login</p>
+                </div>
+                <div class="card-footer py-1 @(Model.NetworkIs("Classified") ? "bg-text-danger": "bg-text-success") text-white">
+                    <div class="text-uppercase">@Model.GetNetworkDisplay()</div>
+                    @if (Model.HasNetworkDescription())
+                    {
+                        <div><small>@Model.SiteNetworkDescription</small></div>
+                    }
+                </div>
+            </div>
         </div>
+
     </div>
 </div>
+
+
+
+
+
+
+
 <a href="@ViewBag.RedirectUrl" id="RedirectAction" class="d-none"></a>
 @section scripts{
     <script type="text/javascript">

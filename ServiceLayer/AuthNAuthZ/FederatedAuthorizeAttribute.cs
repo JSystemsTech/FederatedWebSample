@@ -42,6 +42,5 @@ namespace ServiceLayer.AuthNAuthZ
         {
             return tokenClaims.ParseFirst<Guid?>("UserGuid") is Guid guid ? UserManagmentService.GetUserRoles(guid) : new string[0];
         }
-
     }
 }

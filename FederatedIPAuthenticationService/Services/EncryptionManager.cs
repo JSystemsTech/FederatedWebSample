@@ -7,46 +7,64 @@ using System.Text;
 
 namespace FederatedIPAuthenticationService.Services
 {
+    public static class EncryotionServiceExtensions
+    {
+        public static string DateSaltEncrypt(this IEncryptionService encryptionService, string str) => encryptionService.Encrypt(str,DateTime.UtcNow.Date.ToString());
+        public static string DateSaltDecrypt(this IEncryptionService encryptionService, string str, bool allowOldSaltCheck = false)
+        {
+            string value = encryptionService.Decrypt(str, DateTime.UtcNow.Date.ToString());
+            if (allowOldSaltCheck && value == null)
+            {
+                return encryptionService.Decrypt(str, DateTime.UtcNow.AddDays(-1).Date.ToString());
+            }
+            return value;
+        }
+    }
     public interface IEncryptionService
     {
-        string Encrypt(string data);
-        string Decrypt(string data);
+        string Encrypt(string data, string salt = "");
+        string Decrypt(string data, string salt = "");
     }
-    public sealed class EncryptionService : Service, IEncryptionService
+    public abstract class EncryptionServiceBase : Service
     {
-        private byte[] Key { get; set; }
-        private byte[] IV { get; set; }
-        public EncryptionService():base(){}
+        protected string EncryptionKey { get; set; }
+        public EncryptionServiceBase():base(){}
+        public EncryptionServiceBase(string encryptionKey){ EncryptionKey = encryptionKey; }
         protected override void Init()
         {
             IEncryptionServiceSettings settings = Services.Get<IEncryptionServiceSettings>();
-            byte[][] keys = GetHashKeys(settings.Key);
-            Key = keys[0];
-            IV = keys[1];
+            EncryptionKey = settings.Key;
         }
-        public string Encrypt(string data)
+        private (byte[] Key, byte[] IV) GetKeyIV(string salt = "")
+        {
+            byte[][] keys = GetHashKeys($"{EncryptionKey}{salt}");
+            return (keys[0], keys[1]);
+        }
+        protected string EncryptCore(string data, string salt = "")
         {
             string encData = null;
 
             try
             {
-                encData = EncryptStringToBytes_Aes(data);
+                encData = EncryptStringToBytes_Aes(data, salt);
             }
             catch (CryptographicException) { }
             catch (ArgumentNullException) { }
 
             return encData;
         }
-        public string Decrypt(string data)
+        protected string DecryptCore(string data, string salt = "")
         {
             string decData = null;
 
             try
             {
-                decData = DecryptStringFromBytes_Aes(data);
+                decData = DecryptStringFromBytes_Aes(data, salt);
             }
-            catch (CryptographicException) { }
-            catch (ArgumentNullException) { }
+            catch (CryptographicException cE) {
+                var test = "";
+            }
+            catch (ArgumentNullException aE) { }
 
             return decData;
         }
@@ -72,22 +90,22 @@ namespace FederatedIPAuthenticationService.Services
             return result;
         }
 
-        private string EncryptStringToBytes_Aes(string plainText)
+        private string EncryptStringToBytes_Aes(string plainText, string salt = "")
         {
+            var config = GetKeyIV(salt);
             if (plainText == null || plainText.Length <= 0)
                 throw new ArgumentNullException("plainText");
-            if (Key == null || Key.Length <= 0)
+            if (config.Key == null || config.Key.Length <= 0)
                 throw new ArgumentNullException("Key");
-            if (IV == null || IV.Length <= 0)
+            if (config.IV == null || config.IV.Length <= 0)
                 throw new ArgumentNullException("IV");
 
             byte[] encrypted;
 
             using (AesManaged aesAlg = new AesManaged())
             {
-                aesAlg.Key = Key;
-                aesAlg.IV = IV;
-
+                aesAlg.Key = config.Key;
+                aesAlg.IV = config.IV;
                 ICryptoTransform encryptor = aesAlg.CreateEncryptor(aesAlg.Key, aesAlg.IV);
 
                 using (MemoryStream msEncrypt = new MemoryStream())
@@ -107,23 +125,24 @@ namespace FederatedIPAuthenticationService.Services
         }
 
         
-        private string DecryptStringFromBytes_Aes(string cipherTextString)
+        private string DecryptStringFromBytes_Aes(string cipherTextString, string salt = "")
         {
+            var config = GetKeyIV(salt);
             byte[] cipherText = Convert.FromBase64String(cipherTextString);
 
             if (cipherText == null || cipherText.Length <= 0)
                 throw new ArgumentNullException("cipherText");
-            if (Key == null || Key.Length <= 0)
+            if (config.Key == null || config.Key.Length <= 0)
                 throw new ArgumentNullException("Key");
-            if (IV == null || IV.Length <= 0)
+            if (config.IV == null || config.IV.Length <= 0)
                 throw new ArgumentNullException("IV");
 
             string plaintext = null;
 
             using (Aes aesAlg = Aes.Create())
             {
-                aesAlg.Key = Key;
-                aesAlg.IV = IV;
+                aesAlg.Key = config.Key;
+                aesAlg.IV = config.IV;
 
                 ICryptoTransform decryptor = aesAlg.CreateDecryptor(aesAlg.Key, aesAlg.IV);
 
@@ -141,5 +160,31 @@ namespace FederatedIPAuthenticationService.Services
             }
             return plaintext;
         }
+    }
+
+    public sealed class EncryptionService : EncryptionServiceBase, IEncryptionService
+    {
+        public EncryptionService() : base() { }
+        public string Encrypt(string data, string salt = "")
+        => EncryptCore(data, salt);
+        public string Decrypt(string data, string salt = "") => DecryptCore(data, salt);
+    }
+    public sealed class FederatedApplicationBasicEncryptionService : EncryptionServiceBase, IEncryptionService
+    {
+        private static string GetKey(IFederatedApplicationSettings settings)=> settings.IsProvider ? $"{settings.SiteId}{settings.SiteNetwork}" : $"{settings.AuthenticationProviderId}{settings.SiteNetwork}";
+        public FederatedApplicationBasicEncryptionService() : base() { }
+        public FederatedApplicationBasicEncryptionService(IFederatedApplicationSettings settings) : 
+            base(GetKey(settings)) { }
+        public FederatedApplicationBasicEncryptionService(ITokenProviderSettings settings) :
+            base($"{settings.ProviderId}{settings.ProviderNetwork}")
+        { }
+        protected override void Init()
+        {
+            IFederatedApplicationSettings settings = Services.Get<IFederatedApplicationSettings>();
+            EncryptionKey = GetKey(settings);
+        }
+        public string Encrypt(string data, string salt = "")
+        => EncryptCore(data, salt);
+        public string Decrypt(string data, string salt = "") => DecryptCore(data, salt);
     }
 }

@@ -22,18 +22,15 @@ namespace WebApiClientShared.Web
 {
     public abstract class FederatedWebController : ServiceProviderController
     {
-        protected IFederatedConsumerSettings FederatedConsumerSettings => Services.Get<IFederatedConsumerSettings>();
-        protected IFederatedProviderSettings FederatedProviderSettings => Services.Get<IFederatedProviderSettings>();
-        protected ISiteMeta SiteMeta => Services.Get<ISiteMeta>();
+        protected IFederatedApplicationSettings FederatedApplicationSettings => Services.Get<IFederatedApplicationSettings>();
         protected IMailService MailService => Services.Get<IMailService>();
 
         protected ITokenProvider TokenProvider => Services.Get<ITokenProvider>();
 
         protected string LogoutRedirectUrl => HttpContext.Session["LogoutRedirectUrl"] is string redirectUrl && !string.IsNullOrWhiteSpace(redirectUrl) ? redirectUrl : "";
-        protected string AuthenticationRequestToken => HttpContext.Session["AuthenticationRequestToken"] is string authenticationRequestToken && !string.IsNullOrWhiteSpace(authenticationRequestToken) ? authenticationRequestToken : "";
 
 
-        protected IDictionary<string, IEnumerable<string>> AuthenticationRequestClaims => TokenProvider.GetTokenClaims(AuthenticationRequestToken);
+        
         
         
         private object GetJsonResponseData(object data) => new { sessionTimeout = HttpContext.User is FederatedPrincipal principal ? principal.SessionTimeout : 0, data };
@@ -52,7 +49,7 @@ namespace WebApiClientShared.Web
             var sessionTimeout = HttpContext.User is FederatedPrincipal principal ? principal.SessionTimeout : 0;
             return Json(new { sessionTimeout, data }, JsonRequestBehavior.AllowGet);
         }
-        private string AuthenticationRequestCookieName { get => $"{FederatedSettings.FederatedAuthenticationRequestTokenCookiePrefix}{SiteMeta.SiteId}"; }
+        private string AuthenticationRequestCookieName { get => $"{FederatedSettings.FederatedAuthenticationRequestTokenCookiePrefix}{FederatedApplicationSettings.SiteId}"; }
         private HttpCookie GetHttpCookie(string name) => Request.Cookies.AllKeys.Contains(name) ? Request.Cookies[name] : null;
         protected HttpCookie CreateAuthenticationRequestCookie(string value) => new HttpCookie(AuthenticationRequestCookieName, value) { HttpOnly = true, Expires = DateTime.UtcNow.AddMinutes(5), SameSite = SameSiteMode.Lax, Secure = IsSecureRequest };
         protected void RemoveAuthenticationRequestCookie() => Response.Cookies.Add(new HttpCookie(AuthenticationRequestCookieName, "") { HttpOnly = true, Expires = DateTime.UtcNow.AddDays(-1), SameSite = SameSiteMode.Lax, Secure = IsSecureRequest });
@@ -116,7 +113,7 @@ namespace WebApiClientShared.Web
             }
             ViewBag.IsAuthenticated = filterContext.HttpContext.User.Identity != null && filterContext.HttpContext.User.Identity.IsAuthenticated;
             ViewBag.SessionTimeout = filterContext.HttpContext.User is FederatedPrincipal principal ? principal.SessionTimeout : 0;
-            ViewBag.SiteMeta = SiteMeta;
+            ViewBag.FederatedApplicationSettings = FederatedApplicationSettings;
             
         }
 
@@ -139,22 +136,23 @@ namespace WebApiClientShared.Web
     public abstract class FederatedProviderWebController : FederatedWebController
     {
         
-        private Uri ExternalAuthenticationUri => GetUri(FederatedProviderSettings.ExternalAuthenticationtUrl);
+        private Uri ExternalAuthenticationUri => GetUri(FederatedApplicationSettings.ExternalAuthenticationtUrl);
         protected IConsumerAuthenticationApi ConsumerAPI { get; private set; }
-        protected ISiteMeta ConsumingApplicationSiteMeta => ConsumerAPI.GetSiteMeta();
+        protected IConsumerApplicationSettingsResponse ConsumerApplicationSettings { get; private set; }
+        protected IFederatedApplicationSettings ConsumingApplicationFederatedApplicationSettings => ConsumerApplicationSettings.FederatedApplicationSettings;
+        protected IEnumerable<ConsumerUser> ConsumingApplicationTestUsers => ConsumerApplicationSettings.TestUsers;
+        private IEncryptionService EncryptionService => Services.Get<IEncryptionService>();
         private HttpCookie CreateAuthenticationCookie(string value, DateTime expires) => new HttpCookie(AuthenticationCookieName, value) { HttpOnly = true, Expires = expires, SameSite = SameSiteMode.Lax, Secure = IsSecureRequest };
 
 
         private void RefreshAuthenticationRequestTokenCookie()
         {
-            string authenticationRequestToken = TokenProvider.CreateToken(claims => {
-                foreach (KeyValuePair<string, string> siteMetaItem in ConsumingApplicationSiteMeta.Collection)
-                {
-                    claims.AddUpdate(siteMetaItem.Key, siteMetaItem.Value.ToString());
-                }
-            });
+            string authenticationRequestToken = TokenProvider.CreateToken(claims => { });
             Response.Cookies.Add(CreateAuthenticationRequestCookie(authenticationRequestToken));
         }
+        protected string AuthenticationRequestToken => Response.Cookies.Get(AuthenticationRequestCookieName) is HttpCookie httpCookie && !string.IsNullOrWhiteSpace(httpCookie.Value) ? httpCookie.Value : "";
+        protected IDictionary<string, IEnumerable<string>> AuthenticationRequestClaims => TokenProvider.GetTokenClaims(AuthenticationRequestToken);
+        
         protected bool TryValidateAuthentication(ConsumerApiAuthenticationResponse response)
         {
             if (TokenProvider.IsValidToken(response.AuthenticationToken) && TokenProvider.GetExpirationDate(response.AuthenticationToken) is DateTime expires)
@@ -170,8 +168,7 @@ namespace WebApiClientShared.Web
             }
         }
 
-        private bool ConsumingApplicationUseRhealm { get => !string.IsNullOrWhiteSpace(ConsumingApplicationSiteMeta.SiteRhealmId); }
-        private string AuthenticationCookieName { get => $"{FederatedSettings.FederatedAuthenticationTokenCookiePrefix}{(ConsumingApplicationUseRhealm ? ConsumingApplicationSiteMeta.SiteRhealmId : ConsumingApplicationSiteMeta.SiteId)}"; }
+        private string AuthenticationCookieName { get => $"{FederatedSettings.FederatedAuthenticationTokenCookiePrefix}{ConsumingApplicationFederatedApplicationSettings.GetCookieSuffix()}"; }
 
         [HttpPost]
         [FederatedExternalPostback]
@@ -181,17 +178,21 @@ namespace WebApiClientShared.Web
 
         {
             base.OnActionExecuting(filterContext);
-            ConsumerAPI = new ConsumerAuthenticationApi(TokenProvider, HttpContext.Session["ConsumerAuthenticationApiUrl"].ToString());
-            ViewBag.ConsumingApplicationSiteMeta = ConsumingApplicationSiteMeta;
+
+            string ConsumerAuthenticationApiUrl = TokenProvider.GetTokenClaims(AuthenticationRequestToken)["ConsumerAuthenticationApiUrl"].FirstOrDefault();
+            ConsumerAPI = new ConsumerAuthenticationApi(EncryptionService, TokenProvider, ConsumerAuthenticationApiUrl);
+
+            ConsumerApplicationSettings = ConsumerAPI.GetConsumerApplicationSettings();
+            ViewBag.ConsumingApplicationFederatedApplicationSettings = ConsumingApplicationFederatedApplicationSettings;
+            ViewBag.LogoImage = ConsumerApplicationSettings.LogoImage;
         }
         protected abstract string SaveAuthenticationRequest(string authenticationRequestToken);
         protected string BeginGetExternalAuthenticationPostbackUrl()
         {
-            string authenticationRequestToken = HttpContext.Session["AuthenticationRequestToken"] as string;
-            string returnUrl = BuildUrl(GetUri(Url.Action("ExternalAuthenticationPostback")).AbsoluteUri, new { AuthenticationRequest = SaveAuthenticationRequest(authenticationRequestToken) });
+            string returnUrl = BuildUrl(GetUri(Url.Action("ExternalAuthenticationPostback")).AbsoluteUri, new { AuthenticationRequest = SaveAuthenticationRequest(AuthenticationRequestToken) });
             return BuildUrl(ExternalAuthenticationUri.AbsoluteUri, new { returnUrl = returnUrl });
         }
-        private string AuthenticationRequestCookieName { get => $"{FederatedSettings.FederatedAuthenticationRequestTokenCookiePrefix}{SiteMeta.SiteId}"; }
+        private string AuthenticationRequestCookieName { get => $"{FederatedSettings.FederatedAuthenticationRequestTokenCookiePrefix}{FederatedApplicationSettings.SiteId}"; }
         private bool IsSecureRequest { get => Request.Url.Scheme.ToLower().Trim() == "https"; }
         private  HttpCookie CreateCookie(string name, string value, DateTime expires, bool strict = false) => new HttpCookie(name, value) { HttpOnly = true, Expires = expires, SameSite = strict ? SameSiteMode.Strict : SameSiteMode.Lax, Secure = IsSecureRequest };
 

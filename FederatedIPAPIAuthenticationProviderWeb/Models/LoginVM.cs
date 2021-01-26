@@ -11,10 +11,9 @@ namespace FederatedIPAPIAuthenticationProviderWeb.Models
         public string Username { get; set; }
         public string Email { get; set; }
         public string Password { get; set; }
-        public ISiteMeta ConsumingApplicationSiteMeta { get; set; }
+        public IFederatedApplicationSettings ConsumingApplicationFederatedApplicationSettings { get; set; }
         public IEnumerable<ConsumerUser> TestUsers { get; set; }
         public string Mode { get; set; }
         public string OnAuthenticationMessage { get; set; }
-        public string PrivacyNotice { get; set; }
     }
 }

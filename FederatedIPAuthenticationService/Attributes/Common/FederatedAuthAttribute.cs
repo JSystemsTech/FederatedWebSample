@@ -1,4 +1,5 @@
 ﻿using FederatedIPAuthenticationService.Services;
+using ServiceLayer.DomainLayer;
 using System;
 
 namespace FederatedIPAuthenticationService.Attributes.Common
@@ -6,13 +7,13 @@ namespace FederatedIPAuthenticationService.Attributes.Common
 
     public class FederatedProviderAttribute : FederatedAuthenticationProvider {
         private IEncryptionService EncryptionService => Services.Get<IEncryptionService>();
-        private IAuthenticationRequestCache AuthenticationRequestCache { get => Services.Get<IAuthenticationRequestCache>(); }
+        private IAuthenticationProviderDomainFacade AuthenticationProviderDomainFacade => Services.Get<IAuthenticationProviderDomainFacade>();
 
-        protected override string GetSavedAuthenticationRequest(string key)
+        protected override string GetSavedConsumerAuthenticationApiUrl(string key)
         {
-            string authenticationRequestGuidStr = EncryptionService.Decrypt(key);
+            string authenticationRequestGuidStr = EncryptionService.DateSaltDecrypt(key);
             Guid authenticationRequestGuid = Guid.Parse(authenticationRequestGuidStr);
-            return AuthenticationRequestCache.Get(authenticationRequestGuid);
+            return AuthenticationProviderDomainFacade.GetWebAuthenticationCache(authenticationRequestGuid);
         }
     }
     public class FederatedAllowAnnonomousAttribute : FederatedAuthenticationFilter
