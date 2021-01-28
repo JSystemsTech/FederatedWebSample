@@ -1,9 +1,10 @@
-﻿using FederatedIPAuthenticationService.Configuration;
-using FederatedIPAuthenticationService.Extensions;
-using FederatedIPAuthenticationService.Services;
-using FederatedIPAuthenticationService.Web.ConsumerAPI;
+﻿using FederatedAuthNAuthZ.Configuration;
+using FederatedAuthNAuthZ.Extensions;
+using FederatedAuthNAuthZ.Services;
+using FederatedAuthNAuthZ.Web.ConsumerAPI;
 using ServiceProvider.ServiceProvider;
 using ServiceProvider.Web;
+using ServiceProviderShared;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -12,18 +13,16 @@ using System.Web;
 using System.Web.Mvc;
 using System.Web.Mvc.Filters;
 
-namespace FederatedIPAuthenticationService.Attributes
+namespace FederatedAuthNAuthZ.Attributes
 {
     public abstract class FederatedAuthenticationProvider : FederatedAuthenticationFilter
     {
-
-        protected IServices Services { get => HttpContext.ApplicationInstance is IMvcServiceApplication app ? app.Services : null; }
         
-        private ITokenProvider TokenProvider => Services.Get<ITokenProvider>();
-        private IEncryptionService EncryptionService => Services.Get<IEncryptionService>();
-        private IFederatedApplicationSettings FederatedApplicationSettings => Services.Get<IFederatedApplicationSettings>();
-        private string AuthenticationRequestCookieName { get => $"{FederatedSettings.FederatedAuthenticationRequestTokenCookiePrefix}{FederatedApplicationSettings.SiteId}"; }
-
+        private ITokenProvider TokenProvider => ServiceManager.GetService<ITokenProvider>();
+        private IEncryptionService EncryptionService => ServiceManager.GetService<IEncryptionService>();
+        private IFederatedApplicationSettings FederatedApplicationSettings => ServiceManager.GetService<IFederatedApplicationSettings>();
+        private string AuthenticationRequestCookieName { get => $"{FederatedApplicationSettings.GetAuthRequestCookieName()}{AuthenticationRequestTokenCookieSuffix}"; }
+        private string AuthenticationRequestTokenCookieSuffix => HttpContext.Session["AuthenticationRequestTokenCookieSuffix"].ToString();
         private string AuthenticationRequestKey => Request.Form["AuthenticationRequest"];
         private string  ConsumerAuthenticationApiUrl { get; set; }
         private bool IsExternalAuthenticationPostbackRequest
@@ -86,6 +85,8 @@ namespace FederatedIPAuthenticationService.Attributes
                             claims.Add("ConsumerAuthenticationApiUrl", new string[] { GetSavedConsumerAuthenticationApiUrl(AuthenticationRequestKey) });
                         });
 
+                        HttpContext.Session.Remove("AuthenticationRequestTokenCookieSuffix");
+                        HttpContext.Session.Add("AuthenticationRequestTokenCookieSuffix", DateTime.UtcNow.ToString("yyyyMMddHHmmssFFF"));
                         RenewAuthenticationRequestToken(authenticationRequestToken);
                         ValidateRequestingSite(filterContext);
                     }
@@ -96,6 +97,21 @@ namespace FederatedIPAuthenticationService.Attributes
                 }
                 else
                 {
+                    if(Request.QueryString["LoginRequestToken"] is string loginRequestToken)
+                    {
+                        if(EncryptionService.DateSaltDecrypt(loginRequestToken, true) is string authenticationRequestTokenCookieSuffix)
+                        {
+                            HttpContext.Session.Remove("AuthenticationRequestTokenCookieSuffix");
+                            HttpContext.Session.Add("AuthenticationRequestTokenCookieSuffix", authenticationRequestTokenCookieSuffix);
+                        }
+                        else
+                        {
+                            OnAuthenticationError(filterContext, "Invalid Authentication Request Token", "Authentication Request Cookie does not contain a valid token");
+                            return;
+                        }                       
+                        
+                    }
+
                     string token = GetAuthenticationRequestCookieValue();
                     if (!TokenProvider.IsValidToken(token) && !IsExternalAuthenticationPostbackRequest)
                     {

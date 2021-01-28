@@ -1,9 +1,10 @@
 ﻿
-using FederatedIPAuthenticationService.Attributes;
-using FederatedIPAuthenticationService.Attributes.Common;
-using FederatedIPAuthenticationService.Extensions;
-using FederatedIPAuthenticationService.Web.ConsumerAPI;
+using FederatedAuthNAuthZ.Attributes;
+using FederatedAuthNAuthZ.Attributes.Common;
+using FederatedAuthNAuthZ.Extensions;
+using FederatedAuthNAuthZ.Web.ConsumerAPI;
 using ServiceLayer.Services;
+using ServiceProviderShared;
 using System;
 using System.Collections.Generic;
 using System.Security.Principal;
@@ -13,7 +14,7 @@ namespace ServiceLayer.AuthNAuthZ
     /*Define Consuming application's Authentication attribute*/
     public class FederatedAuthorizeAttribute : FederatedAuthenticationConsumer
     {
-        private IUserManagmentService UserManagmentService => Services.Get<IUserManagmentService>();
+        private IUserManagmentService UserManagmentService => ServiceManager.GetService<IUserManagmentService>();
         public FederatedAuthorizeAttribute(bool isAuthenticatedRoute = true) : base(isAuthenticatedRoute) { }
 
         protected override IIdentity CreateAuthenticatedPrincipalIdentity(IDictionary<string, IEnumerable<string>> tokenClaims)

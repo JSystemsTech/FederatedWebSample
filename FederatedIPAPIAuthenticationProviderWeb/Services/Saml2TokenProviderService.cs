@@ -1,5 +1,5 @@
 ﻿using FederatedIPAPIAuthenticationProviderWeb.Configuration;
-using FederatedIPAuthenticationService.Services;
+using FederatedAuthNAuthZ.Services;
 using Microsoft.IdentityModel.Tokens.Saml2;
 using ServiceProvider.Services;
 using System;

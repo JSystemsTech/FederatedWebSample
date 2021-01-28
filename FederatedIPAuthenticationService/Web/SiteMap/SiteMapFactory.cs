@@ -1,5 +1,5 @@
-﻿using FederatedIPAuthenticationService.Attributes;
-using FederatedIPAuthenticationService.Web.ConsumerAPI;
+﻿using FederatedAuthNAuthZ.Attributes;
+using FederatedAuthNAuthZ.Web.ConsumerAPI;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,7 +9,7 @@ using System.Web.Http;
 using System.Web.Mvc;
 using System.Web.Routing;
 
-namespace FederatedIPAuthenticationService.Web.SiteMap
+namespace FederatedAuthNAuthZ.Web.SiteMap
 {
     internal class SiteMapFactory
     {

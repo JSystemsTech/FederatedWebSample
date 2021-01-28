@@ -1,8 +1,8 @@
-﻿using FederatedIPAuthenticationService.Configuration;
+﻿using FederatedAuthNAuthZ.Configuration;
 using ServiceProvider.ServiceProvider;
 using ServiceProvider.Services;
 
-namespace FederatedIPAuthenticationService.Services
+namespace FederatedAuthNAuthZ.Services
 {
     public static class ServiceFactory
     {

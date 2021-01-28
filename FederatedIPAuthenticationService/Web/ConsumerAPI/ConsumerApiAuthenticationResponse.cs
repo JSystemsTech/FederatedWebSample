@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace FederatedIPAuthenticationService.Web.ConsumerAPI
+namespace FederatedAuthNAuthZ.Web.ConsumerAPI
 {
     public class ConsumerApiAuthenticationResponse
     {

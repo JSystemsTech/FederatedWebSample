@@ -3,7 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace FederatedIPAuthenticationService.Configuration
+namespace FederatedAuthNAuthZ.Configuration
 {
     public interface IEncryptionServiceSettings : IConfigurationSectionConfig
     {

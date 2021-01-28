@@ -18,5 +18,13 @@
   {
     "outputFile": "Content/site-flatly.css",
     "inputFile": "Content/site-flatly.scss"
+  },
+  {
+    "outputFile": "Content/site-army.css",
+    "inputFile": "Content/site-army.scss"
+  },
+  {
+    "outputFile": "Content/site-army-dark.css",
+    "inputFile": "Content/site-army-dark.scss"
   }
 ]

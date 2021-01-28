@@ -1,10 +1,10 @@
-﻿using FederatedIPAuthenticationService.Enums;
-using FederatedIPAuthenticationService.Models.Collection;
+﻿using FederatedAuthNAuthZ.Enums;
+using FederatedAuthNAuthZ.Models.Collection;
 using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace FederatedIPAuthenticationService.Models
+namespace FederatedAuthNAuthZ.Models
 {
     public class ProviderAuthenticationCredentials
     {

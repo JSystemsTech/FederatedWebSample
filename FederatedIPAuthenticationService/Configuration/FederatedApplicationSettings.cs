@@ -1,10 +1,10 @@
-﻿using FederatedIPAuthenticationService.Extensions;
+﻿using FederatedAuthNAuthZ.Extensions;
 using ServiceProvider.Configuration;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace FederatedIPAuthenticationService.Configuration
+namespace FederatedAuthNAuthZ.Configuration
 {
     internal class FederatedApplicationSettingsFields {
         public static string SiteId => "SiteId";
@@ -35,7 +35,7 @@ namespace FederatedIPAuthenticationService.Configuration
         public static string TokenProviderPassword => "TokenProviderPassword";
 
         public static string IsProvider => "IsProvider";
-        public static string ExternalAuthenticationtUrl => "ExternalAuthenticationtUrl";
+        public static string ExternalAuthenticationUrl => "ExternalAuthenticationUrl";
         public static string AuthenticationErrorUrl => "AuthenticationErrorUrl";
     }
 
@@ -48,6 +48,7 @@ namespace FederatedIPAuthenticationService.Configuration
         public static string GetEnvironment(this IFederatedApplicationSettings FederatedApplicationSettings) => FederatedApplicationSettings.IsProductionEnvironment() ? "" : FederatedApplicationSettings.SiteEnvironment;
         public static bool UseRhealm(this IFederatedApplicationSettings FederatedApplicationSettings) => !string.IsNullOrWhiteSpace(FederatedApplicationSettings.SiteRhealmId);
         public static string GetCookieSuffix(this IFederatedApplicationSettings FederatedApplicationSettings) => FederatedApplicationSettings.UseRhealm() ? FederatedApplicationSettings.SiteRhealmId : $"{FederatedApplicationSettings.SiteId}{FederatedApplicationSettings.GetEnvironment()}{FederatedApplicationSettings.SiteVersion}";
+        public static string GetCookiePrefix(this IFederatedApplicationSettings FederatedApplicationSettings) => $"{FederatedApplicationSettings.AuthenticationProviderId}{FederatedApplicationSettings.SiteNetwork}_Auth_";
         public static bool IsSameNetwork(this IFederatedApplicationSettings FederatedApplicationSettings, IFederatedApplicationSettings FederatedApplicationSettingsTarget) => FederatedApplicationSettings.SiteNetwork == FederatedApplicationSettingsTarget.SiteNetwork;
         public static void UpdateConsumerTokenClaims(this IFederatedApplicationSettings FederatedApplicationSettings, IDictionary<string, IEnumerable<string>> claims)
         {
@@ -77,6 +78,9 @@ namespace FederatedIPAuthenticationService.Configuration
         public static string GetNetworkDisplay(this IFederatedApplicationSettings FederatedApplicationSettings) => string.IsNullOrWhiteSpace(FederatedApplicationSettings.SiteNetworkDisplay) ? FederatedApplicationSettings.SiteNetwork : FederatedApplicationSettings.SiteNetworkDisplay;
         public static bool HasNetworkDescription(this IFederatedApplicationSettings FederatedApplicationSettings) => !string.IsNullOrWhiteSpace(FederatedApplicationSettings.SiteNetworkDescription);
         public static bool NetworkIs(this IFederatedApplicationSettings FederatedApplicationSettings, string network) => FederatedApplicationSettings.SiteNetwork == network;
+        public static string GetAuthRequestCookieName(this IFederatedApplicationSettings FederatedApplicationSettings) => FederatedApplicationSettings.IsProvider ?
+            $"{FederatedApplicationSettings.SiteId}{FederatedApplicationSettings.SiteNetwork}_Request_" :
+            $"{FederatedApplicationSettings.AuthenticationProviderId}{FederatedApplicationSettings.SiteNetwork}_Request_";
 
     }
     public interface IFederatedApplicationSettings
@@ -111,7 +115,7 @@ namespace FederatedIPAuthenticationService.Configuration
 
 
         bool IsProvider { get; }
-        string ExternalAuthenticationtUrl { get; }
+        string ExternalAuthenticationUrl { get; }
         string AuthenticationErrorUrl { get; }
 
         IDictionary<string, string> Collection { get; }
@@ -148,7 +152,7 @@ namespace FederatedIPAuthenticationService.Configuration
 
 
         public bool IsProvider { get; set; }
-        public string ExternalAuthenticationtUrl { get; set; }
+        public string ExternalAuthenticationUrl { get; set; }
         public string AuthenticationErrorUrl { get; set; }
 
         public IDictionary<string, string> Collection => EmptyCollection;
@@ -181,7 +185,7 @@ namespace FederatedIPAuthenticationService.Configuration
             //TokenProviderPassword = FederatedApplicationSettings.TokenProviderPassword;
 
             IsProvider = FederatedApplicationSettings.IsProvider;
-            ExternalAuthenticationtUrl = FederatedApplicationSettings.ExternalAuthenticationtUrl;
+            ExternalAuthenticationUrl = FederatedApplicationSettings.ExternalAuthenticationUrl;
             AuthenticationErrorUrl = FederatedApplicationSettings.AuthenticationErrorUrl;
         }
     }
@@ -218,7 +222,7 @@ namespace FederatedIPAuthenticationService.Configuration
         public string TokenProviderPassword { get; set; }
 
         public bool IsProvider { get; set; }
-        public string ExternalAuthenticationtUrl { get; set; }
+        public string ExternalAuthenticationUrl { get; set; }
         public string AuthenticationErrorUrl { get; set; }
 
         public FederatedApplicationSettingsConfig() : base() { }
@@ -239,7 +243,7 @@ namespace FederatedIPAuthenticationService.Configuration
             }
 
             if (IsProvider) {
-                ExternalAuthenticationtUrl = GetValue(FederatedApplicationSettingsFields.ExternalAuthenticationtUrl, true);
+                ExternalAuthenticationUrl = GetValue(FederatedApplicationSettingsFields.ExternalAuthenticationUrl, true);
                 AuthenticationErrorUrl = GetValue(FederatedApplicationSettingsFields.AuthenticationErrorUrl, true);
             } 
             else

@@ -6,7 +6,7 @@ using System.Net.Mail;
 using System.Net.Mime;
 using System.Text;
 
-namespace FederatedIPAuthenticationService.Services
+namespace FederatedAuthNAuthZ.Services
 {
     public class EmailSendConfigure
     {

@@ -1,5 +1,5 @@
-﻿using FederatedIPAuthenticationService.Configuration;
-using FederatedIPAuthenticationService.Models;
+﻿using FederatedAuthNAuthZ.Configuration;
+using FederatedAuthNAuthZ.Models;
 using ServiceProvider.Services;
 using System;
 using System.Collections.Generic;
@@ -7,7 +7,7 @@ using System.Linq;
 using System.Web;
 using WebApiClient;
 
-namespace FederatedIPAuthenticationService.Services
+namespace FederatedAuthNAuthZ.Services
 {
     public interface ITokenProvider
     {

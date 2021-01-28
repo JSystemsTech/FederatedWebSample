@@ -64,8 +64,8 @@
     <Reference Include="Oracle.ManagedDataAccess, Version=4.122.19.1, Culture=neutral, PublicKeyToken=89b483f429c47342, processorArchitecture=MSIL">
       <HintPath>..\packages\Oracle.ManagedDataAccess.19.9.0\lib\net40\Oracle.ManagedDataAccess.dll</HintPath>
     </Reference>
-    <Reference Include="ServiceProvider, Version=1.0.3.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\ServiceProvider.1.0.3\lib\net48\ServiceProvider.dll</HintPath>
+    <Reference Include="ServiceProvider, Version=1.1.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\ServiceProvider.1.1.0\lib\net48\ServiceProvider.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Configuration.ConfigurationManager, Version=5.0.0.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
@@ -343,6 +343,18 @@
     <Content Include="Content\DataTables\swf\flashExport.swf" />
     <Content Include="Content\fontawesome\LICENSE.txt" />
     <Content Include="Content\Images\logo.png" />
+    <Content Include="Content\site-army-dark.css">
+      <DependentUpon>site-army-dark.scss</DependentUpon>
+    </Content>
+    <Content Include="Content\site-army-dark.min.css">
+      <DependentUpon>site-army-dark.css</DependentUpon>
+    </Content>
+    <Content Include="Content\site-army.css">
+      <DependentUpon>site-army.scss</DependentUpon>
+    </Content>
+    <Content Include="Content\site-army.min.css">
+      <DependentUpon>site-army.css</DependentUpon>
+    </Content>
     <Content Include="Content\site-flatly.css">
       <DependentUpon>site-flatly.scss</DependentUpon>
     </Content>
@@ -493,6 +505,7 @@
     <Content Include="Content\site-base-variables.scss" />
     <Content Include="Content\site-flatly.scss" />
     <Content Include="Content\datatables-fontawesome.scss" />
+    <Content Include="Content\site-army-dark.scss" />
     <None Include="Content\site.scss" />
     <Content Include="icon.jpg" />
     <Content Include="Scripts\bootstrap.bundle.js" />
@@ -718,6 +731,8 @@
     <Content Include="Content\site-base.scss" />
     <Content Include="Views\Home\CookiePolicy.cshtml" />
     <Content Include="Views\Home\PrivacyPolicy.cshtml" />
+    <Content Include="Content\site-army.scss" />
+    <Content Include="Views\Home\BootstrapComponents.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />

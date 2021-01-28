@@ -1,7 +1,7 @@
 ﻿using FederatedIPAPIAuthenticationProviderWeb.App_Start;
 using FederatedIPAPIAuthenticationProviderWeb.Configuration;
 using FederatedIPAPIAuthenticationProviderWeb.Services;
-using FederatedIPAuthenticationService.Services;
+using FederatedAuthNAuthZ.Services;
 using ServiceLayer.DomainLayer;
 using ServiceLayer.DomainLayer.DbConnection;
 using ServiceProvider.ServiceProvider;

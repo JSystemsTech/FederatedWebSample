@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace FederatedIPAuthenticationService.Attributes
+namespace FederatedAuthNAuthZ.Attributes
 {
     [AttributeUsage(AttributeTargets.Method)]
     public sealed class FederatedExternalPostbackAttribute : Attribute { }

@@ -1,4 +1,4 @@
-﻿using FederatedIPAuthenticationService.Web.ConsumerAPI;
+﻿using FederatedAuthNAuthZ.Web.ConsumerAPI;
 using ServiceLayer.DomainLayer;
 using ServiceProvider.Services;
 using System;

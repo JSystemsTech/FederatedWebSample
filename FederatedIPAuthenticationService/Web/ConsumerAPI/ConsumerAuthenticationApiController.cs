@@ -1,10 +1,11 @@
-﻿using FederatedIPAuthenticationService.Configuration;
-using FederatedIPAuthenticationService.Extensions;
-using FederatedIPAuthenticationService.Models;
-using FederatedIPAuthenticationService.Services;
+﻿using FederatedAuthNAuthZ.Configuration;
+using FederatedAuthNAuthZ.Extensions;
+using FederatedAuthNAuthZ.Models;
+using FederatedAuthNAuthZ.Services;
 using Newtonsoft.Json;
 using ServiceProvider.ServiceProvider;
 using ServiceProvider.Web;
+using ServiceProviderShared;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -19,15 +20,14 @@ using System.Web.Http.Controllers;
 using System.Web.Http.Filters;
 using System.Web.Mvc;
 
-namespace FederatedIPAuthenticationService.Web.ConsumerAPI
+namespace FederatedAuthNAuthZ.Web.ConsumerAPI
 {
     [ConsumerAuthenticationApiFilter]
     public abstract class ConsumerAuthenticationApiControllerBase : ApiController
     {
-        protected IServices Services => HttpContext.Current.ApplicationInstance is IMvcServiceApplication app ? app.Services : null;
-        protected ITokenProvider TokenProvider => Services.Get<ITokenProvider>();
-        protected IFederatedApplicationSettings FederatedApplicationSettings => Services.Get<IFederatedApplicationSettings>();
-        private IEncryptionService EncryptionService => Services.Get<IEncryptionService>();
+        protected ITokenProvider TokenProvider => ServiceManager.GetService<ITokenProvider>();
+        protected IFederatedApplicationSettings FederatedApplicationSettings => ServiceManager.GetService<IFederatedApplicationSettings>();
+        private IEncryptionService EncryptionService => ServiceManager.GetService<IEncryptionService>();
         protected HttpResponseMessage TextResponse(string value)
         {
             var response = new HttpResponseMessage(HttpStatusCode.OK);
@@ -156,8 +156,7 @@ namespace FederatedIPAuthenticationService.Web.ConsumerAPI
         private string GetBearerAuthorizationHeader(HttpActionContext actionContext)
         => GetAuthorizationHeader(actionContext, "Bearer");
 
-        private IServices Services => HttpContext.Current.ApplicationInstance is IMvcServiceApplication app ? app.Services : null;
-        private ITokenProvider TokenProvider => Services.Get<ITokenProvider>();
+        private ITokenProvider TokenProvider => ServiceManager.GetService<ITokenProvider>();
 
 
         public override void OnAuthorization(HttpActionContext actionContext)

@@ -1,9 +1,10 @@
-﻿using FederatedIPAuthenticationService.Extensions;
-using FederatedIPAuthenticationService.Models;
-using FederatedIPAuthenticationService.Web.ConsumerAPI;
+﻿using FederatedAuthNAuthZ.Extensions;
+using FederatedAuthNAuthZ.Models;
+using FederatedAuthNAuthZ.Web.ConsumerAPI;
 using Newtonsoft.Json;
 using ServiceLayer.DomainLayer.Models.Data;
 using ServiceLayer.Services;
+using ServiceProviderShared;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -13,7 +14,7 @@ namespace FederatedIPAPIConsumer.Controllers.AuthenticationApi
 {
     public class AuthenticationController : ConsumerAuthenticationApiAuthenticationController
     {
-        private IUserManagmentService UserManagmentService => Services.Get<IUserManagmentService>();
+        private IUserManagmentService UserManagmentService => ServiceManager.GetService<IUserManagmentService>();
         private ConsumerUser ResolveUserWithBasicAuth(string username, string password)
         {
             if (username != null && password == "1234")
@@ -56,7 +57,7 @@ namespace FederatedIPAPIConsumer.Controllers.AuthenticationApi
     }
     public class ConsumerApplicationSettingsController : ConsumerAuthenticationApiConsumerApplicationSettingsController
     {
-        private IUserManagmentService UserManagmentService => Services.Get<IUserManagmentService>();
+        private IUserManagmentService UserManagmentService => ServiceManager.GetService<IUserManagmentService>();
         protected override IEnumerable<ConsumerUser> GetTestUsers() => UserManagmentService.GetTestUsers();
         protected override string GetLogoImage() => LoadImageFromFile("~/Content/Images/logo.png");
     }

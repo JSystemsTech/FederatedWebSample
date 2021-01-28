@@ -1,4 +1,7 @@
-﻿@import 'site-base-variables.scss';
+﻿$input-btn-padding-y: .375rem !default;
+$input-btn-padding-x: .75rem !default;
+
+@import 'site-base-variables.scss';
 @import 'bootswatch/slate/_variables.scss';
 @import 'bootstrap/bootstrap.scss';
 @import 'bootswatch/slate/_bootswatch.scss';

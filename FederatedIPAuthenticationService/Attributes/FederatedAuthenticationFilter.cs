@@ -1,4 +1,5 @@
-﻿using System;
+﻿using FederatedAuthNAuthZ.Web;
+using System;
 using System.Linq;
 using System.Security.Principal;
 using System.Web;
@@ -6,7 +7,7 @@ using System.Web.Mvc;
 using System.Web.Mvc.Filters;
 using System.Web.Routing;
 
-namespace FederatedIPAuthenticationService.Attributes
+namespace FederatedAuthNAuthZ.Attributes
 {
     [AttributeUsage(AttributeTargets.Class | AttributeTargets.Method)]
     public abstract class FederatedAuthenticationFilter : ActionFilterAttribute, IAuthenticationFilter
@@ -23,6 +24,7 @@ namespace FederatedIPAuthenticationService.Attributes
         protected bool IsAuthenticated { get => Identity != null && Identity.IsAuthenticated; }
         protected bool IsPostRequest { get => Request.HttpMethod == "POST"; }
         public bool IsAuthenticatedRoute { get; private set; }
+        protected IRedirectToActionController RedirectToActionController { get; private set; }
         public FederatedAuthenticationFilter(bool isAuthenticatedRoute = true) : base()
         {
             IsAuthenticatedRoute = isAuthenticatedRoute;
@@ -30,6 +32,7 @@ namespace FederatedIPAuthenticationService.Attributes
         public virtual void OnAuthentication(AuthenticationContext filterContext) {
             AuthenticationContext = filterContext;
             Url = new UrlHelper(Request.RequestContext);
+            RedirectToActionController = AuthenticationContext.Controller is IRedirectToActionController controller ? controller : null;
         }
 
         public virtual void OnAuthenticationChallenge(AuthenticationChallengeContext filterContext) { }

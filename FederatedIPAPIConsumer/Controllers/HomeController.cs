@@ -41,5 +41,9 @@ namespace FederatedIPAPIConsumer.Controllers
         {
             return PartialFormView("Register", vm);
         }
+        public ActionResult BootstrapComponents()
+        {
+            return View();
+        }
     }
 }

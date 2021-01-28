@@ -1,5 +1,5 @@
 ﻿using FederatedIPAPIAuthenticationProviderWeb.Services;
-using FederatedIPAuthenticationService.Services;
+using FederatedAuthNAuthZ.Services;
 using ServiceLayer.DomainLayer;
 using ServiceProvider.ServiceProvider;
 using ServiceProvider.Web;
@@ -14,6 +14,7 @@ using System.Threading;
 using System.Web;
 using System.Web.Http.Controllers;
 using System.Web.Http.Filters;
+using ServiceProviderShared;
 
 namespace FederatedIPAPIAuthenticationProviderWeb.TokenProviderApi.Filters
 {
@@ -57,10 +58,9 @@ namespace FederatedIPAPIAuthenticationProviderWeb.TokenProviderApi.Filters
         private string GetBearerAuthorizationHeader(HttpActionContext actionContext)
         => GetAuthorizationHeader(actionContext, "Bearer");
 
-        private IServices Services => HttpContext.Current.ApplicationInstance is IMvcServiceApplication app ? app.Services : null;
-        private ITokenProviderService TokenProviderService => Services.Get<ITokenProviderService>();
-        private IAuthenticationProviderDomainFacade AuthenticationProviderDomainFacade => Services.Get<IAuthenticationProviderDomainFacade>();
-        private IEncryptionService EncryptionService => Services.Get<IEncryptionService>();
+        private ITokenProviderService TokenProviderService => ServiceManager.GetService<ITokenProviderService>();
+        private IAuthenticationProviderDomainFacade AuthenticationProviderDomainFacade => ServiceManager.GetService<IAuthenticationProviderDomainFacade>();
+        private IEncryptionService EncryptionService => ServiceManager.GetService<IEncryptionService>();
 
         public override void OnAuthorization(HttpActionContext actionContext)
         {

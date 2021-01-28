@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace FederatedIPAuthenticationService.Enums
+namespace FederatedAuthNAuthZ.Enums
 {
     public enum ProviderAuthenticationCredentialsOrdinal
     {

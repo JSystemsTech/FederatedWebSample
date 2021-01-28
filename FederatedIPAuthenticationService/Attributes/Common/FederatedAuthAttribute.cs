@@ -1,14 +1,15 @@
-﻿using FederatedIPAuthenticationService.Services;
+﻿using FederatedAuthNAuthZ.Services;
 using ServiceLayer.DomainLayer;
+using ServiceProviderShared;
 using System;
 
-namespace FederatedIPAuthenticationService.Attributes.Common
+namespace FederatedAuthNAuthZ.Attributes.Common
 {
 
     public class FederatedProviderAttribute : FederatedAuthenticationProvider {
-        private IEncryptionService EncryptionService => Services.Get<IEncryptionService>();
-        private IAuthenticationProviderDomainFacade AuthenticationProviderDomainFacade => Services.Get<IAuthenticationProviderDomainFacade>();
-
+        private IEncryptionService EncryptionService => ServiceManager.GetService<IEncryptionService>();
+        private IAuthenticationProviderDomainFacade AuthenticationProviderDomainFacade => ServiceManager.GetService<IAuthenticationProviderDomainFacade>();
+        public FederatedProviderAttribute(bool isAuthenticated = true) : base(isAuthenticated) { }
         protected override string GetSavedConsumerAuthenticationApiUrl(string key)
         {
             string authenticationRequestGuidStr = EncryptionService.DateSaltDecrypt(key);

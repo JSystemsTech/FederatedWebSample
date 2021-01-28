@@ -1,5 +1,5 @@
-﻿using FederatedIPAuthenticationService.Configuration;
-using FederatedIPAuthenticationService.Services;
+﻿using FederatedAuthNAuthZ.Configuration;
+using FederatedAuthNAuthZ.Services;
 using System;
 using System.Collections.Generic;
 using System.Net.Http.Headers;
@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 using WebApiClient;
 using WebApiClient.Models;
 
-namespace FederatedIPAuthenticationService.Web.ConsumerAPI
+namespace FederatedAuthNAuthZ.Web.ConsumerAPI
 {
     internal sealed class ConsumerApiClient: ApiClient
     {

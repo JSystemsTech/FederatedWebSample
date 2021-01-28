@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Text;
 using System.Web.Mvc;
 
-namespace FederatedIPAuthenticationService.Web.SiteMap
+namespace FederatedAuthNAuthZ.Web.SiteMap
 {
     internal class SiteMapAction
     {

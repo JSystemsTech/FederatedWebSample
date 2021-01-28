@@ -4,7 +4,7 @@ using System.Linq;
 using System.Security.Principal;
 using System.Web;
 
-namespace FederatedIPAuthenticationService.Principal
+namespace FederatedAuthNAuthZ.Principal
 {
     public class FederatedPrincipal : IPrincipal
     {

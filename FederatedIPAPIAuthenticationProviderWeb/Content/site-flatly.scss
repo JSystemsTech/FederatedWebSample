@@ -12,10 +12,13 @@ $pagination-bg: $dark !default;
 $pagination-hover-bg: darken($dark, 15%) !default;
 $pagination-disabled-bg: lighten($dark, 15%) !default;
 
+$pagination-color: color-yiq($pagination-bg) !default;
+$pagination-hover-color: color-yiq($pagination-hover-bg) !default;
+$pagination-disabled-color: color-yiq($pagination-disabled-bg) !default;
 
 
-$enable-responsive-font-sizes: true;
+@import 'site-base-variables.scss';
 @import 'bootswatch/flatly/_variables.scss';
 @import 'bootstrap/bootstrap.scss';
-@import 'bootswatch/flatly/_bootswatch.scss';;
+@import 'bootswatch/flatly/_bootswatch.scss';
 @import 'site-base.scss';

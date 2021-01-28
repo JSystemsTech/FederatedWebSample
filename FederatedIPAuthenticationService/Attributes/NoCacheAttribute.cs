@@ -2,7 +2,7 @@
 using System.Web;
 using System.Web.Mvc;
 
-namespace FederatedIPAuthenticationService.Attributes
+namespace FederatedAuthNAuthZ.Attributes
 {
     [AttributeUsage(AttributeTargets.Class | AttributeTargets.Method)]
     public sealed class NoCacheAttribute : ActionFilterAttribute

@@ -1,5 +1,5 @@
-﻿using FederatedIPAuthenticationService.Configuration;
-using FederatedIPAuthenticationService.Web.ConsumerAPI;
+﻿using FederatedAuthNAuthZ.Configuration;
+using FederatedAuthNAuthZ.Web.ConsumerAPI;
 using System;
 using System.Collections.Generic;
 

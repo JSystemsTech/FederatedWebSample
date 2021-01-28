@@ -76,8 +76,8 @@
     <Reference Include="Oracle.ManagedDataAccess, Version=4.122.19.1, Culture=neutral, PublicKeyToken=89b483f429c47342, processorArchitecture=MSIL">
       <HintPath>..\packages\Oracle.ManagedDataAccess.19.9.0\lib\net40\Oracle.ManagedDataAccess.dll</HintPath>
     </Reference>
-    <Reference Include="ServiceProvider, Version=1.0.3.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\ServiceProvider.1.0.3\lib\net48\ServiceProvider.dll</HintPath>
+    <Reference Include="ServiceProvider, Version=1.1.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\ServiceProvider.1.1.0\lib\net48\ServiceProvider.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Configuration.ConfigurationManager, Version=5.0.0.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
@@ -190,6 +190,7 @@
     <Compile Include="Configuration\TokenProviderServiceSettings.cs" />
     <Compile Include="Controllers\Api\RequestController.cs" />
     <Compile Include="Controllers\BaseController.cs" />
+    <Compile Include="Controllers\FakeCACServiceController.cs" />
     <Compile Include="Controllers\HomeController.cs" />
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
@@ -362,6 +363,18 @@
     <Content Include="Content\DataTables\images\sort_desc_disabled.png" />
     <Content Include="Content\DataTables\swf\flashExport.swf" />
     <Content Include="Content\fontawesome\LICENSE.txt" />
+    <Content Include="Content\site-army-dark.css">
+      <DependentUpon>site-army-dark.scss</DependentUpon>
+    </Content>
+    <Content Include="Content\site-army-dark.min.css">
+      <DependentUpon>site-army-dark.css</DependentUpon>
+    </Content>
+    <Content Include="Content\site-army.css">
+      <DependentUpon>site-army.scss</DependentUpon>
+    </Content>
+    <Content Include="Content\site-army.min.css">
+      <DependentUpon>site-army.css</DependentUpon>
+    </Content>
     <Content Include="Content\site-cerulean.css">
       <DependentUpon>site-cerulean.scss</DependentUpon>
     </Content>
@@ -486,7 +499,7 @@
     <Content Include="Content\DataTables\css\common.scss" />
     <Content Include="Content\fontawesome-custom\fontawesome.scss" />
     <Content Include="Content\datatables-style-loader.scss" />
-    <Content Include="Content\site.scss" />
+    <None Include="Content\site.scss" />
     <None Include="compilerconfig.json" />
     <None Include="compilerconfig.json.defaults">
       <DependentUpon>compilerconfig.json</DependentUpon>
@@ -626,6 +639,9 @@
     <Content Include="Content\bootswatch\slate\_bootswatch.scss" />
     <Content Include="Content\bootswatch\slate\_variables.scss" />
     <Content Include="Content\datatables-fontawesome.scss" />
+    <Content Include="Content\site-army-dark.scss" />
+    <Content Include="Content\site-army.scss" />
+    <Content Include="Content\site-base-variables.scss" />
     <None Include="Scripts\jquery-3.5.1.intellisense.js" />
     <Content Include="Scripts\jquery-3.5.1.js" />
     <Content Include="Scripts\jquery-3.5.1.min.js" />
@@ -736,12 +752,12 @@
     <Content Include="Scripts\popper-utils.min.js.map" />
     <Content Include="Scripts\popper-utils.js.map" />
     <Content Include="Views\Shared\AlertModal.cshtml" />
-    <Content Include="Views\Home\CACService.cshtml" />
     <Content Include="Views\Shared\Redirect.cshtml" />
     <Content Include="Views\Home\ExternalAuthenticationPostback.cshtml" />
-    <Content Include="Views\Home\SessionEnd.cshtml" />
     <Content Include="Views\Home\PrivacyPolicy.cshtml" />
     <Content Include="Views\Home\CookiePolicy.cshtml" />
+    <Content Include="Views\FakeCACService\Index.cshtml" />
+    <Content Include="Views\SessionEnd\Index.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />

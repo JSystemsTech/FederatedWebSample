@@ -1,6 +1,6 @@
-﻿using FederatedIPAuthenticationService.Attributes;
-using FederatedIPAuthenticationService.Attributes.Common;
-using FederatedIPAuthenticationService.Services;
+﻿using FederatedAuthNAuthZ.Attributes;
+using FederatedAuthNAuthZ.Attributes.Common;
+using FederatedAuthNAuthZ.Services;
 using ServiceLayer.AuthNAuthZ;
 using System.Security.Principal;
 using System.Web.Mvc;

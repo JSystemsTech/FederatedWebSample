@@ -1,0 +1,92 @@
+﻿//
+// Color system
+//
+
+$white: #fff !default;
+$gray-100: #f8f9fa !default;
+$gray-200: #e9ecef !default;
+$gray-300: #dee2e6 !default;
+$gray-400: #ced4da !default;
+$gray-500: #999 !default;
+$gray-600: #7a8288 !default;
+$gray-700: #52575c !default;
+$gray-800: #3a3f44 !default;
+$gray-900: #272b30 !default;
+$black: #000 !default;
+
+$blue: #007bff !default;
+$indigo: #6610f2 !default;
+$purple: #6f42c1 !default;
+$pink: #e83e8c !default;
+$red: #ee5f5b !default;
+$orange: #fd7e14 !default;
+$yellow: #f89406 !default;
+$green: #62c462 !default;
+$teal: #20c997 !default;
+$cyan: #5bc0de !default;
+
+$gold: #fec325 !default;
+$spanish-bistre: #80743A !default;
+$bronze: #AA8655 !default;
+$burlywood: #D7BC84 !default;
+$coconut: #8D5E42 !default;
+
+$primary: $gray-800 !default;
+$secondary: $gray-600 !default;
+$success: $spanish-bistre !default;
+$info: mix($gold,$gray-900,20%) !default;
+$warning: darken($gold, 15%) !default;
+$danger: $coconut !default;
+$light: $burlywood !default;
+$dark: $gray-900 !default;
+
+$component-active-color: $black !default;
+$component-active-bg: $gold !default;
+
+// Links
+
+$link-color: $gold !default;
+// Navbar
+
+$navbar-dark-hover-color: $gold !default;
+
+$input-btn-padding-y: .375rem !default;
+$input-btn-padding-x: .75rem !default;
+$input-btn-focus-color: rgba($component-active-bg, .75) !default;
+$form-feedback-valid-color: $teal !default;
+$form-feedback-invalid-color: $orange !default;
+
+$custom-breadcrumb-bg: $gray-800 !default;
+
+@import 'site-base-variables.scss';
+@import 'bootswatch/slate/_variables.scss';
+@import 'bootstrap/bootstrap.scss';
+@import 'bootswatch/slate/_bootswatch.scss';
+@import 'site-base.scss';
+
+.navbar {
+    .nav-link, .navbar-text {
+        padding: 0.5rem;
+    }
+
+    &.navbar-dark {
+        border-bottom: solid 5px $gold;
+    }
+}
+
+@mixin form-validation-state-overrrides($state, $color, $icon) {
+    .form-control {
+        @include form-validation-state-selector($state) {
+
+            &:focus {
+                border-color: $color;
+                box-shadow: 0 0 0 $input-focus-width rgba($color, .75) !important;
+            }
+        }
+    }
+}
+@each $state, $data in $form-validation-states {
+    @include form-validation-state-overrrides($state, map-get($data, color), map-get($data, icon));
+}
+
+    

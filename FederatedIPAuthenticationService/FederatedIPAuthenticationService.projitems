@@ -47,6 +47,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)Web\ConsumerAPI\ConsumerAuthenticationApiController.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Web\ConsumerAPI\ConsumerUser.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Web\FederatedWebController.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Web\IRedirectToActionController.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Web\SiteMap\SiteMapAction.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Web\SiteMap\SiteMapArea.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Web\SiteMap\SiteMapController.cs" />

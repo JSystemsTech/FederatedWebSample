@@ -2,11 +2,20 @@
 @import 'datatables-style-loader.scss';
 @import 'datatables-fontawesome.scss';
 
+.breadcrumb-item + .breadcrumb-item::before {
+    font-family: 'Font Awesome 5 Free';
+    content: "\f105";
+}
+
+
 .form-control-label.required:after {
     content: ' *';
     color: $danger;
 }
-
+.lead-sm {
+    font-size: 0.7rem;
+    font-weight: $font-weight-light;
+}
 @each $color, $value in $theme-colors {
     .text-#{$color}-inverse {
         color: color-yiq($value);
@@ -25,21 +34,56 @@
         border-radius: .2rem;
     }
 }
+form[data-ajax="form"] {
+    transition: opacity .15s linear;
 
-$font-size-privacy-notice: $font-size-base * .75 !default;
+    &::before {
+        content: '';
+        position: absolute;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba($body-color, 0.2);
+        border-radius: 15px;
+        box-shadow: inset 0px 0px 5px 5px $body-bg;
+        z-index: -1;
+        opacity: 0;
+        transition: opacity .15s linear;
+    }
 
-.card.card-privacy-notice {
-    background-color: rgba($white, 0.7);
+    &::after {
+        font-family: 'Font Awesome 5 Free';
+        font-weight: 900;
+        content: '\f021';
+        position: absolute;
+        left: 44%;
+        top: 44%;
+        font-size: 5em;
+        color: rgba($body-color, 0.75);
+        -webkit-animation: fa-spin 2s linear infinite;
+        animation: fa-spin 2s linear infinite;
+        z-index: -1;
+        opacity: 0;
+        transition: opacity .15s linear;
+    }
 
-    > .card-body {
-        max-height: 200px;
-        overflow-y: auto;
+    &.submitting {
+        > * {
+            opacity: 0.5;
+        }
 
-        > p.card-text {
-            font-size: $font-size-privacy-notice;
+        &::before {
+            z-index: 1024;
+            opacity: 1;
+        }
+
+        &::after {
+            z-index: 1024;
+            opacity: 1;
         }
     }
 }
+
 
 .card > .card-avatar {
     position: absolute;
@@ -118,3 +162,112 @@ $font-size-privacy-notice: $font-size-base * .75 !default;
 
 
 
+$custom-breadcrumb-bg: $gray-200 !default;
+.custom-breadcrumb {
+    text-align: center;
+    display: inline-block;
+    box-shadow: $box-shadow-sm;
+    overflow: hidden;
+    border-radius: $border-radius;
+    counter-reset: flag;
+    padding-left: 0;
+
+    .custom-breadcrumb-item {
+        text-decoration: none;
+        outline: none;
+        display: block;
+        float: left;
+        font-size: 12px;
+        line-height: 36px;
+        padding: 0 10px 0 60px;
+        position: relative;
+        background: $custom-breadcrumb-bg;
+        color: $body-color;
+        transition: background 0.5s;
+
+        &:first-child {
+            padding-left: 46px;
+            border-radius: 5px 0 0 5px;
+
+            &::before {
+                left: 14px;
+            }
+        }
+
+        &:last-child {
+            border-radius: 0 5px 5px 0;
+            padding-right: 20px;
+
+            &::after {
+                content: none;
+            }
+        }
+
+        &::before {
+            content: counter(flag);
+            counter-increment: flag;
+            border-radius: 100%;
+            width: 20px;
+            height: 20px;
+            line-height: 20px;
+            margin: 8px 0;
+            position: absolute;
+            top: 0;
+            left: 30px;
+            font-weight: bold;
+            background: $custom-breadcrumb-bg;
+            box-shadow: 0 0 0 1px $component-active-bg;
+        }
+
+        &::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            right: -18px;
+            width: 36px;
+            height: 36px;
+            transform: scale(0.707) rotate(45deg);
+            z-index: 1;
+            border-radius: 0 5px 0 50px;
+            background: $custom-breadcrumb-bg;
+            transition: background 0.5s;
+            box-shadow: 2px -2px 0 2px $component-active-bg;
+        }
+
+        &.active {
+            color: $component-active-color;
+            background: $component-active-bg;
+
+            &::before {
+                color: $body-color;
+            }
+
+            &::after {
+                background: $component-active-bg;
+            }
+
+            a {
+                color: $component-active-color;
+            }
+        }
+
+        &:hover {
+            color: $component-active-color;
+            background: $component-active-bg;
+
+            &::before {
+                color: $body-color;
+            }
+
+            &::after {
+                color: $component-active-color;
+                background: $component-active-bg;
+                box-shadow: 2px -2px 0 2px $body-bg;
+            }
+
+            a {
+                color: $component-active-color;
+            }
+        }
+    }
+}

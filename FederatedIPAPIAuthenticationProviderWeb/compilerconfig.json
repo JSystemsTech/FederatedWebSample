@@ -18,5 +18,13 @@
   {
     "outputFile": "Content/site-slate.css",
     "inputFile": "Content/site-slate.scss"
+  },
+  {
+    "outputFile": "Content/site-army-dark.css",
+    "inputFile": "Content/site-army-dark.scss"
+  },
+  {
+    "outputFile": "Content/site-army.css",
+    "inputFile": "Content/site-army.scss"
   }
 ]

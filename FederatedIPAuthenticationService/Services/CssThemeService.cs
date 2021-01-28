@@ -6,7 +6,7 @@ using System.Linq;
 using System.Web;
 using System.Web.Optimization;
 
-namespace FederatedIPAuthenticationService.Services
+namespace FederatedAuthNAuthZ.Services
 {
     public interface ICssThemeService
     {

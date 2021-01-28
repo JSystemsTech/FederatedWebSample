@@ -1,0 +1,70 @@
+﻿@{
+    Layout = null;
+}
+@using FederatedAuthNAuthZ.Extensions
+<!DOCTYPE html>
+<html lang="en-us">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fake CAC Service</title>
+
+    @Styles.Render(ViewBag.ThemeBundle as string)
+    @Scripts.Render("~/bundles/modernizr")
+</head>
+<body>
+    @Html.PageLoadLink()
+    @Html.AntiForgeryForm()
+    <main class="container pt-5 py-lg-5 my-lg-5">
+
+
+        <div class="row justify-content-center">
+            <div class="col" style="max-width:30rem;">
+                <div class="body-content text-center">
+                    <div class="card bg-light shadow-border-primary">
+                        <div class="card-avatar card-avatar-primary">
+
+                            <i class="fa fa-sim-card icon"></i>
+                        </div>
+                        <div class="card-body text-dark text-center pt-5">
+                            <div class="row justify-content-center">
+                                <div class="col-auto px-1">
+                                    <h4 class="mb-0">Fake CAC Service</h4>
+                                    <p class="my-0">
+                                        Mock up of a CAC (FOR DEMO ONLY. DO NOT USE IN PRODUCTION)
+                                    </p>
+                                    <p class="mb-0"><small class="badge badge-primary">-v 1.0.0.0</small></p>
+                                </div>
+                            </div>
+                            <hr>
+                            <form action="@ViewBag.PostBackAction" class="mt-5 mb-2" id="PostBack" method="post">
+                                @if (ViewBag.PostBackValues is IDictionary<string, string> postBackValues)
+                                {
+                                    foreach (var param in postBackValues)
+                                    {
+                                        @Html.Hidden(param.Key, param.Value)
+                                    }
+                                }
+                                @Html.Hidden("token", Guid.NewGuid())
+                                <div class="form-row">
+                                    <div class="col">
+                                        <p>CAC Service</p>
+                                        <p><small>Mock up of a CAC (FOR DEMO ONLY. DO NOT USE IN PRODUCTION)</small></p>
+                                        <button type="submit" class="btn btn-primary w-100" data-toggle="popover" title="Complete CAC Request" data-content="Complete Request for Common Access Card (CAC)" data-trigger="hover" data-container="body" data-placement="top">
+                                            <span class="ml-1"><i class="fa fa-sign-in-alt"></i></span>
+                                            <span class="ml-1">Complete CAC Request</span>
+                                        </button>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </main>
+    @Scripts.Render("~/bundles/jquery")
+    @Scripts.Render("~/bundles/bootstrap")
+</body>
+</html>

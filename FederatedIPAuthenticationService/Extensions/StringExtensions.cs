@@ -1,6 +1,6 @@
 ﻿using Newtonsoft.Json;
 
-namespace FederatedIPAuthenticationService.Extensions
+namespace FederatedAuthNAuthZ.Extensions
 {
     public static class StringExtensions
     {

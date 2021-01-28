@@ -14,10 +14,16 @@ namespace FederatedIPAPIAuthenticationProviderWeb
             routes.IgnoreRoute("{resource}.axd/{*pathInfo}");
 
             routes.MapRoute(
-                "ConsumingApplication",                                              // Route name
+                "ProviderInternal",                                              // Route name
+                "Provider/{controller}/{action}/{id}",                           // URL with parameters
+                new { controller = "SessionEnd", action = "Index", id = "" }  // Parameter defaults
+            );
+            routes.MapRoute(
+                "ConsumingApp",                                              // Route name
                 "{name}/{action}/{id}",                           // URL with parameters
                 new { controller = "Home", action = "Index", id = "" }  // Parameter defaults
             );
+            
             //routes.MapRoute(
             //    name: "Default",
             //    url: "{controller}/{action}/{id}",

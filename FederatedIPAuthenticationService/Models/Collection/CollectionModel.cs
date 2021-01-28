@@ -1,9 +1,9 @@
-﻿using FederatedIPAuthenticationService.Extensions;
+﻿using FederatedAuthNAuthZ.Extensions;
 using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace FederatedIPAuthenticationService.Models.Collection
+namespace FederatedAuthNAuthZ.Models.Collection
 {
 	public class CollectionModel<T>
 	where T : struct, IComparable

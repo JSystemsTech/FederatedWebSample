@@ -4,7 +4,7 @@ using System.Dynamic;
 using System.Linq;
 using System.Text;
 
-namespace FederatedIPAuthenticationService.Web.SiteMap
+namespace FederatedAuthNAuthZ.Web.SiteMap
 {
     internal enum SiteMapAreaType
     {

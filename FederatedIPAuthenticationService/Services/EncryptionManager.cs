@@ -1,11 +1,11 @@
-﻿using FederatedIPAuthenticationService.Configuration;
+﻿using FederatedAuthNAuthZ.Configuration;
 using ServiceProvider.Services;
 using System;
 using System.IO;
 using System.Security.Cryptography;
 using System.Text;
 
-namespace FederatedIPAuthenticationService.Services
+namespace FederatedAuthNAuthZ.Services
 {
     public static class EncryotionServiceExtensions
     {
@@ -171,7 +171,9 @@ namespace FederatedIPAuthenticationService.Services
     }
     public sealed class FederatedApplicationBasicEncryptionService : EncryptionServiceBase, IEncryptionService
     {
-        private static string GetKey(IFederatedApplicationSettings settings)=> settings.IsProvider ? $"{settings.SiteId}{settings.SiteNetwork}" : $"{settings.AuthenticationProviderId}{settings.SiteNetwork}";
+        private static string GetKey(IFederatedApplicationSettings settings)=> settings.IsProvider ? 
+            $"{settings.SiteId}{settings.SiteNetwork}" : 
+            $"{settings.AuthenticationProviderId}{settings.SiteNetwork}";
         public FederatedApplicationBasicEncryptionService() : base() { }
         public FederatedApplicationBasicEncryptionService(IFederatedApplicationSettings settings) : 
             base(GetKey(settings)) { }

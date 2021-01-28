@@ -1,4 +1,4 @@
-﻿using FederatedIPAuthenticationService.Services;
+﻿using FederatedAuthNAuthZ.Services;
 using System.Web;
 using System.Web.Optimization;
 
@@ -60,6 +60,12 @@ namespace FederatedIPAPIConsumer
                 ));
             bundles.Add(new ThemeBundle("flatly").Include(
                "~/Content/site-flatly.min.css"
+               ));
+            bundles.Add(new ThemeBundle("army").Include(
+               "~/Content/site-army.min.css"
+               ));
+            bundles.Add(new ThemeBundle("Army-Dark", true).Include(
+               "~/Content/site-army-dark.min.css"
                ));
         }
     }

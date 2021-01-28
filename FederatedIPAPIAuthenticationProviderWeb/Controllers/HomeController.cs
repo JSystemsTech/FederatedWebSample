@@ -1,28 +1,23 @@
-﻿using FederatedIPAPIAuthenticationProviderWeb.Models;
-using FederatedIPAuthenticationService.Attributes;
-using FederatedIPAuthenticationService.Attributes.Common;
-using FederatedIPAuthenticationService.Configuration;
-using FederatedIPAuthenticationService.Extensions;
-using FederatedIPAuthenticationService.Models;
-using FederatedIPAuthenticationService.Services;
-using FederatedIPAuthenticationService.Web;
-using FederatedIPAuthenticationService.Web.ConsumerAPI;
+﻿using FederatedAuthNAuthZ.Attributes;
+using FederatedAuthNAuthZ.Attributes.Common;
+using FederatedAuthNAuthZ.Configuration;
+using FederatedAuthNAuthZ.Services;
+using FederatedAuthNAuthZ.Web;
+using FederatedAuthNAuthZ.Web.ConsumerAPI;
+using FederatedIPAPIAuthenticationProviderWeb.Models;
 using Newtonsoft.Json;
 using ServiceLayer.DomainLayer.Models.Data;
 using ServiceProvider.Configuration;
-using ServiceProvider.Web;
+using ServiceProviderShared;
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Net.Mail;
-using System.Web;
 using System.Web.Mvc;
-using WebApiClientShared.Web;
 
 namespace FederatedIPAPIAuthenticationProviderWeb.Controllers
 {
-    
-    
+
+
     [FederatedProvider]
     [NoCache]
     public class HomeController : BaseController
@@ -202,7 +197,17 @@ namespace FederatedIPAPIAuthenticationProviderWeb.Controllers
             }
             if(vm.Mode == AuthenticationMode.CAC)
             {
-                return Redirect(BeginGetExternalAuthenticationPostbackUrl());
+                //RemoveAuthenticationRequestCookie();
+                string url = BeginGetExternalAuthenticationPostbackUrl();
+                try
+                {
+                    return Redirect(url);
+                }
+                catch(Exception e)
+                {
+                    return View("Index", vm);
+                }
+                
             }
             else
             {
@@ -210,31 +215,17 @@ namespace FederatedIPAPIAuthenticationProviderWeb.Controllers
             }
             
         }
-        [FederatedAllowAnnonomous]
-        public ActionResult SessionEnd()
-            => View();
 
-        [HttpGet]
-        public ActionResult CACService(string returnUrl)
-        {
-            //var response = MailService.SendMail((msg, content) =>
-            //{
-            //    msg.TOs = new[] { "jsmc123@hotmail.com" };
-            //    msg.FromDisplayName = "No-Reply-FederatedAuth-Test";
-            //    msg.Subject = "Test Email from c# project";
-            //    content.Content = "this is a test of the c# email system";
-            //});
-            UriBuilder returnUrlHelper = new UriBuilder(returnUrl);
-            Dictionary<string, string> postBackValues = new Dictionary<string, string>();
-            (returnUrlHelper.Query.StartsWith("?") ? returnUrlHelper.Query.Remove(0, 1) : returnUrlHelper.Query).Split('&').ToList().ForEach(p =>
-            {
-                string[] meta = p.Split('=');
-                postBackValues.Add(meta[0], HttpUtility.UrlDecode(meta[1]));
-            });
-
-            ViewBag.PostBackAction = returnUrlHelper.Uri.GetLeftPart(UriPartial.Path);
-            ViewBag.PostBackValues = postBackValues;
-            return View();
-        }
+        
     }
+
+    public class SessionEndController : Controller {
+        protected override void OnActionExecuting(ActionExecutingContext filterContext)
+        {
+            base.OnActionExecuting(filterContext);
+            ViewBag.ThemeBundle = ServiceManager.GetService<ICssThemeService>().GetTheme("Flatly").Path;
+        }
+        public ActionResult Index()=> View();
+    }
+
 }

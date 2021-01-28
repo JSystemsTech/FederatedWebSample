@@ -1,4 +1,4 @@
-﻿using FederatedIPAuthenticationService.Services;
+﻿using FederatedAuthNAuthZ.Services;
 using ServiceLayer.DomainLayer;
 using System;
 using WebApiClientShared.Web;

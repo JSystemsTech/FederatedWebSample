@@ -290,4 +290,6 @@
     };
     $('[data-ajax="form"]').ajaxFrom();
     $('[data-modal="alert"]').modalAlert();
+    $('[data-toggle="tooltip"]').tooltip();
+    $('[data-toggle="popover"]').popover();
 })));

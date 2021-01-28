@@ -5,7 +5,7 @@ using System.Web;
 using System.Web.Mvc;
 using System.Web.Mvc.Html;
 
-namespace FederatedIPAuthenticationService.Extensions
+namespace FederatedAuthNAuthZ.Extensions
 {
     public static class HtmlExtensions
     {

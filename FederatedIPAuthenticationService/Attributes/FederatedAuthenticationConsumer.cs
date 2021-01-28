@@ -1,11 +1,12 @@
-﻿using FederatedIPAuthenticationService.Configuration;
-using FederatedIPAuthenticationService.Extensions;
-using FederatedIPAuthenticationService.Principal;
-using FederatedIPAuthenticationService.Services;
-using FederatedIPAuthenticationService.Web.ConsumerAPI;
+﻿using FederatedAuthNAuthZ.Configuration;
+using FederatedAuthNAuthZ.Extensions;
+using FederatedAuthNAuthZ.Principal;
+using FederatedAuthNAuthZ.Services;
+using FederatedAuthNAuthZ.Web.ConsumerAPI;
 using Newtonsoft.Json;
 using ServiceProvider.ServiceProvider;
 using ServiceProvider.Web;
+using ServiceProviderShared;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -14,17 +15,16 @@ using System.Web;
 using System.Web.Mvc;
 using System.Web.Mvc.Filters;
 
-namespace FederatedIPAuthenticationService.Attributes
+namespace FederatedAuthNAuthZ.Attributes
 {
     public abstract class FederatedAuthenticationConsumer : FederatedAuthenticationFilter
     {
-        protected IServices Services { get => HttpContext.ApplicationInstance is IMvcServiceApplication app? app.Services : null; }
-        private IFederatedApplicationSettings FederatedApplicationSettings => Services.Get<IFederatedApplicationSettings>();
-        private ITokenProvider TokenProvider => Services.Get<ITokenProvider>();
+        private IFederatedApplicationSettings FederatedApplicationSettings => ServiceManager.GetService<IFederatedApplicationSettings>();
+        private ITokenProvider TokenProvider => ServiceManager.GetService<ITokenProvider>();
+        private IEncryptionService EncryptionService => ServiceManager.GetService<IEncryptionService>();
         private Uri LogoutUri => GetUri(FederatedApplicationSettings.LogoutUrl);
         private bool IsLogoutRequest { get => Request.Url.GetLeftPart(UriPartial.Path) == LogoutUri.GetLeftPart(UriPartial.Path); }
-        private string AuthenticationCookieName { get => $"{FederatedSettings.FederatedAuthenticationTokenCookiePrefix}{FederatedApplicationSettings.GetCookieSuffix()}"; }
-        private string AuthenticationRequestCookieName { get => $"{FederatedSettings.FederatedAuthenticationRequestTokenCookiePrefix}{FederatedApplicationSettings.AuthenticationProviderId}"; }
+        private string AuthenticationCookieName { get => $"{FederatedApplicationSettings.GetCookiePrefix()}{FederatedApplicationSettings.GetCookieSuffix()}"; }
         public FederatedAuthenticationConsumer(bool isAuthenticatedRoute = true) : base(isAuthenticatedRoute) { }
 
         protected abstract IIdentity CreateAuthenticatedPrincipalIdentity(IDictionary<string, IEnumerable<string>> tokenClaims);
@@ -61,13 +61,16 @@ namespace FederatedIPAuthenticationService.Attributes
          */
         private void OnLogoutRequest(AuthenticationContext filterContext) 
         {
-            HttpContext.Session.Add("LogoutRedirectUrl", $"{FederatedApplicationSettings.AuthenticationProviderUrl}/{FederatedApplicationSettings.SiteId}");
+            string AuthenticationRequestTokenCookieSuffix = DateTime.UtcNow.ToString("yyyyMMddHHmmssFFF");
+            HttpContext.Session.Add("LogoutRedirectUrl", $"{FederatedApplicationSettings.AuthenticationProviderUrl}/{FederatedApplicationSettings.SiteId}?LoginRequestToken={Url.Encode(EncryptionService.DateSaltEncrypt(AuthenticationRequestTokenCookieSuffix))}");
+            
+            
             RemoveAuthenticationCookie();
             HttpContext.User = FederatedPrincipal.CreateLogout();
             string authenticationRequestToken = TokenProvider.CreateToken(claims => {
                 claims.AddUpdate("ConsumerAuthenticationApiUrl", FederatedApplicationSettings.ConsumerAuthenticationApiUrl);
             });
-            SetAuthenticationRequestTokenCookie(AuthenticationRequestCookieName, authenticationRequestToken, (DateTime)TokenProvider.GetExpirationDate(authenticationRequestToken));
+            SetAuthenticationRequestTokenCookie(FederatedApplicationSettings.GetAuthRequestCookieName() + AuthenticationRequestTokenCookieSuffix, authenticationRequestToken, (DateTime)TokenProvider.GetExpirationDate(authenticationRequestToken));
         }
 
         /* Process Authenticated Request

@@ -1,14 +1,10 @@
-﻿using FederatedIPAPIAuthenticationProviderWeb.Services;
+﻿using FederatedAuthNAuthZ.Services;
+using FederatedIPAPIAuthenticationProviderWeb.Services;
 using FederatedIPAPIAuthenticationProviderWeb.TokenProviderApi.Filters;
-using FederatedIPAuthenticationService.Services;
 using Newtonsoft.Json;
-using ServiceProvider.ServiceProvider;
-using ServiceProvider.Web;
-using System;
-using System.Collections.Generic;
+using ServiceProviderShared;
 using System.Net;
 using System.Net.Http;
-using System.Net.Http.Formatting;
 using System.Net.Http.Headers;
 using System.Web;
 using System.Web.Http;
@@ -16,14 +12,12 @@ using System.Web.Http;
 namespace FederatedIPAPIAuthenticationProviderWeb.Controllers.Api
 {
     [ApiAuthenticationFilter(false)]
-    //[AcceptHeaderJson]
     public abstract class ApiControllerBase : ApiController
     {
-        private IServices Services => HttpContext.Current.ApplicationInstance is IMvcServiceApplication app ? app.Services : null;
-        protected ITokenProviderService TokenProviderService => Services.Get<ITokenProviderService>();
-        protected ITokenProvider TokenProvider => Services.Get<ITokenProvider>();
+        protected ITokenProviderService TokenProviderService => ServiceManager.GetService<ITokenProviderService>();
+        protected ITokenProvider TokenProvider => ServiceManager.GetService<ITokenProvider>();
 
-        private IEncryptionService EncryptionService => Services.Get<IEncryptionService>();
+        private IEncryptionService EncryptionService => ServiceManager.GetService<IEncryptionService>();
         protected HttpResponseMessage TextResponse(string value)
         {
             var response = new HttpResponseMessage(HttpStatusCode.OK);

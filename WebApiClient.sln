@@ -5,7 +5,7 @@ VisualStudioVersion = 16.0.30114.105
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FederatedIPAPIConsumer", "FederatedIPAPIConsumer\FederatedIPAPIConsumer.csproj", "{6C215DF5-244E-4E05-851A-444B2ECAF728}"
 EndProject
-Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "FederatedIPAuthenticationService", "FederatedIPAuthenticationService\FederatedIPAuthenticationService.shproj", "{CF3B8EF4-F456-416C-9A78-9EB6FB4AE1E3}"
+Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "FederatedAuthNAuthZ", "FederatedIPAuthenticationService\FederatedAuthNAuthZ.shproj", "{CF3B8EF4-F456-416C-9A78-9EB6FB4AE1E3}"
 EndProject
 Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "HtmlExtensionsShared", "HtmlExtensions\HtmlExtensionsShared.shproj", "{2EB9252A-AB19-4111-9589-5F743C8B0564}"
 EndProject

@@ -1,5 +1,5 @@
-﻿using FederatedIPAuthenticationService.Services;
-using FederatedIPAuthenticationService.Web.ConsumerAPI;
+﻿using FederatedAuthNAuthZ.Services;
+using FederatedAuthNAuthZ.Web.ConsumerAPI;
 using ServiceLayer.DomainLayer;
 using ServiceLayer.DomainLayer.DbConnection;
 using ServiceLayer.Services;

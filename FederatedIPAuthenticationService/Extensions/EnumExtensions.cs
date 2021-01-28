@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace FederatedIPAuthenticationService.Extensions
+namespace FederatedAuthNAuthZ.Extensions
 {
 	public static class EnumExtensions
 	{
