@@ -1,5 +1,7 @@
 ﻿using FederatedAuthNAuthZ.Services;
 using FederatedAuthNAuthZ.Web.ConsumerAPI;
+using FederatedIPAPIConsumer.App_Start;
+using FederatedIPAPIConsumer.Services;
 using ServiceLayer.DomainLayer;
 using ServiceLayer.DomainLayer.DbConnection;
 using ServiceLayer.Services;
@@ -21,7 +23,8 @@ namespace FederatedIPAPIConsumer
         {
             services.AddApplicationSettings();
             services.AddConnectionStringConfig();
-            services.ConfigureFederatedApplication();            
+            services.ConfigureFederatedApplication();
+            services.AddFederatedApplicationIdentityService<ConsumingApplicationIdentityService>();
             services.AddService<DbConnectionConfigService>();
             services.AddService<IDomainFacade, DomainFacade>();
             services.AddService<IUserManagmentService, UserManagmentService>();
@@ -30,7 +33,7 @@ namespace FederatedIPAPIConsumer
         }
         protected void Application_Start()
         {
-            GlobalConfiguration.Configure(ConsumerAuthenticationApiConfig.Register);
+            GlobalConfiguration.Configure(WebApiConfig.Register);
             AreaRegistration.RegisterAllAreas();
             FilterConfig.RegisterGlobalFilters(GlobalFilters.Filters);
             RouteConfig.RegisterRoutes(RouteTable.Routes);

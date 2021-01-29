@@ -8,7 +8,7 @@ namespace FederatedAuthNAuthZ.Configuration
 {
     internal class FederatedApplicationSettingsFields {
         public static string SiteId => "SiteId";
-        public static string SiteRhealmId => "SiteRhealmId";
+        public static string SiteRealmId => "SiteRealmId";
         public static string SiteReturnUrl => "SiteReturnUrl";
         public static string SiteName => "SiteName";
         public static string SiteVersion => "SiteVersion";
@@ -46,21 +46,21 @@ namespace FederatedAuthNAuthZ.Configuration
         public static string VersionDisplay(this IFederatedApplicationSettings FederatedApplicationSettings) => FederatedApplicationSettings.IsProductionEnvironment() ? $"-v {FederatedApplicationSettings.SiteVersion}": $"-v {FederatedApplicationSettings.SiteVersion} - {FederatedApplicationSettings.SiteEnvironment}";
         public static string Display(this IFederatedApplicationSettings FederatedApplicationSettings) => $"{FederatedApplicationSettings.SiteName} {FederatedApplicationSettings.VersionDisplay()}";
         public static string GetEnvironment(this IFederatedApplicationSettings FederatedApplicationSettings) => FederatedApplicationSettings.IsProductionEnvironment() ? "" : FederatedApplicationSettings.SiteEnvironment;
-        public static bool UseRhealm(this IFederatedApplicationSettings FederatedApplicationSettings) => !string.IsNullOrWhiteSpace(FederatedApplicationSettings.SiteRhealmId);
-        public static string GetCookieSuffix(this IFederatedApplicationSettings FederatedApplicationSettings) => FederatedApplicationSettings.UseRhealm() ? FederatedApplicationSettings.SiteRhealmId : $"{FederatedApplicationSettings.SiteId}{FederatedApplicationSettings.GetEnvironment()}{FederatedApplicationSettings.SiteVersion}";
+        public static bool UseRealm(this IFederatedApplicationSettings FederatedApplicationSettings) => !string.IsNullOrWhiteSpace(FederatedApplicationSettings.SiteRealmId);
+        public static string GetCookieSuffix(this IFederatedApplicationSettings FederatedApplicationSettings) => FederatedApplicationSettings.UseRealm() ? FederatedApplicationSettings.SiteRealmId : $"{FederatedApplicationSettings.SiteId}{FederatedApplicationSettings.GetEnvironment()}{FederatedApplicationSettings.SiteVersion}";
         public static string GetCookiePrefix(this IFederatedApplicationSettings FederatedApplicationSettings) => $"{FederatedApplicationSettings.AuthenticationProviderId}{FederatedApplicationSettings.SiteNetwork}_Auth_";
         public static bool IsSameNetwork(this IFederatedApplicationSettings FederatedApplicationSettings, IFederatedApplicationSettings FederatedApplicationSettingsTarget) => FederatedApplicationSettings.SiteNetwork == FederatedApplicationSettingsTarget.SiteNetwork;
         public static void UpdateConsumerTokenClaims(this IFederatedApplicationSettings FederatedApplicationSettings, IDictionary<string, IEnumerable<string>> claims)
         {
             claims.AddUpdate(FederatedApplicationSettingsFields.SiteNetwork, FederatedApplicationSettings.SiteNetwork);
-            claims.AddUpdate(FederatedApplicationSettingsFields.SiteRhealmId, FederatedApplicationSettings.SiteRhealmId);
+            claims.AddUpdate(FederatedApplicationSettingsFields.SiteRealmId, FederatedApplicationSettings.SiteRealmId);
             claims.AddUpdate(FederatedApplicationSettingsFields.SiteId, FederatedApplicationSettings.SiteId);
             claims.AddUpdate(FederatedApplicationSettingsFields.SiteVersion, FederatedApplicationSettings.SiteVersion);
             claims.AddUpdate(FederatedApplicationSettingsFields.SiteEnvironment, FederatedApplicationSettings.SiteEnvironment);
         }
         public static bool ValidateConsumerTokenClaims(this IFederatedApplicationSettings FederatedApplicationSettings, IDictionary<string, IEnumerable<string>> claims)
         {
-            return FederatedApplicationSettings.UseRhealm() ? FederatedApplicationSettings.ValidateConsumerTokenRhealmIdentificationClaims(claims) || FederatedApplicationSettings.ValidateConsumerTokenSiteIdentificationClaims(claims) :
+            return FederatedApplicationSettings.UseRealm() ? FederatedApplicationSettings.ValidateConsumerTokenRealmIdentificationClaims(claims) || FederatedApplicationSettings.ValidateConsumerTokenSiteIdentificationClaims(claims) :
                 FederatedApplicationSettings.ValidateConsumerTokenSiteIdentificationClaims(claims);
         }
         public static bool ValidateConsumerTokenSiteIdentificationClaims(this IFederatedApplicationSettings FederatedApplicationSettings, IDictionary<string, IEnumerable<string>> claims)
@@ -70,10 +70,10 @@ namespace FederatedAuthNAuthZ.Configuration
             (claims.ContainsKey(FederatedApplicationSettingsFields.SiteVersion) && claims[FederatedApplicationSettingsFields.SiteVersion].FirstOrDefault() == FederatedApplicationSettings.SiteVersion) &&
             (claims.ContainsKey(FederatedApplicationSettingsFields.SiteEnvironment) && claims[FederatedApplicationSettingsFields.SiteEnvironment].FirstOrDefault() == FederatedApplicationSettings.SiteEnvironment);
         }
-        public static bool ValidateConsumerTokenRhealmIdentificationClaims(this IFederatedApplicationSettings FederatedApplicationSettings, IDictionary<string, IEnumerable<string>> claims)
+        public static bool ValidateConsumerTokenRealmIdentificationClaims(this IFederatedApplicationSettings FederatedApplicationSettings, IDictionary<string, IEnumerable<string>> claims)
         {
             return claims.ContainsKey(FederatedApplicationSettingsFields.SiteNetwork) && claims[FederatedApplicationSettingsFields.SiteNetwork].FirstOrDefault() == FederatedApplicationSettings.SiteNetwork &&
-            claims.ContainsKey(FederatedApplicationSettingsFields.SiteRhealmId) && claims[FederatedApplicationSettingsFields.SiteRhealmId].FirstOrDefault() == FederatedApplicationSettings.SiteRhealmId;
+            claims.ContainsKey(FederatedApplicationSettingsFields.SiteRealmId) && claims[FederatedApplicationSettingsFields.SiteRealmId].FirstOrDefault() == FederatedApplicationSettings.SiteRealmId;
         }
         public static string GetNetworkDisplay(this IFederatedApplicationSettings FederatedApplicationSettings) => string.IsNullOrWhiteSpace(FederatedApplicationSettings.SiteNetworkDisplay) ? FederatedApplicationSettings.SiteNetwork : FederatedApplicationSettings.SiteNetworkDisplay;
         public static bool HasNetworkDescription(this IFederatedApplicationSettings FederatedApplicationSettings) => !string.IsNullOrWhiteSpace(FederatedApplicationSettings.SiteNetworkDescription);
@@ -86,7 +86,7 @@ namespace FederatedAuthNAuthZ.Configuration
     public interface IFederatedApplicationSettings
     {
         string SiteId { get; }
-        string SiteRhealmId { get; }
+        string SiteRealmId { get; }
         
         string SiteReturnUrl { get; }
         string SiteName { get; }
@@ -124,7 +124,7 @@ namespace FederatedAuthNAuthZ.Configuration
 
     public class FederatedApplicationSettings : IFederatedApplicationSettings {
         public string SiteId { get; set; }
-        public string SiteRhealmId { get; set; }
+        public string SiteRealmId { get; set; }
         public string SiteReturnUrl { get; set; }
         public string SiteName { get; set; }
         public string SiteVersion { get; set; }
@@ -159,7 +159,7 @@ namespace FederatedAuthNAuthZ.Configuration
         public FederatedApplicationSettings(){ }
         public FederatedApplicationSettings(IFederatedApplicationSettings FederatedApplicationSettings) {
             SiteId = FederatedApplicationSettings.SiteId;
-            SiteRhealmId = FederatedApplicationSettings.SiteRhealmId;
+            SiteRealmId = FederatedApplicationSettings.SiteRealmId;
             SiteReturnUrl = FederatedApplicationSettings.SiteReturnUrl;
             SiteName = FederatedApplicationSettings.SiteName;
             SiteVersion = FederatedApplicationSettings.SiteVersion;
@@ -195,7 +195,7 @@ namespace FederatedAuthNAuthZ.Configuration
         private static string FederatedApplicationSettings = "federatedApplicationSettings";
         protected override string ConfiguationSection => FederatedApplicationSettings;
         public string SiteId { get; set; }
-        public string SiteRhealmId { get; set; }
+        public string SiteRealmId { get; set; }
         public string SiteReturnUrl { get; set; }
         public string SiteName { get; set; }
         public string SiteVersion { get; set; }
@@ -248,7 +248,7 @@ namespace FederatedAuthNAuthZ.Configuration
             } 
             else
             {
-                SiteRhealmId = GetValue(FederatedApplicationSettingsFields.SiteRhealmId);
+                SiteRealmId = GetValue(FederatedApplicationSettingsFields.SiteRealmId);
                 SiteNetworkDisplay = GetValue(FederatedApplicationSettingsFields.SiteNetworkDisplay);
                 SiteNetworkDescription = GetValue(FederatedApplicationSettingsFields.SiteNetworkDescription);
                 SiteReturnUrl = GetValue(FederatedApplicationSettingsFields.SiteReturnUrl, true);

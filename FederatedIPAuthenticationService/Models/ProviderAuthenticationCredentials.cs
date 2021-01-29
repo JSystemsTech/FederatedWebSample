@@ -11,7 +11,7 @@ namespace FederatedAuthNAuthZ.Models
 		public string Username { get; set; }
 		public string Email { get; set; }
 		public string Password { get; set; }
-		public Guid? TestUserGuid { get; set; }
+		public string TestUserId { get; set; }
 		public string UserData { get; set; }
 	}
 }

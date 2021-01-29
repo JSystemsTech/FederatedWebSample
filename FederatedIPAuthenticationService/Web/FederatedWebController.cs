@@ -121,15 +121,16 @@ namespace WebApiClientShared.Web
         }
 
     }
-
+    [FederatedApplication]
+    public abstract class FederatedApplicationWebController : FederatedWebController { }
     public abstract class FederatedProviderWebController : FederatedWebController
     {
         
         private Uri ExternalAuthenticationUri => GetUri(FederatedApplicationSettings.ExternalAuthenticationUrl);
-        protected IConsumerAuthenticationApi ConsumerAPI { get; private set; }
-        protected IConsumerApplicationSettingsResponse ConsumerApplicationSettings { get; private set; }
-        protected IFederatedApplicationSettings ConsumingApplicationFederatedApplicationSettings => ConsumerApplicationSettings.FederatedApplicationSettings;
-        protected IEnumerable<ConsumerUser> ConsumingApplicationTestUsers => ConsumerApplicationSettings.TestUsers;
+        protected IApplicationAuthenticationAPI ApplicationAuthenticationAPI { get; private set; }
+        protected IApplicationAuthenticationAPIApplicationSettingsResponse TargetApplicationSettings { get; private set; }
+        protected IFederatedApplicationSettings ConsumingApplicationFederatedApplicationSettings => TargetApplicationSettings.FederatedApplicationSettings;
+        protected IEnumerable<ApplicationUser> ConsumingApplicationTestUsers => TargetApplicationSettings.TestUsers;
         private IEncryptionService EncryptionService => Services.Get<IEncryptionService>();
         private HttpCookie CreateAuthenticationCookie(string value, DateTime expires) => new HttpCookie(AuthenticationCookieName, value) { HttpOnly = true, Expires = expires, SameSite = SameSiteMode.Lax, Secure = IsSecureRequest };
 
@@ -142,7 +143,7 @@ namespace WebApiClientShared.Web
         protected string AuthenticationRequestToken => Response.Cookies.Get(AuthenticationRequestCookieName) is HttpCookie httpCookie && !string.IsNullOrWhiteSpace(httpCookie.Value) ? httpCookie.Value : "";
         protected IDictionary<string, IEnumerable<string>> AuthenticationRequestClaims => TokenProvider.GetTokenClaims(AuthenticationRequestToken);
         
-        protected bool TryValidateAuthentication(ConsumerApiAuthenticationResponse response)
+        protected bool TryValidateAuthentication(ApplicationAuthenticationApiAuthenticationResponse response)
         {
             if (TokenProvider.IsValidToken(response.AuthenticationToken) && TokenProvider.GetExpirationDate(response.AuthenticationToken) is DateTime expires)
             {
@@ -168,11 +169,11 @@ namespace WebApiClientShared.Web
         {
             base.OnAuthorization(filterContext);
             string ConsumerAuthenticationApiUrl = TokenProvider.GetTokenClaims(AuthenticationRequestToken)["ConsumerAuthenticationApiUrl"].FirstOrDefault();
-            ConsumerAPI = new ConsumerAuthenticationApi(EncryptionService, TokenProvider, ConsumerAuthenticationApiUrl);
+            ApplicationAuthenticationAPI = new ApplicationAuthenticationAPI(ConsumerAuthenticationApiUrl);
 
-            ConsumerApplicationSettings = ConsumerAPI.GetConsumerApplicationSettings();
+            TargetApplicationSettings = ApplicationAuthenticationAPI.GetApplicationSettings();
             ViewBag.ConsumingApplicationFederatedApplicationSettings = ConsumingApplicationFederatedApplicationSettings;
-            ViewBag.LogoImage = ConsumerApplicationSettings.LogoImage;
+            ViewBag.LogoImage = TargetApplicationSettings.LogoImage;
         }
         protected abstract string SaveAuthenticationRequest(string authenticationRequestToken);
         protected string BeginGetExternalAuthenticationPostbackUrl()

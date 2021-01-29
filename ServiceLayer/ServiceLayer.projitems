@@ -9,7 +9,6 @@
     <Import_RootNamespace>ServiceLayer</Import_RootNamespace>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="$(MSBuildThisFileDirectory)AuthNAuthZ\FederatedAuthorizeAttribute.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)DomainLayer\AuthenticationProviderDomainFacade.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)DomainLayer\DbConnection\AuthenticationProviderDbConnection.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)DomainLayer\DbConnection\ConsumingApplicationDbConnection.cs" />

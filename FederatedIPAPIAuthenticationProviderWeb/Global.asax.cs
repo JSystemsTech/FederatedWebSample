@@ -22,17 +22,16 @@ namespace FederatedIPAPIAuthenticationProviderWeb
             services.AddConnectionStringConfig();
             services.AddConfiguration<ITokenProviderServiceSettings, TokenProviderServiceSettings>();
             services.ConfigureFederatedApplication<SelfContainedTokenProvider>();
-            services.AddAuthenticationRequestCache();
             services.AddService<AuthenticationProviderDbConnectionConfigService>();
             services.AddService<IAuthenticationProviderDomainFacade, AuthenticationProviderDomainFacade>();
-            services.AddMailService();
-            services.AddService<ITokenProviderService, Saml2TokenProviderService>();
+            services.AddAPIAuthenticationService<TokenProviderAPIAuthenticationService>();            
+            services.AddTokenHandlerService<Saml2TokenHandlerService>();
             services.AddService<ICssThemeService, CssThemeService>();
 
         }
         protected void Application_Start()
         {
-            GlobalConfiguration.Configure(TokenProviderWebApiConfig.Register);
+            GlobalConfiguration.Configure(WebApiConfig.Register);
             AreaRegistration.RegisterAllAreas();
             FilterConfig.RegisterGlobalFilters(GlobalFilters.Filters);
             RouteConfig.RegisterRoutes(RouteTable.Routes);

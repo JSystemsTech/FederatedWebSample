@@ -1,7 +1,6 @@
 ﻿using FederatedAuthNAuthZ.Attributes;
 using FederatedAuthNAuthZ.Attributes.Common;
 using FederatedAuthNAuthZ.Services;
-using ServiceLayer.AuthNAuthZ;
 using System.Security.Principal;
 using System.Web.Mvc;
 using WebApiClientShared.Web;
@@ -9,12 +8,12 @@ using WebApiClientShared.Web;
 namespace FederatedIPAPIConsumer.Controllers
 {
 
-    [FederatedAuthorize]
+    
     [NoCache]
-    public abstract class BaseController : FederatedWebController
+    public abstract class BaseController : FederatedApplicationWebController
     {
         private ICssThemeService CssThemeService => Services.Get<ICssThemeService>();
-        [FederatedAllowAnnonomous]
+        [FederatedApplication(false)]
         public ActionResult Logout() {
             ViewBag.Logout = true;
             ViewBag.RedirectUrl = LogoutRedirectUrl;

@@ -1,25 +1,17 @@
-﻿using FederatedIPAPIAuthenticationProviderWeb.Configuration;
+﻿using FederatedAuthNAuthZ.Models;
 using FederatedAuthNAuthZ.Services;
+using FederatedIPAPIAuthenticationProviderWeb.Configuration;
+using FederatedIPAuthenticationService.Services;
 using Microsoft.IdentityModel.Tokens.Saml2;
-using ServiceProvider.Services;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Web;
 
 namespace FederatedIPAPIAuthenticationProviderWeb.Services
 {
-    public interface ITokenProviderService
-    {
-        string Create(IEnumerable<TokenClaim> claims);
-        string Renew(string tokenStr, IEnumerable<TokenClaim> claims);
-        string Renew(string tokenStr, TokenClaim claim);
-        IEnumerable<TokenClaim> GetClaims(string tokenStr);
-        DateTime? GetExpirationDate(string tokenStr);
-        bool IsValid(string tokenStr);
-    }
 
-    internal class Saml2TokenProviderService : Service,ITokenProviderService
+
+    internal class Saml2TokenHandlerService : TokenHandlerServiceBase
     {
         private ITokenProviderServiceSettings Settings => Services.Get<ITokenProviderServiceSettings>();
         private IEncryptionService EncryptionService => Services.Get<IEncryptionService>();
@@ -27,17 +19,17 @@ namespace FederatedIPAPIAuthenticationProviderWeb.Services
         private static Saml2SecurityTokenHandler SamlTokenHandler = new Saml2SecurityTokenHandler();
         private static IEnumerable<TokenClaim> DefaultClaims = new TokenClaim[0];
 
-        public string Create(IEnumerable<TokenClaim> claims)
+        public override string Create(IEnumerable<TokenClaim> claims)
             => Serialize(CreateSaml2SecurityToken(claims));
-        public string Renew(string tokenStr, IEnumerable<TokenClaim> claims)
+        public override string Renew(string tokenStr, IEnumerable<TokenClaim> claims)
             => Deserialize(tokenStr) is Saml2SecurityToken saml2Token && IsValidToken(saml2Token) ? Serialize(RenewToken(saml2Token, claims)) : null;
-        public string Renew(string tokenStr, TokenClaim claim)
+        public override string Renew(string tokenStr, TokenClaim claim)
             => Deserialize(tokenStr) is Saml2SecurityToken saml2Token && IsValidToken(saml2Token) ? Serialize(RenewToken(saml2Token, claim)) : null;
-        public IEnumerable<TokenClaim> GetClaims(string tokenStr)
+        public override IEnumerable<TokenClaim> GetClaims(string tokenStr)
             => Deserialize(tokenStr) is Saml2SecurityToken saml2Token && IsValidToken(saml2Token) ? GetClaims(saml2Token) : DefaultClaims;
-        public DateTime? GetExpirationDate(string tokenStr)
+        public override DateTime? GetExpirationDate(string tokenStr)
             => Deserialize(tokenStr) is Saml2SecurityToken saml2Token && IsValidToken(saml2Token) ? saml2Token.Assertion.Conditions.NotOnOrAfter : null;
-        public bool IsValid(string tokenStr)
+        public override bool IsValid(string tokenStr)
             => Deserialize(tokenStr) is Saml2SecurityToken saml2Token && IsValidToken(saml2Token);
 
 

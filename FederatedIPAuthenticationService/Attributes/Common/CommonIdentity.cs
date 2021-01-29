@@ -13,7 +13,7 @@ namespace FederatedAuthNAuthZ.Attributes.Common
         internal string FirstName { get; private set; }
         internal string MiddleInitial { get; private set; }
         internal string LastName { get; private set; }
-        internal Guid Guid { get; private set; }
+        internal string UserId { get; private set; }
 
         internal void Update(string firstName, string middleInitial, string lastName)
         {
@@ -22,13 +22,13 @@ namespace FederatedAuthNAuthZ.Attributes.Common
             LastName = lastName;
         }
         private CommonIdentity() { }
-        internal static CommonIdentity Create(Guid guid, string firstName, string middleInitial, string lastName)
+        internal static CommonIdentity Create(string userId, string firstName, string middleInitial, string lastName)
             => new CommonIdentity
             { 
                 FirstName = firstName,
                 MiddleInitial = middleInitial, 
-                LastName = lastName, 
-                Guid = guid, 
+                LastName = lastName,
+                UserId = userId, 
                 IsAuthenticated = true };
         internal static CommonIdentity CreateLogout()
             => new CommonIdentity

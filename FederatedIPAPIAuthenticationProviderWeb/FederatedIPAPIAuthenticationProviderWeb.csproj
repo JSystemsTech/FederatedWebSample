@@ -186,9 +186,9 @@
     <Compile Include="App_Start\BundleConfig.cs" />
     <Compile Include="App_Start\FilterConfig.cs" />
     <Compile Include="App_Start\RouteConfig.cs" />
-    <Compile Include="App_Start\TokenProviderWebApiConfig.cs" />
+    <Compile Include="App_Start\WebApiConfig.cs" />
     <Compile Include="Configuration\TokenProviderServiceSettings.cs" />
-    <Compile Include="Controllers\Api\RequestController.cs" />
+    <Compile Include="Controllers\TokenProviderAPI.cs" />
     <Compile Include="Controllers\BaseController.cs" />
     <Compile Include="Controllers\FakeCACServiceController.cs" />
     <Compile Include="Controllers\HomeController.cs" />
@@ -199,10 +199,8 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Services\CACService.cs" />
     <Compile Include="Services\Saml2TokenProviderService.cs" />
-    <Compile Include="Services\TokenClaim.cs" />
-    <Compile Include="Services\TokenParameters.cs" />
     <Compile Include="Services\TokenProvider.cs" />
-    <Compile Include="TokenProviderApi\Filters\ApiAuthenticationFilter.cs" />
+    <Compile Include="Services\TokenProviderAPIAuthenticationService.cs" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Content\DataTables\css\autoFill.bootstrap.css" />

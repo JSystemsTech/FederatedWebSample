@@ -12,10 +12,10 @@ using System.Web;
 
 namespace FederatedIPAPIConsumer.Controllers.AuthenticationApi
 {
-    public class AuthenticationController : ConsumerAuthenticationApiAuthenticationController
+    public class ApplicationAuthenticationAPIController : ApplicationAuthenticationAPIControllerBase
     {
         private IUserManagmentService UserManagmentService => ServiceManager.GetService<IUserManagmentService>();
-        private ConsumerUser ResolveUserWithBasicAuth(string username, string password)
+        private ApplicationUser ResolveUserWithBasicAuth(string username, string password)
         {
             if (username != null && password == "1234")
             {
@@ -23,7 +23,7 @@ namespace FederatedIPAPIConsumer.Controllers.AuthenticationApi
             }
             return null;
         }
-        private ConsumerUser ResolveUserWithEmailAuth(string email, string password)
+        private ApplicationUser ResolveUserWithEmailAuth(string email, string password)
         {
             if (email != null && password == "1234")
             {
@@ -32,11 +32,11 @@ namespace FederatedIPAPIConsumer.Controllers.AuthenticationApi
             return null;
         }
         
-        protected override ConsumerUser ResolveAuthenticatedUser(ProviderAuthenticationCredentials providerAuthenticationCredentials)
+        protected override ApplicationUser ResolveAuthenticatedUser(ProviderAuthenticationCredentials providerAuthenticationCredentials)
         {
-            if (providerAuthenticationCredentials.TestUserGuid is Guid userGuid)
+            if (providerAuthenticationCredentials.TestUserId is string userId)
             {
-                return UserManagmentService.GetTestUser(userGuid);
+                return UserManagmentService.GetTestUser(userId);
             }
             else if (!string.IsNullOrWhiteSpace(providerAuthenticationCredentials.Username) && !string.IsNullOrWhiteSpace(providerAuthenticationCredentials.Password))
             {
@@ -54,14 +54,8 @@ namespace FederatedIPAPIConsumer.Controllers.AuthenticationApi
             }
             return null;
         }
-    }
-    public class ConsumerApplicationSettingsController : ConsumerAuthenticationApiConsumerApplicationSettingsController
-    {
-        private IUserManagmentService UserManagmentService => ServiceManager.GetService<IUserManagmentService>();
-        protected override IEnumerable<ConsumerUser> GetTestUsers() => UserManagmentService.GetTestUsers();
+
+        protected override IEnumerable<ApplicationUser> GetTestUsers() => UserManagmentService.GetTestUsers();
         protected override string GetLogoImage() => LoadImageFromFile("~/Content/Images/logo.png");
     }
-
-
-
 }

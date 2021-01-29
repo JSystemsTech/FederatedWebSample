@@ -1,5 +1,6 @@
 ﻿using FederatedAuthNAuthZ.Configuration;
 using FederatedAuthNAuthZ.Models;
+using FederatedIPAuthenticationService.Extensions;
 using ServiceProvider.Services;
 using System;
 using System.Collections.Generic;
@@ -32,24 +33,25 @@ namespace FederatedAuthNAuthZ.Services
             
             IFederatedApplicationSettings FederatedApplicationSettings = Services.Get<IFederatedApplicationSettings>();
             IEncryptionService encryptionService;
+            string authenticationEndpointName = "Authentication".GetTokenProviderAPIEndpointName();
             if (FederatedApplicationSettings == null)
             {
                 ITokenProviderSettings standAloneConfig = Services.Get<ITokenProviderSettings>();
-                Client = ApiClientFactory.Create(standAloneConfig.Url, standAloneConfig.AuthenticationEndpoint, standAloneConfig.Username, standAloneConfig.Password);
+                Client = ApiClientFactory.Create(standAloneConfig.Url, authenticationEndpointName, standAloneConfig.Username, standAloneConfig.Password);
                 encryptionService = new FederatedApplicationBasicEncryptionService(standAloneConfig);
             }
             else
             {
                 encryptionService = Services.Get<IEncryptionService>();
-                Client = ApiClientFactory.Create(FederatedApplicationSettings.AuthenticationProviderUrl, FederatedApplicationSettings.TokenProviderAuthenticationEndpoint, FederatedApplicationSettings.TokenProviderUsername, FederatedApplicationSettings.TokenProviderPassword);                
+                Client = ApiClientFactory.Create(FederatedApplicationSettings.AuthenticationProviderUrl, authenticationEndpointName, FederatedApplicationSettings.TokenProviderUsername, FederatedApplicationSettings.TokenProviderPassword);                
             }
             Client.EncryptionHandler = str => encryptionService.DateSaltEncrypt(str);
             Client.DecryptionHandler = str => encryptionService.DateSaltDecrypt(str, true);
 
-            RequestEndpoint = Client.CreateEndpoint("api/Request");
-            RenewEndpoint = Client.CreateEndpoint("api/Renew");
-            ClaimsEndpoint = Client.CreateEndpoint("api/Claims");
-            ExpirationEndpoint = Client.CreateEndpoint("api/Expires");
+            RequestEndpoint = Client.CreateEndpoint("Request".GetTokenProviderAPIEndpointName());
+            RenewEndpoint = Client.CreateEndpoint("Renew".GetTokenProviderAPIEndpointName());
+            ClaimsEndpoint = Client.CreateEndpoint("Claims".GetTokenProviderAPIEndpointName());
+            ExpirationEndpoint = Client.CreateEndpoint("Expires".GetTokenProviderAPIEndpointName());
         }
         private IEnumerable<TokenClaim> ToClaimsParams(IDictionary<string, IEnumerable<string>> claims) => claims.Select(c => new TokenClaim() { Name = c.Key, Values = c.Value });
         public string CreateToken(Action<IDictionary<string, IEnumerable<string>>> tokenClaimHandler) {

@@ -56,8 +56,8 @@ namespace FederatedAuthNAuthZ.Attributes
         }
         private void ValidateRequestingSite(AuthenticationContext filterContext)
         {
-            IConsumerAuthenticationApi ConsumerAPI = new ConsumerAuthenticationApi(EncryptionService, TokenProvider, ConsumerAuthenticationApiUrl);
-            if (!ConsumerAPI.GetConsumerApplicationSettings().FederatedApplicationSettings.IsSameNetwork(FederatedApplicationSettings))
+            IApplicationAuthenticationAPI ApplicationAuthenticationAPI = new ApplicationAuthenticationAPI(ConsumerAuthenticationApiUrl);
+            if (!ApplicationAuthenticationAPI.GetApplicationSettings().FederatedApplicationSettings.IsSameNetwork(FederatedApplicationSettings))
             {
                 OnAuthenticationError(filterContext, "Invalid Authentication Request", "Requesting Site is not on the same network");
             }
@@ -86,7 +86,7 @@ namespace FederatedAuthNAuthZ.Attributes
                         });
 
                         HttpContext.Session.Remove("AuthenticationRequestTokenCookieSuffix");
-                        HttpContext.Session.Add("AuthenticationRequestTokenCookieSuffix", DateTime.UtcNow.ToString("yyyyMMddHHmmssFFF"));
+                        HttpContext.Session.Add("AuthenticationRequestTokenCookieSuffix", CreateAuthenticationRequestTokenCookieSuffix());
                         RenewAuthenticationRequestToken(authenticationRequestToken);
                         ValidateRequestingSite(filterContext);
                     }
@@ -113,7 +113,7 @@ namespace FederatedAuthNAuthZ.Attributes
                     }
 
                     string token = GetAuthenticationRequestCookieValue();
-                    if (!TokenProvider.IsValidToken(token) && !IsExternalAuthenticationPostbackRequest)
+                    if (!TokenProvider.IsValidToken(token))
                     {
                         OnAuthenticationError(filterContext, "Invalid Authentication Request Token", "Authentication Request Cookie does not contain a valid token");
                         return;

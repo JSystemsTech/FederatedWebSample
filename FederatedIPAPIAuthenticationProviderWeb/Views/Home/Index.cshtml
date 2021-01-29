@@ -71,7 +71,7 @@
                                             }
                                         </td>
                                         <td>
-                                            <button class="btn btn-primary btn-sm w-100" type="submit" data-toggle="tooltip" formaction="@Url.Action("Login", "Home", new { Mode=AuthenticationMode.Test, TestUserGuid = user.Guid})" title="Login with test user @(user.Name)">Login</button>
+                                            <button class="btn btn-primary btn-sm w-100" type="submit" data-toggle="tooltip" formaction="@Url.Action("Login", "Home", new { Mode=AuthenticationMode.Test, TestUserId = user.UserId})" title="Login with test user @(user.Name)">Login</button>
                                         </td>
                                     </tr>
                                 }

@@ -25,6 +25,7 @@ namespace FederatedAuthNAuthZ.Attributes
         protected bool IsPostRequest { get => Request.HttpMethod == "POST"; }
         public bool IsAuthenticatedRoute { get; private set; }
         protected IRedirectToActionController RedirectToActionController { get; private set; }
+        protected string CreateAuthenticationRequestTokenCookieSuffix() => Guid.NewGuid().ToString();
         public FederatedAuthenticationFilter(bool isAuthenticatedRoute = true) : base()
         {
             IsAuthenticatedRoute = isAuthenticatedRoute;

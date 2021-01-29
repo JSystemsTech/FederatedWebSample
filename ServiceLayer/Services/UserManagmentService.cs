@@ -1,4 +1,5 @@
-﻿using FederatedAuthNAuthZ.Web.ConsumerAPI;
+﻿using FederatedAuthNAuthZ.Services;
+using FederatedAuthNAuthZ.Web.ConsumerAPI;
 using ServiceLayer.DomainLayer;
 using ServiceProvider.Services;
 using System;
@@ -8,25 +9,26 @@ using System.Linq;
 namespace ServiceLayer.Services
 {
     public interface IUserManagmentService {
-        IEnumerable<ConsumerUser> GetTestUsers();
-        ConsumerUser GetTestUser(Guid userGuid);
-        ConsumerUser GetUser(Guid userGuid);
-        ConsumerUser ResolveUser(string email, string password);
-        ConsumerUser ResolveUser(string edipi);
-        IEnumerable<string> GetUserRoles(Guid userGuid);
+        IEnumerable<ApplicationUser> GetTestUsers();
+        ApplicationUser GetTestUser(string userId);
+        ApplicationUser GetUser(string userId);
+        ApplicationUser ResolveUser(string email, string password);
+        ApplicationUser ResolveUser(string edipi);
+        IEnumerable<string> GetUserRoles(string userId);
     }
     internal class UserManagmentService: Service, IUserManagmentService
     {
 
         private IDomainFacade DomainFacade => Services.Get<IDomainFacade>();
-
+        private IEncryptionService EncryptionService => Services.Get<IEncryptionService>();
         protected override void Init() { }
 
-        public IEnumerable<ConsumerUser> GetTestUsers() => DomainFacade.GetTestUsers().Select(m=> new ConsumerUser(m.Guid, $"{m.FirstName} {m.MiddleInitial} {m.LastName}", m.Roles));
-        public ConsumerUser GetTestUser(Guid userGuid) => GetTestUsers() is IEnumerable<ConsumerUser>testUsers && testUsers.Any(u=>u.Guid == userGuid)? testUsers.FirstOrDefault(u => u.Guid == userGuid): null;
-        public ConsumerUser GetUser(Guid userGuid) => GetTestUser(userGuid); /*Make call to database to get user*/
-        public IEnumerable<string> GetUserRoles(Guid userGuid) => GetUser(userGuid) is ConsumerUser user ? user.Roles: new string[0]; /*Make call to database to get user*/
-        public ConsumerUser ResolveUser(string email, string password) => GetTestUsers().First(); /*Make call to database to get user*/
-        public ConsumerUser ResolveUser(string edipi) => GetTestUsers().First(); /*Make call to database to get user*/
+        public IEnumerable<ApplicationUser> GetTestUsers() => DomainFacade.GetTestUsers().Select(m=> new ApplicationUser(EncryptionService.DateSaltEncrypt(m.Guid.ToString()), $"{m.FirstName} {m.MiddleInitial} {m.LastName}", m.Roles));
+        private Guid? DecryptUserGuid(string userId) => EncryptionService.DateSaltDecrypt(userId, true) is string userGuidStr && Guid.TryParse(userGuidStr, out Guid guid) ? guid : default;
+        public ApplicationUser GetTestUser(string userId) => GetTestUsers() is IEnumerable<ApplicationUser> testUsers && testUsers.Any(u=> DecryptUserGuid(u.UserId) == DecryptUserGuid(userId)) ? testUsers.FirstOrDefault(u => DecryptUserGuid(u.UserId) == DecryptUserGuid(userId)) : null;
+        public ApplicationUser GetUser(string userId) => GetTestUser(userId); /*Make call to database to get user*/
+        public IEnumerable<string> GetUserRoles(string userId) => GetUser(userId) is ApplicationUser user ? user.Roles: new string[0]; /*Make call to database to get user*/
+        public ApplicationUser ResolveUser(string email, string password) => GetTestUsers().First(); /*Make call to database to get user*/
+        public ApplicationUser ResolveUser(string edipi) => GetTestUsers().First(); /*Make call to database to get user*/
     }
 }

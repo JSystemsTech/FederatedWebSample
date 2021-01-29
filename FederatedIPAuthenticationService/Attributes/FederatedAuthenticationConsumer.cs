@@ -2,14 +2,10 @@
 using FederatedAuthNAuthZ.Extensions;
 using FederatedAuthNAuthZ.Principal;
 using FederatedAuthNAuthZ.Services;
-using FederatedAuthNAuthZ.Web.ConsumerAPI;
-using Newtonsoft.Json;
-using ServiceProvider.ServiceProvider;
-using ServiceProvider.Web;
+using FederatedIPAuthenticationService.Services;
 using ServiceProviderShared;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Security.Principal;
 using System.Web;
 using System.Web.Mvc;
@@ -17,20 +13,17 @@ using System.Web.Mvc.Filters;
 
 namespace FederatedAuthNAuthZ.Attributes
 {
-    public abstract class FederatedAuthenticationConsumer : FederatedAuthenticationFilter
+    public class FederatedApplicationAttribute : FederatedAuthenticationFilter
     {
         private IFederatedApplicationSettings FederatedApplicationSettings => ServiceManager.GetService<IFederatedApplicationSettings>();
+        private IFederatedApplicationIdentityService FederatedApplicationIdentityService => ServiceManager.GetService<IFederatedApplicationIdentityService>();
         private ITokenProvider TokenProvider => ServiceManager.GetService<ITokenProvider>();
         private IEncryptionService EncryptionService => ServiceManager.GetService<IEncryptionService>();
         private Uri LogoutUri => GetUri(FederatedApplicationSettings.LogoutUrl);
         private bool IsLogoutRequest { get => Request.Url.GetLeftPart(UriPartial.Path) == LogoutUri.GetLeftPart(UriPartial.Path); }
         private string AuthenticationCookieName { get => $"{FederatedApplicationSettings.GetCookiePrefix()}{FederatedApplicationSettings.GetCookieSuffix()}"; }
-        public FederatedAuthenticationConsumer(bool isAuthenticatedRoute = true) : base(isAuthenticatedRoute) { }
+        public FederatedApplicationAttribute(bool isAuthenticatedRoute = true) : base(isAuthenticatedRoute) { }
 
-        protected abstract IIdentity CreateAuthenticatedPrincipalIdentity(IDictionary<string, IEnumerable<string>> tokenClaims);
-        protected abstract IEnumerable<string> GetRoles(IDictionary<string, IEnumerable<string>> tokenClaims, IEnumerable<string> currentRoles);
-        protected virtual void OnLogout(IIdentity identity) { }
-        protected virtual void SetTokenUpdateClaims(IIdentity identity, IDictionary<string, IEnumerable<string>> tokenClaims) { }
 
         /* Process Request 
          * 1.If Request is a logout request handle that request
@@ -61,7 +54,7 @@ namespace FederatedAuthNAuthZ.Attributes
          */
         private void OnLogoutRequest(AuthenticationContext filterContext) 
         {
-            string AuthenticationRequestTokenCookieSuffix = DateTime.UtcNow.ToString("yyyyMMddHHmmssFFF");
+            string AuthenticationRequestTokenCookieSuffix = CreateAuthenticationRequestTokenCookieSuffix();
             HttpContext.Session.Add("LogoutRedirectUrl", $"{FederatedApplicationSettings.AuthenticationProviderUrl}/{FederatedApplicationSettings.SiteId}?LoginRequestToken={Url.Encode(EncryptionService.DateSaltEncrypt(AuthenticationRequestTokenCookieSuffix))}");
             
             
@@ -94,12 +87,12 @@ namespace FederatedAuthNAuthZ.Attributes
                 )
             {
                 try {
-                    IIdentity identity = CreateAuthenticatedPrincipalIdentity(tokenClaims);
+                    IIdentity identity = FederatedApplicationIdentityService.CreateAuthenticatedPrincipalIdentity(tokenClaims);
                     string updatedToken = TokenProvider.RenewToken(token, (claims) =>
                     {
-                        claims.AddUpdate("Roles", GetRoles(tokenClaims, tokenClaims.Get<string>("Roles")));
+                        claims.AddUpdate("Roles", FederatedApplicationIdentityService.GetRoles(tokenClaims, tokenClaims.Get<string>("Roles")));
                         FederatedApplicationSettings.UpdateConsumerTokenClaims(tokenClaims);
-                        SetTokenUpdateClaims(identity, claims);
+                        FederatedApplicationIdentityService.SetTokenUpdateClaims(identity, claims);
                     });
                     var updatedTokenClaims = TokenProvider.GetTokenClaims(updatedToken);
                     DateTime? expirationDate = TokenProvider.GetExpirationDate(updatedToken);
@@ -121,7 +114,7 @@ namespace FederatedAuthNAuthZ.Attributes
                 }
                 else
                 {
-                    OnLogout(HttpContext.User.Identity);
+                    FederatedApplicationIdentityService.OnLogout(HttpContext.User.Identity);
                     UriBuilder builder = new UriBuilder(LogoutUri);
                     filterContext.Result = new RedirectResult(builder.Uri.ToString());
                 }
@@ -138,11 +131,11 @@ namespace FederatedAuthNAuthZ.Attributes
         {
             if (FederatedApplicationSettings.UseSessionCookie)
             {
-                SetHttpCookie(CreateSessionCookie(AuthenticationCookieName, value, !FederatedApplicationSettings.UseRhealm()));
+                SetHttpCookie(CreateSessionCookie(AuthenticationCookieName, value, !FederatedApplicationSettings.UseRealm()));
             }
             else if (expires is DateTime expirationDate)
             {
-                SetHttpCookie(CreateCookie(AuthenticationCookieName, value, expirationDate, !FederatedApplicationSettings.UseRhealm()));
+                SetHttpCookie(CreateCookie(AuthenticationCookieName, value, expirationDate, !FederatedApplicationSettings.UseRealm()));
             }
         }
     }

@@ -1,4 +1,5 @@
 ﻿using FederatedAuthNAuthZ.Configuration;
+using FederatedIPAuthenticationService.Services;
 using ServiceProvider.ServiceProvider;
 using ServiceProvider.Services;
 
@@ -6,9 +7,6 @@ namespace FederatedAuthNAuthZ.Services
 {
     public static class ServiceFactory
     {
-        public static void AddAuthenticationRequestCache(this IServiceCollection services) {
-            services.AddService<IAuthenticationRequestCache, AuthenticationRequestCache>();
-        }
         public static void AddEncryptionService<TEncryptionService>(this IServiceCollection services)
             where TEncryptionService : EncryptionServiceBase, IService
         {
@@ -46,5 +44,21 @@ namespace FederatedAuthNAuthZ.Services
             services.AddTokenProvider<TTokenProvider>();
             
         }
+        public static void AddAPIAuthenticationService<TAPIAuthenticationService>(this IServiceCollection services)
+            where TAPIAuthenticationService : APIAuthenticationServiceBase
+        {
+            services.AddService<IAPIAuthenticationService, TAPIAuthenticationService>();
+        }
+        public static void AddTokenHandlerService<TTokenHandlerService>(this IServiceCollection services)
+            where TTokenHandlerService : TokenHandlerServiceBase
+        {
+            services.AddService<ITokenHandlerService, TTokenHandlerService>();
+        }
+        public static void AddFederatedApplicationIdentityService<TFederatedApplicationIdentityService>(this IServiceCollection services)
+            where TFederatedApplicationIdentityService : FederatedApplicationIdentityService
+        {
+            services.AddService<IFederatedApplicationIdentityService, TFederatedApplicationIdentityService>();
+        }        
+
     }
 }

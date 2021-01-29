@@ -100,27 +100,27 @@ namespace FederatedIPAPIAuthenticationProviderWeb.Controllers
         {
             vm.ConsumingApplicationFederatedApplicationSettings = ConsumingApplicationFederatedApplicationSettings;
 
-            ConsumerApiAuthenticationResponse response;
+            ApplicationAuthenticationApiAuthenticationResponse response;
             if (!string.IsNullOrWhiteSpace(externalAuthToken))
             {
                 ICACUser UserData = AuthenticationProviderDomainFacade.GetCACLoginRequestUser(externalAuthToken);
-                response = ConsumerAPI.Authenticate(new
+                response = ApplicationAuthenticationAPI.Authenticate(new
                 {
                     vm.Username,
                     vm.Password,
                     vm.Email,
-                    vm.TestUserGuid,
+                    vm.TestUserId,
                     UserData = JsonConvert.SerializeObject(UserData)//presserialize before API serializes to keep it as a string
                 });
             }
             else
             {                
-                response = ConsumerAPI.Authenticate(new
+                response = ApplicationAuthenticationAPI.Authenticate(new
                 {
                     vm.Username,
                     vm.Password,
                     vm.Email,
-                    vm.TestUserGuid
+                    vm.TestUserId
                 });
             }
             
@@ -197,7 +197,7 @@ namespace FederatedIPAPIAuthenticationProviderWeb.Controllers
             }
             if(vm.Mode == AuthenticationMode.CAC)
             {
-                //RemoveAuthenticationRequestCookie();
+                RemoveAuthenticationRequestCookie();
                 string url = BeginGetExternalAuthenticationPostbackUrl();
                 try
                 {
