@@ -1,8 +1,7 @@
 ﻿using FederatedAuthNAuthZ.Attributes;
-using FederatedAuthNAuthZ.Attributes.Common;
 using FederatedAuthNAuthZ.Services;
-using ServiceLayer.WebHelpers.SiteMap;
 using Newtonsoft.Json;
+using ServiceLayer.WebHelpers.SiteMap;
 using System.Collections.Generic;
 using System.Dynamic;
 using System.Linq;
@@ -13,7 +12,7 @@ using WebApiClientShared.Web;
 namespace FederatedIPAPIConsumer.Controllers
 {
 
-    
+
     [NoCache]
     public abstract class BaseController : FederatedApplicationWebController
     {
