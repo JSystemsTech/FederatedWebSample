@@ -24,6 +24,7 @@ namespace FederatedIPAPIAuthenticationProviderWeb
             services.ConfigureFederatedApplication<SelfContainedTokenProvider>();
             services.AddService<AuthenticationProviderDbConnectionConfigService>();
             services.AddService<IAuthenticationProviderDomainFacade, AuthenticationProviderDomainFacade>();
+            services.AddProviderAuthenticationModeService<FederatedAuthenticationModeService>();
             services.AddAPIAuthenticationService<TokenProviderAPIAuthenticationService>();            
             services.AddTokenHandlerService<Saml2TokenHandlerService>();
             services.AddService<ICssThemeService, CssThemeService>();

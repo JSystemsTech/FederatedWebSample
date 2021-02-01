@@ -2,7 +2,7 @@
 using FederatedAuthNAuthZ.Extensions;
 using FederatedAuthNAuthZ.Models;
 using FederatedAuthNAuthZ.Services;
-using FederatedIPAuthenticationService.Web;
+using FederatedAuthNAuthZ.Web;
 using Newtonsoft.Json;
 using ServiceProvider.ServiceProvider;
 using ServiceProvider.Web;

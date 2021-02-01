@@ -1,23 +1,17 @@
-﻿using FederatedAuthNAuthZ;
-using FederatedAuthNAuthZ.Attributes;
+﻿using FederatedAuthNAuthZ.Attributes;
 using FederatedAuthNAuthZ.Configuration;
-using FederatedAuthNAuthZ.Extensions;
 using FederatedAuthNAuthZ.Principal;
 using FederatedAuthNAuthZ.Services;
 using FederatedAuthNAuthZ.Web;
 using FederatedAuthNAuthZ.Web.ConsumerAPI;
-using FederatedAuthNAuthZ.Web.SiteMap;
-using Newtonsoft.Json;
 using ServiceProvider.Web;
 using System;
 using System.Collections.Generic;
-using System.Dynamic;
 using System.Linq;
 using System.Reflection;
 using System.Text;
 using System.Web;
 using System.Web.Mvc;
-using System.Web.Mvc.Filters;
 using System.Web.Routing;
 
 namespace WebApiClientShared.Web
@@ -25,7 +19,6 @@ namespace WebApiClientShared.Web
     public abstract class FederatedWebController : ServiceProviderController,IRedirectToActionController
     {
         protected IFederatedApplicationSettings FederatedApplicationSettings => Services.Get<IFederatedApplicationSettings>();
-        protected IMailService MailService => Services.Get<IMailService>();
 
         protected ITokenProvider TokenProvider => Services.Get<ITokenProvider>();
 
@@ -86,27 +79,12 @@ namespace WebApiClientShared.Web
 
         {
             base.OnAuthorization(filterContext);
-            /* only build site Map on PageRequests */
-            if (filterContext.ActionDescriptor is ReflectedActionDescriptor method &&
-                !typeof(JsonResult).IsAssignableFrom(method.MethodInfo.ReturnType) &&
-                !typeof(PartialViewResult).IsAssignableFrom(method.MethodInfo.ReturnType) &&
-                !typeof(FileResult).IsAssignableFrom(method.MethodInfo.ReturnType))
-            {
-                bool IsAuthenticated = HttpContext.User.Identity != null && HttpContext.User.Identity.IsAuthenticated;
-                IEnumerable<SiteMapArea> areas = SiteMapFactory.BuildSiteMap(GetDeafaultNamespace(), IsAuthenticated, Url);
-
-                var map = new ExpandoObject() as IDictionary<string, object>;
-                areas.ToList().ForEach(area => map.Add(area.Name, area.ToMap()));
-                string json = JsonConvert.SerializeObject(map);
-                ViewBag.SiteMap = json;
-            }
+            
             ViewBag.IsAuthenticated = filterContext.HttpContext.User.Identity != null && filterContext.HttpContext.User.Identity.IsAuthenticated;
             ViewBag.SessionTimeout = filterContext.HttpContext.User is FederatedPrincipal principal ? principal.SessionTimeout : 0;
             ViewBag.FederatedApplicationSettings = FederatedApplicationSettings;
             
         }
-
-        protected abstract string GetDeafaultNamespace();
 
         protected Uri GetUri(string absoluteOrRelativeUrl)
         {
@@ -126,10 +104,10 @@ namespace WebApiClientShared.Web
     public abstract class FederatedProviderWebController : FederatedWebController
     {
         
-        private Uri ExternalAuthenticationUri => GetUri(FederatedApplicationSettings.ExternalAuthenticationUrl);
         protected IApplicationAuthenticationAPI ApplicationAuthenticationAPI { get; private set; }
         protected IApplicationAuthenticationAPIApplicationSettingsResponse TargetApplicationSettings { get; private set; }
         protected IFederatedApplicationSettings ConsumingApplicationFederatedApplicationSettings => TargetApplicationSettings.FederatedApplicationSettings;
+        protected IProviderAuthenticationModeService ProviderAuthenticationModeService => Services.Get<IProviderAuthenticationModeService>();
         protected IEnumerable<ApplicationUser> ConsumingApplicationTestUsers => TargetApplicationSettings.TestUsers;
         private IEncryptionService EncryptionService => Services.Get<IEncryptionService>();
         private HttpCookie CreateAuthenticationCookie(string value, DateTime expires) => new HttpCookie(AuthenticationCookieName, value) { HttpOnly = true, Expires = expires, SameSite = SameSiteMode.Lax, Secure = IsSecureRequest };
@@ -162,7 +140,7 @@ namespace WebApiClientShared.Web
 
         [HttpPost]
         [FederatedExternalPostback]
-        public abstract ActionResult ExternalAuthenticationPostback(string token);
+        public abstract ActionResult ExternalAuthenticationPostback(string token, string mode);
 
         protected override void OnAuthorization(AuthorizationContext filterContext)
 
@@ -176,10 +154,11 @@ namespace WebApiClientShared.Web
             ViewBag.LogoImage = TargetApplicationSettings.LogoImage;
         }
         protected abstract string SaveAuthenticationRequest(string authenticationRequestToken);
-        protected string BeginGetExternalAuthenticationPostbackUrl()
+        //protected string BeginGetExternalAuthenticationPostbackUrl() => BeginGetExternalAuthenticationPostbackUrl(Url.Action("ExternalAuthenticationPostback"));
+        protected string BeginGetExternalAuthenticationPostbackUrl(string url, string mode)
         {
-            string returnUrl = BuildUrl(GetUri(Url.Action("ExternalAuthenticationPostback")).AbsoluteUri, new { AuthenticationRequest = SaveAuthenticationRequest(AuthenticationRequestToken) });
-            return BuildUrl(ExternalAuthenticationUri.AbsoluteUri, new { returnUrl = returnUrl });
+            string returnUrl = BuildUrl(GetUri(Url.Action("ExternalAuthenticationPostback")).AbsoluteUri, new { mode, AuthenticationRequest = SaveAuthenticationRequest(AuthenticationRequestToken) });
+            return BuildUrl(GetUri(url).AbsoluteUri, new { returnUrl = returnUrl });
         }
         private string AuthenticationRequestCookieName { get => $"{FederatedApplicationSettings.GetAuthRequestCookieName()}{AuthenticationRequestTokenCookieSuffix}"; }
         private string AuthenticationRequestTokenCookieSuffix => HttpContext.Session["AuthenticationRequestTokenCookieSuffix"].ToString();

@@ -67,10 +67,13 @@ $pagination-disabled-color: darken($gold, 25%) !default;
 @import 'bootstrap/bootstrap.scss';
 @import 'bootswatch/flatly/_bootswatch.scss';
 @import 'site-base.scss';
-.navbar-dark{
-    background-color: $black !important;
-    border-bottom: solid 5px $gold;
+header {
+    .navbar-dark {
+        background-color: $black !important;
+        border-bottom: solid 5px $gold;
+    }
 }
+
 .card-avatar-primary {
     background-color: $black !important;
     color: $gold !important;

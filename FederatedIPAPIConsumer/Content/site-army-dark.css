@@ -13502,8 +13502,12 @@ form[data-ajax="form"] {
 .navbar .nav-link, .navbar .navbar-text {
   padding: 0.5rem; }
 
-.navbar.navbar-dark {
+header .navbar.navbar-dark {
   border-bottom: solid 5px #fec325; }
+
+.navbar-dark .navbar-nav .nav-link,
+.navbar-dark .navbar-text {
+  color: rgba(255, 255, 255, 0.75); }
 
 .was-validated .form-control:valid:focus, .form-control.is-valid:focus {
   border-color: #20c997;

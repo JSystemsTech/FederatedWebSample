@@ -33,6 +33,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)Services\CssThemeService.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Services\FederatedApplicationIdentityService.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Services\ITokenHandlerService.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Services\ProviderAuthenticatonModeService.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Web\ApiControllerBase.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Web\AuthenticationMode.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Web\ApplicationAuthenticationAPI\ApplicationAuthenticationAPI.cs" />
@@ -51,10 +52,6 @@
     <Compile Include="$(MSBuildThisFileDirectory)Web\ApplicationAuthenticationAPI\ApplicationUser.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Web\FederatedWebController.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Web\IRedirectToActionController.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Web\SiteMap\SiteMapAction.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Web\SiteMap\SiteMapArea.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Web\SiteMap\SiteMapController.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Web\SiteMap\SiteMapFactory.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Web\TokenProviderAPI\TokenProviderAPIControllerBase.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Web\TokenProviderAPI\TokenProviderAuthenticationAttribute.cs" />
   </ItemGroup>

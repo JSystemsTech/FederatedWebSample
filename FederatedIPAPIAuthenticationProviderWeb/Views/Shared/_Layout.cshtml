@@ -105,8 +105,6 @@
     <script type="text/javascript">
         $.siteInit({
             authenticated: '@ViewBag.IsAuthenticated' === 'True',
-            siteMap: '@Html.Raw(ViewBag.SiteMap)',
-            sessionTimeout: parseFloat('@ViewBag.SessionTimeout')
         });
     </script>
     @RenderSection("scripts", required: false)

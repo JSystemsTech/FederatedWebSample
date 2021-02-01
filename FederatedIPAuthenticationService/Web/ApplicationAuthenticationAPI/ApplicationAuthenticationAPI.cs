@@ -1,5 +1,5 @@
 ﻿using FederatedAuthNAuthZ.Services;
-using FederatedIPAuthenticationService.Extensions;
+using FederatedAuthNAuthZ.Extensions;
 using ServiceProviderShared;
 using System.Net.Http.Headers;
 using System.Threading.Tasks;

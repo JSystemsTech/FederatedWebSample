@@ -1,7 +1,7 @@
 ﻿using FederatedAuthNAuthZ.Configuration;
 using FederatedAuthNAuthZ.Models;
 using FederatedAuthNAuthZ.Services;
-using FederatedIPAuthenticationService.Services;
+using FederatedAuthNAuthZ.Services;
 using ServiceProviderShared;
 using System;
 using System.Linq;
@@ -13,7 +13,7 @@ using System.Web;
 using System.Web.Http.Controllers;
 using System.Web.Http.Filters;
 
-namespace FederatedIPAuthenticationService.Web.TokenProviderAPI
+namespace FederatedAuthNAuthZ.Web.TokenProviderAPI
 {
     internal class TokenProviderAPIIdentity : IIdentity
     {

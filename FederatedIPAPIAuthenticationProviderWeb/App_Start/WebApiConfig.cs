@@ -1,5 +1,5 @@
 ﻿using FederatedIPAPIAuthenticationProviderWeb.Controllers;
-using FederatedIPAuthenticationService.Extensions;
+using FederatedAuthNAuthZ.Extensions;
 using System.Web.Http;
 
 namespace FederatedIPAPIAuthenticationProviderWeb.App_Start

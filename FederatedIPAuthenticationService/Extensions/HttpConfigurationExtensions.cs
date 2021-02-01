@@ -1,11 +1,11 @@
 ﻿using FederatedAuthNAuthZ.Web.ConsumerAPI;
-using FederatedIPAuthenticationService.Web.TokenProviderAPI;
+using FederatedAuthNAuthZ.Web.TokenProviderAPI;
 using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Web.Http;
 
-namespace FederatedIPAuthenticationService.Extensions
+namespace FederatedAuthNAuthZ.Extensions
 {
     public static class HttpConfigurationExtensions
     {

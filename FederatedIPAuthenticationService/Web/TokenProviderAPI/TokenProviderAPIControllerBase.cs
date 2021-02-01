@@ -1,7 +1,7 @@
 ﻿using FederatedAuthNAuthZ.Configuration;
 using FederatedAuthNAuthZ.Models;
 using FederatedAuthNAuthZ.Services;
-using FederatedIPAuthenticationService.Services;
+using FederatedAuthNAuthZ.Services;
 using Newtonsoft.Json;
 using ServiceProviderShared;
 using System;
@@ -12,7 +12,7 @@ using System.Text;
 using System.Web;
 using System.Web.Http;
 
-namespace FederatedIPAuthenticationService.Web.TokenProviderAPI
+namespace FederatedAuthNAuthZ.Web.TokenProviderAPI
 {
 
     public class TokenParameters

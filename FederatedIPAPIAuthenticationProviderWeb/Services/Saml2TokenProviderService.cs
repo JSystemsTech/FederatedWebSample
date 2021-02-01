@@ -1,7 +1,7 @@
 ﻿using FederatedAuthNAuthZ.Models;
 using FederatedAuthNAuthZ.Services;
 using FederatedIPAPIAuthenticationProviderWeb.Configuration;
-using FederatedIPAuthenticationService.Services;
+using FederatedAuthNAuthZ.Services;
 using Microsoft.IdentityModel.Tokens.Saml2;
 using System;
 using System.Collections.Generic;

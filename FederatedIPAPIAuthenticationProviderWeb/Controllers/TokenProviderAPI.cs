@@ -1,4 +1,4 @@
-﻿using FederatedIPAuthenticationService.Web.TokenProviderAPI;
+﻿using FederatedAuthNAuthZ.Web.TokenProviderAPI;
 
 namespace FederatedIPAPIAuthenticationProviderWeb.Controllers
 {

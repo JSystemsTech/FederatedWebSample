@@ -21,6 +21,10 @@
     <Compile Include="$(MSBuildThisFileDirectory)DomainLayer\Models\Data\TestUser.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)DomainLayer\Models\Data\WebAuthenticationCacheRecord.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Services\UserManagmentService.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)WebHelpers\SiteMap\SiteMapAction.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)WebHelpers\SiteMap\SiteMapArea.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)WebHelpers\SiteMap\SiteMapController.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)WebHelpers\SiteMap\SiteMapFactory.cs" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="$(MSBuildThisFileDirectory)DomainLayer\Models\Parameters\" />

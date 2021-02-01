@@ -2,7 +2,7 @@
 using FederatedAuthNAuthZ.Extensions;
 using FederatedAuthNAuthZ.Principal;
 using FederatedAuthNAuthZ.Services;
-using FederatedIPAuthenticationService.Services;
+using FederatedAuthNAuthZ.Services;
 using ServiceProviderShared;
 using System;
 using System.Collections.Generic;
@@ -39,8 +39,9 @@ namespace FederatedAuthNAuthZ.Attributes
             }
             else if (IsAuthenticatedRoute)
             {
-                OnAuthenticatedRequest(filterContext);
+                HandleGeneralRequest(filterContext, HandleLogoutRequest, HandleBadTokenRequest);
             }
+            HandleGeneralRequest(filterContext, fc => { },fc => { });
         }
         /* Process Logout Request
          * 1. If Logout Request does not contail a query parameter then redirect back to logout url with default query
@@ -66,27 +67,34 @@ namespace FederatedAuthNAuthZ.Attributes
             SetAuthenticationRequestTokenCookie(FederatedApplicationSettings.GetAuthRequestCookieName() + AuthenticationRequestTokenCookieSuffix, authenticationRequestToken, (DateTime)TokenProvider.GetExpirationDate(authenticationRequestToken));
         }
 
-        /* Process Authenticated Request
-         * 1. Get Auth Token value
-         * 2. Check if token was provided via a POST back option
-         * 3. If token is a valid token 
-         *      Create Identity, set Authenticated Principal, and update site auth cookie
-         * 4. Else Logout: 
-         *      a.If Request is an AJAX request then complete the request with a HttpUnauthorizedResult. 
-         *          client AJAX handler is responsible for triggering a logout request on the client page;
-         *      b. Else redirect the consuming app logout url. 
-         *          (This will begin a new authentication check process with the IsLogoutRequest set to true)
-         */
-        private void OnAuthenticatedRequest(AuthenticationContext filterContext)
+        private void HandleLogoutRequest(AuthenticationContext filterContext)
+        {
+            UriBuilder builder = new UriBuilder(LogoutUri);
+            filterContext.Result = new RedirectResult(builder.Uri.ToString());
+        }
+        private void HandleBadTokenRequest(AuthenticationContext filterContext)
+        {
+            if (Request.IsAjaxRequest())
+            {
+                filterContext.Result = new HttpUnauthorizedResult("Not Authenticated");
+            }
+            else
+            {
+                FederatedApplicationIdentityService.OnLogout(HttpContext.User.Identity);
+                HandleLogoutRequest(filterContext);
+            }
+        }
+        private void HandleGeneralRequest(AuthenticationContext filterContext, Action<AuthenticationContext> handleLogoutRequest, Action<AuthenticationContext> handleBadTokenRequest)
         {
             string token = GetAuthenticationCookieValue();
-            if (!string.IsNullOrWhiteSpace(token) && 
-                TokenProvider.IsValidToken(token) && 
-                TokenProvider.GetTokenClaims(token) is IDictionary<string,IEnumerable<string>> tokenClaims &&
+            if (!string.IsNullOrWhiteSpace(token) &&
+                TokenProvider.IsValidToken(token) &&
+                TokenProvider.GetTokenClaims(token) is IDictionary<string, IEnumerable<string>> tokenClaims &&
                 FederatedApplicationSettings.ValidateConsumerTokenClaims(tokenClaims)
                 )
             {
-                try {
+                try
+                {
                     IIdentity identity = FederatedApplicationIdentityService.CreateAuthenticatedPrincipalIdentity(tokenClaims);
                     string updatedToken = TokenProvider.RenewToken(token, (claims) =>
                     {
@@ -101,27 +109,15 @@ namespace FederatedAuthNAuthZ.Attributes
                 }
                 catch
                 {
-                    UriBuilder builder = new UriBuilder(LogoutUri);
-                    filterContext.Result = new RedirectResult(builder.Uri.ToString());
+                    handleLogoutRequest(filterContext);
                 }
-                
+
             }
             else
             {
-                if (Request.IsAjaxRequest())
-                {
-                    filterContext.Result = new HttpUnauthorizedResult("Not Authenticated");
-                }
-                else
-                {
-                    FederatedApplicationIdentityService.OnLogout(HttpContext.User.Identity);
-                    UriBuilder builder = new UriBuilder(LogoutUri);
-                    filterContext.Result = new RedirectResult(builder.Uri.ToString());
-                }
+                handleBadTokenRequest(filterContext);
             }
         }
-
-
         private string GetAuthenticationCookieValue() => GetAuthenticationCookie() is HttpCookie cookie ? cookie.Value : null;
         private HttpCookie GetAuthenticationCookie() => HasValidHttpCookie(AuthenticationCookieName) ? GetHttpCookie(AuthenticationCookieName) : null;
         private void RemoveAuthenticationCookie() => RemoveHttpCookie(GetAuthenticationCookie());

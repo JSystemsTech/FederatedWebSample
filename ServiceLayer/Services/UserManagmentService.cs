@@ -20,12 +20,12 @@ namespace ServiceLayer.Services
     {
 
         private IDomainFacade DomainFacade => Services.Get<IDomainFacade>();
-        private IEncryptionService EncryptionService => Services.Get<IEncryptionService>();
+        //private IEncryptionService EncryptionService => Services.Get<IEncryptionService>();
         protected override void Init() { }
 
-        public IEnumerable<ApplicationUser> GetTestUsers() => DomainFacade.GetTestUsers().Select(m=> new ApplicationUser(EncryptionService.DateSaltEncrypt(m.Guid.ToString()), $"{m.FirstName} {m.MiddleInitial} {m.LastName}", m.Roles));
-        private Guid? DecryptUserGuid(string userId) => EncryptionService.DateSaltDecrypt(userId, true) is string userGuidStr && Guid.TryParse(userGuidStr, out Guid guid) ? guid : default;
-        public ApplicationUser GetTestUser(string userId) => GetTestUsers() is IEnumerable<ApplicationUser> testUsers && testUsers.Any(u=> DecryptUserGuid(u.UserId) == DecryptUserGuid(userId)) ? testUsers.FirstOrDefault(u => DecryptUserGuid(u.UserId) == DecryptUserGuid(userId)) : null;
+        public IEnumerable<ApplicationUser> GetTestUsers() => DomainFacade.GetTestUsers().Select(m=> new ApplicationUser(m.Guid.ToString(), $"{m.FirstName} {m.MiddleInitial} {m.LastName}", m.Roles));
+        //private Guid? DecryptUserGuid(string userId) => EncryptionService.DateSaltDecrypt(userId, true) is string userGuidStr && Guid.TryParse(userGuidStr, out Guid guid) ? guid : default;
+        public ApplicationUser GetTestUser(string userId) => GetTestUsers() is IEnumerable<ApplicationUser> testUsers && testUsers.Any(u=> u.UserId == userId) ? testUsers.FirstOrDefault(u => u.UserId == userId) : null;
         public ApplicationUser GetUser(string userId) => GetTestUser(userId); /*Make call to database to get user*/
         public IEnumerable<string> GetUserRoles(string userId) => GetUser(userId) is ApplicationUser user ? user.Roles: new string[0]; /*Make call to database to get user*/
         public ApplicationUser ResolveUser(string email, string password) => GetTestUsers().First(); /*Make call to database to get user*/

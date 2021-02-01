@@ -13304,7 +13304,7 @@ form[data-ajax="form"] {
       .custom-breadcrumb .custom-breadcrumb-item:hover a {
         color: #fff; }
 
-.navbar-dark {
+header .navbar-dark {
   background-color: #000 !important;
   border-bottom: solid 5px #fec325; }
 

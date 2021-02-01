@@ -1,148 +1,33 @@
 ﻿@model FederatedIPAPIAuthenticationProviderWeb.Models.LoginVM
-@using FederatedAuthNAuthZ.Configuration
-@using HtmlExtensions.Bootstrap4FormControl
-@using FederatedAuthNAuthZ.Web
-@{
-    IFederatedApplicationSettings FederatedApplicationSettings = ViewBag.FederatedApplicationSettings as IFederatedApplicationSettings;
-    IFederatedApplicationSettings ConsumingApplicationFederatedApplicationSettings = ViewBag.ConsumingApplicationFederatedApplicationSettings as IFederatedApplicationSettings;
-    string controller = ConsumingApplicationFederatedApplicationSettings.SiteId;
+
+@foreach (var authMode in Model.FormViewModes)
+{
+    Html.RenderAction(authMode.FormView);
 }
 
-@if (Model.ConsumingApplicationFederatedApplicationSettings.AuthenticationModes.Contains(AuthenticationMode.CAC))
-{
-    using (Html.BeginForm("Login", "Home", new { Mode = AuthenticationMode.CAC }, FormMethod.Post, new { @id = "LoginFormCAC" }))
+@*else if (Model.ConsumingApplicationFederatedApplicationSettings.AuthenticationModes.Contains(AuthenticationMode.Email))
     {
-        @Html.AntiForgeryToken()
-        <div class="form-row mb-2">
-            <div class="col">
-                <button type="submit" class="btn btn-primary w-100" data-toggle="popover" title="Common Access Card" data-content="Login to @(Model.ConsumingApplicationFederatedApplicationSettings.SiteName) with Common Access Card (CAC)" data-trigger="hover" data-container="body" data-placement="top">
-                    <span class="ml-1"><i class="fa fa-sim-card"></i></span>
-                    <span class="ml-1">CAC Login</span>
-                </button>
-            </div>
-        </div>
-    }
-}
-
-@if (Model.ConsumingApplicationFederatedApplicationSettings.AuthenticationModes.Contains(AuthenticationMode.Test) &&
-    !FederatedApplicationSettings.IsProductionEnvironment() &&
-    !ConsumingApplicationFederatedApplicationSettings.IsProductionEnvironment() &&
-    Model.TestUsers != null &&
-    Model.TestUsers.Count() > 0)
-{
-    using (Html.BeginForm("Login", "Home", new { Mode = AuthenticationMode.Test }, FormMethod.Post, new { @id = "LoginFormTest" }))
-    {
-        @Html.AntiForgeryToken()
-        <div class="form-row">
-            <div class="col">
-                <button class="btn btn-secondary w-100" type="button" data-toggle="modal" data-target="#TestUsersModal">
-                    <span class="ml-1"><i class="fa fa-user-alt"></i></span>
-                    <span class="ml-1">Test Login</span>
-                </button>
-            </div>
-        </div>
-        <div class="modal fade text-left" id="TestUsersModal" data-backdrop="static" data-keyboard="false" tabindex="-1" aria-labelledby="TestUsersModalLabel">
-            <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable modal-lg">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h5 class="modal-title" id="TestUsersModalLabel">Test Users</h5>
-                        <button type="button" class="btn btn-link p-0" data-dismiss="modal" aria-label="Close" data-toggle="tooltip" title="Close Test Users Modal">
-                            <span aria-hidden="true"><i class="fa fa-times"></i></span>
-                        </button>
-                    </div>
-                    <div class="modal-body">
-                        <table class="table table-bordered table-striped shadow-border-solid-primary" id="TestUsersTable">
-                            <thead>
-                                <tr>
-                                    <th>Name</th>
-                                    <th>Roles</th>
-                                    <th>Login</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @foreach (var user in Model.TestUsers)
-                                {
-                                    <tr>
-                                        <td>@user.Name</td>
-                                        <td>
-                                            @foreach (string role in user.Roles)
-                                            {
-                                                <span class="badge badge-pill badge-primary mr-1 text-capitalize">@role.ToLower()</span>
-                                            }
-                                        </td>
-                                        <td>
-                                            <button class="btn btn-primary btn-sm w-100" type="submit" data-toggle="tooltip" formaction="@Url.Action("Login", "Home", new { Mode=AuthenticationMode.Test, TestUserId = user.UserId})" title="Login with test user @(user.Name)">Login</button>
-                                        </td>
-                                    </tr>
-                                }
-                            </tbody>
-                        </table>
-                    </div>
+        using (Html.BeginForm("Login", "Home", new { Mode = AuthenticationMode.Email }, FormMethod.Post, new { @id = "LoginFormEmail" }))
+        {
+            @Html.AntiForgeryToken()
+            <div class="form-row">
+                <div class="col-12 text-left">
+                    @Html.BootstrapEmailInputFormControlFor(m => m.Email, new { required = true }).AddLabelAndValidation()
                 </div>
             </div>
-        </div>
-
-        
-        @section scripts{
-            <script type="text/javascript">
-                $('#TestUsersTable').DataTable({
-                    drawCallback: function (settings) {
-                        $('#TestUsersTable tbody>tr>td>[data-toggle="tooltip"]').tooltip();
-                    }
-                });
-            </script>
+            <div class="form-row">
+                <div class="col-12 text-left">
+                    @Html.BootstrapPasswordInputFormControlFor(m => m.Password, new { required = true }).AddLabelAndValidation()
+                </div>
+            </div>
+            <div class="form-row mt-1">
+                <div class="col-12 text-left">
+                    <button type="submit" class="btn btn-primary w-100" data-toggle="popover" title="Login" data-content="Login to @(ConsumingApplicationFederatedApplicationSettings.SiteName) with email and password" data-trigger="hover" data-container="body" data-placement="top">
+                        <span class="ml-1"><i class="fa fa-sign-in-alt"></i></span>
+                        <span class="ml-1">Login</span>
+                    </button>
+                </div>
+            </div>
         }
-    }
-}
-
-@if (Model.ConsumingApplicationFederatedApplicationSettings.AuthenticationModes.Contains(AuthenticationMode.Basic))
-{
-    using (Html.BeginForm("Login", "Home", new { Mode = AuthenticationMode.Basic }, FormMethod.Post, new { @id = "LoginFormBasic" }))
-    {
-        @Html.AntiForgeryToken()
-        <div class="form-row">
-            <div class="col-12 text-left">
-                @Html.BootstrapTextInputFormControlFor(m => m.Username).AddLabelAndValidation()
-            </div>
-        </div>
-        <div class="form-row">
-            <div class="col-12 text-left">
-                @Html.BootstrapPasswordInputFormControlFor(m => m.Password).AddLabelAndValidation()
-            </div>
-        </div>
-        <div class="form-row mt-1">
-            <div class="col-12 text-left">
-                <button type="submit" class="btn btn-primary w-100" data-toggle="popover" title="Login" data-content="Login to @(ConsumingApplicationFederatedApplicationSettings.SiteName) with username and password" data-trigger="hover" data-container="body" data-placement="top">
-                    <span class="ml-1"><i class="fa fa-sign-in-alt"></i></span>
-                    <span class="ml-1">Login</span>
-                </button>
-            </div>
-        </div>
-    }
-}
-else if (Model.ConsumingApplicationFederatedApplicationSettings.AuthenticationModes.Contains(AuthenticationMode.Email))
-{
-    using (Html.BeginForm("Login", "Home", new { Mode = AuthenticationMode.Email }, FormMethod.Post, new { @id = "LoginFormEmail" }))
-    {
-        @Html.AntiForgeryToken()
-        <div class="form-row">
-            <div class="col-12 text-left">
-                @Html.BootstrapEmailInputFormControlFor(m => m.Email, new { required = true }).AddLabelAndValidation()
-            </div>
-        </div>
-        <div class="form-row">
-            <div class="col-12 text-left">
-                @Html.BootstrapPasswordInputFormControlFor(m => m.Password, new { required = true }).AddLabelAndValidation()
-            </div>
-        </div>
-        <div class="form-row mt-1">
-            <div class="col-12 text-left">
-                <button type="submit" class="btn btn-primary w-100" data-toggle="popover" title="Login" data-content="Login to @(ConsumingApplicationFederatedApplicationSettings.SiteName) with email and password" data-trigger="hover" data-container="body" data-placement="top">
-                    <span class="ml-1"><i class="fa fa-sign-in-alt"></i></span>
-                    <span class="ml-1">Login</span>
-                </button>
-            </div>
-        </div>
-    }
-}
+    }*@
 

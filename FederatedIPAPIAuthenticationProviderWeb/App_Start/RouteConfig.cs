@@ -15,8 +15,8 @@ namespace FederatedIPAPIAuthenticationProviderWeb
 
             routes.MapRoute(
                 "ProviderInternal",                                              // Route name
-                "Provider/{controller}/{action}/{id}",                           // URL with parameters
-                new { controller = "SessionEnd", action = "Index", id = "" }  // Parameter defaults
+                "Provider/{action}/{id}",                           // URL with parameters
+                new { controller = "Provider", action = "Index", id = "" }  // Parameter defaults
             );
             routes.MapRoute(
                 "ConsumingApp",                                              // Route name

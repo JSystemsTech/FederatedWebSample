@@ -1,5 +1,5 @@
 ﻿using FederatedAuthNAuthZ.Configuration;
-using FederatedIPAuthenticationService.Services;
+using FederatedAuthNAuthZ.Services;
 using ServiceProvider.ServiceProvider;
 using ServiceProvider.Services;
 
@@ -58,7 +58,11 @@ namespace FederatedAuthNAuthZ.Services
             where TFederatedApplicationIdentityService : FederatedApplicationIdentityService
         {
             services.AddService<IFederatedApplicationIdentityService, TFederatedApplicationIdentityService>();
-        }        
-
+        }
+        public static void AddProviderAuthenticationModeService<TProviderAuthenticationModeService>(this IServiceCollection services)
+            where TProviderAuthenticationModeService : ProviderAuthenticationModeService
+        {
+            services.AddService<IProviderAuthenticationModeService, TProviderAuthenticationModeService>();
+        }
     }
 }

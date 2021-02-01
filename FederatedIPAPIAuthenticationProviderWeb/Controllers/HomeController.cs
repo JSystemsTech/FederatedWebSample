@@ -1,17 +1,13 @@
 ﻿using FederatedAuthNAuthZ.Attributes;
 using FederatedAuthNAuthZ.Attributes.Common;
-using FederatedAuthNAuthZ.Configuration;
 using FederatedAuthNAuthZ.Services;
-using FederatedAuthNAuthZ.Web;
 using FederatedAuthNAuthZ.Web.ConsumerAPI;
 using FederatedIPAPIAuthenticationProviderWeb.Models;
-using Newtonsoft.Json;
-using ServiceLayer.DomainLayer.Models.Data;
 using ServiceProvider.Configuration;
 using ServiceProviderShared;
 using System;
+using System.Collections.Generic;
 using System.Linq;
-using System.Net.Mail;
 using System.Web.Mvc;
 
 namespace FederatedIPAPIAuthenticationProviderWeb.Controllers
@@ -22,11 +18,10 @@ namespace FederatedIPAPIAuthenticationProviderWeb.Controllers
     [NoCache]
     public class HomeController : BaseController
     {
-        protected override string GetDeafaultNamespace() => typeof(HomeController).Namespace;
         protected IApplicationSettings ApplicationSettings => Services.Get<IApplicationSettings>();
         
         private ICssThemeService CssThemeService => Services.Get<ICssThemeService>();
-
+        
         protected override void OnActionExecuting(ActionExecutingContext filterContext)
         {
             base.OnActionExecuting(filterContext);
@@ -38,10 +33,10 @@ namespace FederatedIPAPIAuthenticationProviderWeb.Controllers
             bool.TryParse(AuthenticationRequestClaims["AcceptedCookies"].FirstOrDefault(), out bool acceptedCookies) ? acceptedCookies : false;
 
         private LoginVM GetSessionLoginVM() {
+            IEnumerable<IAuthenticationMode> FormViewModes = 
+                ProviderAuthenticationModeService.GetFormViewModes(ApplicationAuthenticationAPI, ConsumingApplicationFederatedApplicationSettings.AuthenticationModes);
 
-            var vm = new LoginVM() { ConsumingApplicationFederatedApplicationSettings = ConsumingApplicationFederatedApplicationSettings, TestUsers = ConsumingApplicationTestUsers };
-
-            return vm;
+            return new LoginVM() { FormViewModes= FormViewModes };
         }
         
         public ActionResult Index()
@@ -53,14 +48,60 @@ namespace FederatedIPAPIAuthenticationProviderWeb.Controllers
             {
                 return RedirectToAction("PrivacyPolicy");
             }
+            IEnumerable<IAuthenticationMode> RedirectOnlyModes = ProviderAuthenticationModeService.GetRedirectOnlyModes(ApplicationAuthenticationAPI, ConsumingApplicationFederatedApplicationSettings.AuthenticationModes);
+            
+            if (RedirectOnlyModes.FirstOrDefault() is IAuthenticationMode externalAuth)
+            {
+                RemoveAuthenticationRequestCookie();                
+                string url = BeginGetExternalAuthenticationPostbackUrl(ProviderAuthenticationModeService.GetMode(externalAuth.Mode).RedirectUrl, externalAuth.Mode);
+                return Redirect(url);
+            }
             return View(GetSessionLoginVM()); 
         }
+
+        [ChildActionOnly]
+        public PartialViewResult CACForm()
+        {
+            return PartialView(new LoginModeFormVM() { Mode = "CAC" });
+        }
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public ActionResult CACForm(LoginModeFormVM vm)
+        {
+            vm.Validate(ModelState);
+            if (ModelState.IsValid)
+            {
+                RemoveAuthenticationRequestCookie();
+                string url = BeginGetExternalAuthenticationPostbackUrl(ProviderAuthenticationModeService.GetMode(vm.Mode).RedirectUrl, vm.Mode);
+                return Redirect(url);
+            }
+            return View("Index", GetSessionLoginVM());
+        }
+
+        [ChildActionOnly]
+        public PartialViewResult TestUsersForm()
+        {
+            return PartialView(new TestUserVM() { Mode = "Test", TestUsers = ConsumingApplicationTestUsers });
+        }
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public ActionResult TestUsersForm(TestUserVM vm)
+        {
+            vm.Validate(ModelState);
+            if (ModelState.IsValid)
+            {
+                return Authenticate(vm.Mode, vm, ReturnToIndex);
+            }
+            return ReturnToIndex();
+        }
+
+
 
         public ActionResult PrivacyPolicy()
         {
             if (!ConsumingApplicationFederatedApplicationSettings.RequirePrivacyPolicy)
             {
-                return RedirectToAction("Index");
+                return ReturnToIndex();
             }
             ViewBag.DisplayAsWarning = true;
             ViewBag.MainIcon = "fa-exclamation-triangle";
@@ -80,7 +121,7 @@ namespace FederatedIPAPIAuthenticationProviderWeb.Controllers
                 clms.Add("AcknowlagedPrivacyNotice", new string[] { $"{true}" });
             });
             UpdateAuthenticationRequestTokenCookie(token);
-            return RedirectToAction("Index");
+            return ReturnToIndex();
         }
         [HttpPost]
         [ValidateAntiForgeryToken]
@@ -90,41 +131,17 @@ namespace FederatedIPAPIAuthenticationProviderWeb.Controllers
                 clms.Add("AcceptedCookies", new string[] { $"{true}" });
             });
             UpdateAuthenticationRequestTokenCookie(token);
-            return RedirectToAction("Index");
+            return ReturnToIndex();
         }
 
 
         [HttpPost]
-        public override ActionResult ExternalAuthenticationPostback(string token) => Authenticate(GetSessionLoginVM(), token);
-        private ActionResult Authenticate(LoginVM vm, string externalAuthToken = null)
+        public override ActionResult ExternalAuthenticationPostback(string token, string mode) => Authenticate(mode, token, ReturnToIndex);
+        private ActionResult ReturnToIndex() => RedirectToAction("Index");
+        private ActionResult Authenticate(string mode, object values, Func<ActionResult> callback)
         {
-            vm.ConsumingApplicationFederatedApplicationSettings = ConsumingApplicationFederatedApplicationSettings;
-
-            ApplicationAuthenticationApiAuthenticationResponse response;
-            if (!string.IsNullOrWhiteSpace(externalAuthToken))
-            {
-                ICACUser UserData = AuthenticationProviderDomainFacade.GetCACLoginRequestUser(externalAuthToken);
-                response = ApplicationAuthenticationAPI.Authenticate(new
-                {
-                    vm.Username,
-                    vm.Password,
-                    vm.Email,
-                    vm.TestUserId,
-                    UserData = JsonConvert.SerializeObject(UserData)//presserialize before API serializes to keep it as a string
-                });
-            }
-            else
-            {                
-                response = ApplicationAuthenticationAPI.Authenticate(new
-                {
-                    vm.Username,
-                    vm.Password,
-                    vm.Email,
-                    vm.TestUserId
-                });
-            }
-            
-            
+            ApplicationAuthenticationApiAuthenticationResponse response = ProviderAuthenticationModeService.Authenticate(mode, ApplicationAuthenticationAPI, values);
+            var vm = GetSessionLoginVM();
             if (TryValidateAuthentication(response))
             {
                 vm.OnAuthenticationMessage = response.Message;
@@ -132,100 +149,8 @@ namespace FederatedIPAPIAuthenticationProviderWeb.Controllers
                 ViewBag.MainIcon = "fa-user-check";
                 return View("ExternalAuthenticationPostback", vm);
             }
-            if(vm.Mode == AuthenticationMode.Basic)
-            {
-                ModelState.AddModelError("Username", "Invalid Username or password");
-                ModelState.AddModelError("Password", "Invalid Username or password");
-            }
-            else if(vm.Mode == AuthenticationMode.Email)
-            {
-                ModelState.AddModelError("Email", "Invalid Email or password");
-                ModelState.AddModelError("Password", "Invalid Email or password");
-            }
-            vm.TestUsers = ConsumingApplicationTestUsers;
-            return View("Index",vm);
+            return callback();
         }
-
-
-        private void ValidateLoginModel(LoginVM vm)
-        {
-            if(vm.Mode == AuthenticationMode.Test && (FederatedApplicationSettings.IsProductionEnvironment() || ConsumingApplicationFederatedApplicationSettings.IsProductionEnvironment()))
-            {
-                ModelState.AddModelError("Mode", $"Cannot Use Authenticate with test users in '{FederatedApplicationSettings.SiteEnvironment}' Environment");
-            }
-            else if (vm.Mode == AuthenticationMode.Basic)
-            {
-                if (string.IsNullOrEmpty(vm.Username))
-                {
-                    ModelState.AddModelError("Username", "Username is Required");
-                }
-                if (string.IsNullOrEmpty(vm.Password))
-                {
-                    ModelState.AddModelError("Password", "Password is Required");
-                }
-            }else if (vm.Mode == AuthenticationMode.Email)
-            {
-                if (string.IsNullOrEmpty(vm.Email))
-                {
-                    ModelState.AddModelError("Email", "Email is Required");
-                }
-                try
-                {
-                    var ValidateEmail = new MailAddress(vm.Email);
-                }
-                catch
-                {
-                    ModelState.AddModelError("Email", "Invalid Email");
-                }
-                if (string.IsNullOrEmpty(vm.Password))
-                {
-                    ModelState.AddModelError("Password", "Password is Required");
-                }
-            }
-        }
-
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public ActionResult Login(LoginVM vm)
-        {
-            ValidateLoginModel(vm);
-            if (!ModelState.IsValid)
-            {
-                vm.ConsumingApplicationFederatedApplicationSettings = ConsumingApplicationFederatedApplicationSettings;
-                vm.TestUsers = ConsumingApplicationTestUsers;
-                return View("Index", vm);
-            }
-            if(vm.Mode == AuthenticationMode.CAC)
-            {
-                RemoveAuthenticationRequestCookie();
-                string url = BeginGetExternalAuthenticationPostbackUrl();
-                try
-                {
-                    return Redirect(url);
-                }
-                catch(Exception e)
-                {
-                    return View("Index", vm);
-                }
-                
-            }
-            else
-            {
-                return Authenticate(vm);
-            }
-            
-        }
-
-        
-    }
-
-    public class SessionEndController : Controller {
-        protected override void OnActionExecuting(ActionExecutingContext filterContext)
-        {
-            base.OnActionExecuting(filterContext);
-            ViewBag.ThemeBundle = ServiceManager.GetService<ICssThemeService>().GetTheme("Flatly").Path;
-        }
-        public ActionResult Index()=> View();
     }
 
 }

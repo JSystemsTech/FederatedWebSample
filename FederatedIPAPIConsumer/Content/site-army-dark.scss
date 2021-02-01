@@ -69,11 +69,17 @@ $custom-breadcrumb-bg: $gray-800 !default;
         padding: 0.5rem;
     }
 
-    &.navbar-dark {
+    
+}
+header {
+    .navbar.navbar-dark {
         border-bottom: solid 5px $gold;
     }
 }
-
+.navbar-dark .navbar-nav .nav-link,
+.navbar-dark .navbar-text {
+    color: rgba(255,255,255,.75);
+}
 @mixin form-validation-state-overrrides($state, $color, $icon) {
     .form-control {
         @include form-validation-state-selector($state) {

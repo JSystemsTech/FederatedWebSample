@@ -1,0 +1,71 @@
+﻿@model FederatedIPAPIAuthenticationProviderWeb.Models.TestUserVM
+@using FederatedAuthNAuthZ.Configuration
+@{
+    IFederatedApplicationSettings FederatedApplicationSettings = ViewBag.FederatedApplicationSettings as IFederatedApplicationSettings;
+    IFederatedApplicationSettings ConsumingApplicationFederatedApplicationSettings = ViewBag.ConsumingApplicationFederatedApplicationSettings as IFederatedApplicationSettings;
+}
+
+<div class="row">
+    <div class="col">
+        <button class="btn btn-secondary w-100" type="button" data-toggle="modal" data-target="#TestUsersModal">
+            <span class="ml-1"><i class="fa fa-user-alt"></i></span>
+            <span class="ml-1">Test Login</span>
+        </button>
+    </div>
+</div>
+<div class="modal fade text-left" id="TestUsersModal" data-backdrop="static" data-keyboard="false" tabindex="-1" aria-labelledby="TestUsersModalLabel">
+    <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="TestUsersModalLabel">Test Users</h5>
+                <button type="button" class="btn btn-link p-0" data-dismiss="modal" aria-label="Close" data-toggle="tooltip" title="Close Test Users Modal">
+                    <span aria-hidden="true"><i class="fa fa-times"></i></span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <table class="table table-bordered table-striped shadow-border-solid-primary" id="TestUsersTable">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Roles</th>
+                            <th>Login</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var user in Model.TestUsers)
+                        {
+                            <tr>
+                                <td>@user.Name</td>
+                                <td>
+                                    @foreach (string role in user.Roles)
+                                    {
+                                        <span class="badge badge-pill badge-primary mr-1 text-capitalize">@role.ToLower()</span>
+                                    }
+                                </td>
+                                <td>
+                                    @using (Html.BeginForm("TestUsersForm", "Home", FormMethod.Post))
+                                    {
+                                        @Html.AntiForgeryToken()
+                                        @Html.HiddenFor(m => m.Mode, new { @id = $"Mode{user.UserId}" })
+                                        @Html.Hidden("TestUserId", user.UserId, new { @id=$"TestUserId{user.UserId}"})
+                                        <button class="btn btn-primary btn-sm w-100" type="submit" data-toggle="tooltip" title="Login with test user @(user.Name)">Login</button>
+                                    }
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+@section scripts {
+    <script type="text/javascript">
+        $('#TestUsersTable').DataTable({
+            drawCallback: function (settings) {
+                $('#TestUsersTable tbody>tr>td>[data-toggle="tooltip"]').tooltip();
+            }
+        });
+    </script>
+}
+

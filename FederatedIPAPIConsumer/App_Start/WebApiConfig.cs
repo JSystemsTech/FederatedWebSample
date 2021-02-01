@@ -1,5 +1,5 @@
 ﻿using FederatedIPAPIConsumer.Controllers.AuthenticationApi;
-using FederatedIPAuthenticationService.Extensions;
+using FederatedAuthNAuthZ.Extensions;
 using System.Web.Http;
 
 namespace FederatedIPAPIConsumer.App_Start

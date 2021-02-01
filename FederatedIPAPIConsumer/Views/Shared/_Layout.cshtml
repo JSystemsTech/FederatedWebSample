@@ -55,7 +55,7 @@
 
                 <div class="collapse navbar-collapse font-weight-light" id="navbarSupportedContent">
 
-                    @if (ViewBag.IsAuthenticated)
+                    @if (User.Identity.IsAuthenticated)
                     {
                         <ul class="navbar-nav mr-auto">
                             <li class="nav-item">
@@ -112,18 +112,43 @@
             </div>
         </main>
         <footer class="text-center container-fluid border-top">
+
             <div class="row">
-                <div class="col align-self-center py-2">
-                    <p class="mb-0">@FederatedApplicationSettings.Display()</p>
+                <div class="col align-self-center p-0">
+                    <nav class="navbar navbar-expand @(isDarkMode ? "navbar-dark bg-primary": "navbar-light bg-light") py-0 mx-auto border-0">
+                        <ul class="navbar-nav mx-auto pb-0">
+                            <li class="nav-item">
+                                @Html.ActionLink("Cookie Policy", "CookiePolicy", "Home", new { }, new { @class = "nav-link pb-0 pt-1" })
+                            </li>
+                            <li class="nav-item">
+                                @Html.ActionLink("Privacy Policy", "PrivacyPolicy", "Home", new { }, new { @class = "nav-link pb-0 pt-1" })
+                            </li>
+                        </ul>
+                    </nav>
                 </div>
             </div>
-            <div class="row @(FederatedApplicationSettings.NetworkIs("Classified") ? "bg-text-danger": "bg-text-success")" style="font-size:0.7em;">
-                <div class="col align-self-center py-0">
-                    <div class="mb-0 text-uppercase">@FederatedApplicationSettings.GetNetworkDisplay()</div>
-                    @if (FederatedApplicationSettings.HasNetworkDescription())
-                    {
-                        <div class="mb-0"><small>@FederatedApplicationSettings.SiteNetworkDescription</small></div>
-                    }
+            <div class="row">
+                <div class="col align-self-center p-0">
+                    <nav class="navbar navbar-expand @(isDarkMode ? "navbar-dark bg-primary": "navbar-light bg-light") py-0 border-0">
+                        <span class="navbar-text py-0 mx-auto">
+                            <small>@FederatedApplicationSettings.Display()</small>
+                        </span>
+                    </nav>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col align-self-center p-0">
+                    <nav class="navbar navbar-dark @(FederatedApplicationSettings.NetworkIs("Classified") ? "bg-danger": "bg-success") py-0">
+                        <div class="navbar-text text-uppercase py-1">
+                            @FederatedApplicationSettings.GetNetworkDisplay()
+                        </div>
+                        @if (FederatedApplicationSettings.HasNetworkDescription())
+                        {
+                            <div class="navbar-text py-1">
+                                <small>@FederatedApplicationSettings.SiteNetworkDescription</small>
+                            </div>
+                        }
+                    </nav>
                 </div>
             </div>
         </footer>

@@ -1,9 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using System.Web.Mvc;
+﻿using System.Web.Mvc;
 
-namespace FederatedAuthNAuthZ.Web.SiteMap
+namespace ServiceLayer.WebHelpers.SiteMap
 {
     internal class SiteMapAction
     {

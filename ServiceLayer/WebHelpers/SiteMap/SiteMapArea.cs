@@ -1,10 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Dynamic;
 using System.Linq;
-using System.Text;
 
-namespace FederatedAuthNAuthZ.Web.SiteMap
+namespace ServiceLayer.WebHelpers.SiteMap
 {
     internal enum SiteMapAreaType
     {

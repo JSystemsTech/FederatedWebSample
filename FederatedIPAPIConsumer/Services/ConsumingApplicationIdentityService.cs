@@ -1,7 +1,7 @@
 ﻿using FederatedAuthNAuthZ.Attributes.Common;
 using FederatedAuthNAuthZ.Extensions;
 using FederatedAuthNAuthZ.Web.ConsumerAPI;
-using FederatedIPAuthenticationService.Services;
+using FederatedAuthNAuthZ.Services;
 using ServiceLayer.Services;
 using System;
 using System.Collections.Generic;

@@ -1,0 +1,19 @@
+﻿@model FederatedIPAPIAuthenticationProviderWeb.Models.LoginModeFormVM
+@using FederatedAuthNAuthZ.Configuration
+@{
+    IFederatedApplicationSettings FederatedApplicationSettings = ViewBag.FederatedApplicationSettings as IFederatedApplicationSettings;
+    IFederatedApplicationSettings ConsumingApplicationFederatedApplicationSettings = ViewBag.ConsumingApplicationFederatedApplicationSettings as IFederatedApplicationSettings;
+}
+@using (Html.BeginForm("CACForm", "Home", FormMethod.Post, new { @id = "LoginFormCAC" }))
+{
+    @Html.AntiForgeryToken()
+    @Html.HiddenFor(m=>m.Mode)
+    <div class="form-row mb-2">
+        <div class="col">
+            <button type="submit" class="btn btn-primary w-100" data-toggle="popover" title="Common Access Card" data-content="Login to @(ConsumingApplicationFederatedApplicationSettings.SiteName) with Common Access Card (CAC)" data-trigger="hover" data-container="body" data-placement="top">
+                <span class="ml-1"><i class="fa fa-sim-card"></i></span>
+                <span class="ml-1">CAC Login</span>
+            </button>
+        </div>
+    </div>
+}

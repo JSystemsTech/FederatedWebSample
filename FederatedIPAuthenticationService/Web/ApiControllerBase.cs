@@ -6,7 +6,7 @@ using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Web.Http;
 
-namespace FederatedIPAuthenticationService.Web
+namespace FederatedAuthNAuthZ.Web
 {
     public class EncryptedPostBody
     {

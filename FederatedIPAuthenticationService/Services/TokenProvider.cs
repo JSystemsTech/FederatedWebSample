@@ -1,6 +1,6 @@
 ﻿using FederatedAuthNAuthZ.Configuration;
 using FederatedAuthNAuthZ.Models;
-using FederatedIPAuthenticationService.Extensions;
+using FederatedAuthNAuthZ.Extensions;
 using ServiceProvider.Services;
 using System;
 using System.Collections.Generic;

@@ -8,15 +8,17 @@ using System.Web.Mvc;
 
 namespace FederatedIPAPIAuthenticationProviderWeb.Controllers
 {
-    public class FakeCACServiceController : Controller
+    public class ProviderController : Controller
     {
         protected override void OnActionExecuting(ActionExecutingContext filterContext)
         {
             base.OnActionExecuting(filterContext);
             ViewBag.ThemeBundle = ServiceManager.GetService<ICssThemeService>().GetTheme("Flatly").Path;
         }
+        public ActionResult SessionEnd() => View();
+
         [HttpGet]
-        public ActionResult Index(string returnUrl)
+        public ActionResult FakeCACService(string returnUrl)
         {
             //var response = MailService.SendMail((msg, content) =>
             //{
