@@ -42,15 +42,14 @@ namespace FederatedAuthNAuthZ.Web.ConsumerAPI
         private ApplicationAuthenticationApiApiClient Client { get; set; }
         private IApiEndpoint ApplicationSettingsEndpoint { get; set; }
         private IApiEndpoint AuthenticateEndpoint { get; set; }
-        private IEncryptionService EncryptionService => ServiceManager.GetService<IEncryptionService>();
         public ApplicationAuthenticationAPI(string url)
         {
             Client = new ApplicationAuthenticationApiApiClient(url);
             ApplicationSettingsEndpoint = Client.CreateEndpoint("ApplicationSettings".GetApplicationAuthenticationAPIEndpointName());
             AuthenticateEndpoint = Client.CreateEndpoint("Authentication".GetApplicationAuthenticationAPIEndpointName());
 
-            Client.EncryptionHandler = str => EncryptionService.DateSaltEncrypt(str);
-            Client.DecryptionHandler = str => EncryptionService.DateSaltDecrypt(str, true);
+            Client.EncryptionHandler = str => str.Encrypt();
+            Client.DecryptionHandler = str => str.Decrypt();
         }
         public IApplicationAuthenticationAPIApplicationSettingsResponse GetApplicationSettings()=> ApplicationSettingsEndpoint.Get(new { }).Deserialize<ApplicationAuthenticationAPIApplicationSettingsResponse>();
         public ApplicationAuthenticationApiAuthenticationResponse Authenticate<T>(T data) => AuthenticateEndpoint.Post(data).Deserialize<ApplicationAuthenticationApiAuthenticationResponse>();

@@ -21,6 +21,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)FormControl\MultiSelectListForExtensions.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)FormControl\SingleSelectListForExtensions.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)FormControl\TextareaFormControlForExtensions.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)LayoutExtensions.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ModelStateExtensions.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)StringExtensions.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)TemplateExtensions.cs" />

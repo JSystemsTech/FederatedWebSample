@@ -1,14 +1,11 @@
 ﻿using FederatedAuthNAuthZ.Configuration;
 using FederatedAuthNAuthZ.Models;
 using FederatedAuthNAuthZ.Services;
-using FederatedAuthNAuthZ.Services;
 using Newtonsoft.Json;
 using ServiceProviderShared;
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
-using System.Text;
 using System.Web;
 using System.Web.Http;
 
@@ -26,7 +23,7 @@ namespace FederatedAuthNAuthZ.Web.TokenProviderAPI
         internal IEnumerable<TokenClaim> GetClaims() => Claims != null ? Claims : Claim != null ? new TokenClaim[1] { Claim } : new TokenClaim[0];
         internal IDictionary<string, IEnumerable<string>> ToClaimsDictionary() => GetClaims().ToDictionary(claim => claim.Name, claim => claim.GetValues());
     }
-    [TokenProviderAPIAuthentication(true)]
+    [TokenProviderAPIAuthentication]
     public abstract class TokenProviderAPIControllerBase : ApiControllerBase
     {
         private ITokenHandlerService TokenHandlerService => ServiceManager.GetService<ITokenHandlerService>();
@@ -34,8 +31,7 @@ namespace FederatedAuthNAuthZ.Web.TokenProviderAPI
         private ITokenProvider TokenProvider => ServiceManager.GetService<ITokenProvider>();
 
 
-        private string DecryptBody(EncryptedPostBody body) => EncryptionService.DateSaltDecrypt(body.Content, true);
-        protected TokenParameters GetBodyAsTokenParameters(EncryptedPostBody body) => JsonConvert.DeserializeObject<TokenParameters>(DecryptBody(body));
+        protected TokenParameters GetBodyAsTokenParameters(EncryptedPostBody body) => JsonConvert.DeserializeObject<TokenParameters>(body.Content.Decrypt());
 
         protected HttpResponseMessage CreateToken(EncryptedPostBody body) => EncryptedResponse(TokenHandlerService.Create(GetBodyAsTokenParameters(body).GetClaims()));
         protected HttpResponseMessage GetClaims(EncryptedPostBody body) => EncryptedResponse(TokenHandlerService.GetClaims(GetBodyAsTokenParameters(body).Token));
@@ -46,7 +42,7 @@ namespace FederatedAuthNAuthZ.Web.TokenProviderAPI
         }
         protected HttpResponseMessage GetExpirationDate(EncryptedPostBody body) => EncryptedResponse(TokenHandlerService.GetExpirationDate(GetBodyAsTokenParameters(body).Token));
         protected HttpResponseMessage BuildApiAuthToken() => EncryptedResponse(TokenProvider.CreateToken(claims => {
-            claims.Add($"{FederatedApplicationSettings.SiteId}Name", new string[] { EncryptionService.DateSaltEncrypt(HttpContext.Current.User.Identity.Name) });
+            claims.Add($"{FederatedApplicationSettings.SiteId}Name", new string[] { HttpContext.Current.User.Identity.Name.Encrypt() });
         }));
 
 

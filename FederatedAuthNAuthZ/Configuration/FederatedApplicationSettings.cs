@@ -30,7 +30,6 @@ namespace FederatedAuthNAuthZ.Configuration
         public static string LogoutUrl => "LogoutUrl";
         public static string AuthenticationProviderId => "AuthenticationProviderId";
         public static string AuthenticationProviderUrl => "AuthenticationProviderUrl";
-        public static string TokenProviderAuthenticationEndpoint => "TokenProviderAuthenticationEndpoint";
         public static string TokenProviderUsername => "TokenProviderUsername";
         public static string TokenProviderPassword => "TokenProviderPassword";
 
@@ -50,13 +49,17 @@ namespace FederatedAuthNAuthZ.Configuration
         public static string GetCookieSuffix(this IFederatedApplicationSettings FederatedApplicationSettings) => FederatedApplicationSettings.UseRealm() ? FederatedApplicationSettings.SiteRealmId : $"{FederatedApplicationSettings.SiteId}{FederatedApplicationSettings.GetEnvironment()}{FederatedApplicationSettings.SiteVersion}";
         public static string GetCookiePrefix(this IFederatedApplicationSettings FederatedApplicationSettings) => $"{FederatedApplicationSettings.AuthenticationProviderId}{FederatedApplicationSettings.SiteNetwork}_Auth_";
         public static bool IsSameNetwork(this IFederatedApplicationSettings FederatedApplicationSettings, IFederatedApplicationSettings FederatedApplicationSettingsTarget) => FederatedApplicationSettings.SiteNetwork == FederatedApplicationSettingsTarget.SiteNetwork;
-        public static void UpdateConsumerTokenClaims(this IFederatedApplicationSettings FederatedApplicationSettings, IDictionary<string, IEnumerable<string>> claims)
+        public static void UpdateConsumerTokenClaims(this IFederatedApplicationSettings FederatedApplicationSettings, IDictionary<string, IEnumerable<string>> claims, string userId = null)
         {
             claims.AddUpdate(FederatedApplicationSettingsFields.SiteNetwork, FederatedApplicationSettings.SiteNetwork);
             claims.AddUpdate(FederatedApplicationSettingsFields.SiteRealmId, FederatedApplicationSettings.SiteRealmId);
             claims.AddUpdate(FederatedApplicationSettingsFields.SiteId, FederatedApplicationSettings.SiteId);
             claims.AddUpdate(FederatedApplicationSettingsFields.SiteVersion, FederatedApplicationSettings.SiteVersion);
             claims.AddUpdate(FederatedApplicationSettingsFields.SiteEnvironment, FederatedApplicationSettings.SiteEnvironment);
+            if(userId != null)
+            {
+                claims.AddUpdate("UserId", userId);
+            }
         }
         public static bool ValidateConsumerTokenClaims(this IFederatedApplicationSettings FederatedApplicationSettings, IDictionary<string, IEnumerable<string>> claims)
         {
@@ -109,7 +112,6 @@ namespace FederatedAuthNAuthZ.Configuration
         string LogoutUrl { get; }
         string AuthenticationProviderId { get; }
         string AuthenticationProviderUrl { get; }
-        string TokenProviderAuthenticationEndpoint { get; }
         string TokenProviderUsername { get; }
         string TokenProviderPassword { get; }
 
@@ -146,7 +148,6 @@ namespace FederatedAuthNAuthZ.Configuration
         public string LogoutUrl { get; set; }
         public string AuthenticationProviderId { get; set; }
         public string AuthenticationProviderUrl { get; set; }
-        public string TokenProviderAuthenticationEndpoint { get; set; }
         public string TokenProviderUsername { get; set; }
         public string TokenProviderPassword { get; set; }
 
@@ -190,52 +191,52 @@ namespace FederatedAuthNAuthZ.Configuration
         }
     }
 
-    internal class FederatedApplicationSettingsConfig : ConfigurationSectionConfig, IFederatedApplicationSettings, IConfigurationSectionConfig
+    public class FederatedApplicationSettingsConfig : ConfigurationSectionConfig, IFederatedApplicationSettings, IConfigurationSectionConfig
     {
         private static string FederatedApplicationSettings = "federatedApplicationSettings";
+        protected bool IgnoreMissingConfigValues { get; set; }
+        private bool IsRequired(bool flag =true) => IgnoreMissingConfigValues ? false : flag;
         protected override string ConfiguationSection => FederatedApplicationSettings;
-        public string SiteId { get; set; }
-        public string SiteRealmId { get; set; }
-        public string SiteReturnUrl { get; set; }
-        public string SiteName { get; set; }
-        public string SiteVersion { get; set; }
-        public string SiteEnvironment { get; set; }
-        public string SiteNetwork { get; set; }
-        public string SiteNetworkDisplay { get; set; }
-        public string SiteNetworkDescription { get; set; }
-        public string SiteDescription { get; set; }
-        public string ConsumerAuthenticationApiUrl { get; set; }
-        public string Theme { get; set; }
-        public string DarkTheme { get; set; }
-        public bool RequirePrivacyPolicy { get; set; }
-        public string PrivacyPolicyUrl { get; set; }
-        public string CookiePolicyUrl { get; set; }
-        public IEnumerable<string> AuthenticationModes { get; set; }
+        public string SiteId { get; protected set; }
+        public string SiteRealmId { get; protected set; }
+        public string SiteReturnUrl { get; protected set; }
+        public string SiteName { get; protected set; }
+        public string SiteVersion { get; protected set; }
+        public string SiteEnvironment { get; protected set; }
+        public string SiteNetwork { get; protected set; }
+        public string SiteNetworkDisplay { get; protected set; }
+        public string SiteNetworkDescription { get; protected set; }
+        public string SiteDescription { get; protected set; }
+        public string ConsumerAuthenticationApiUrl { get; protected set; }
+        public string Theme { get; protected set; }
+        public string DarkTheme { get; protected set; }
+        public bool RequirePrivacyPolicy { get; protected set; }
+        public string PrivacyPolicyUrl { get; protected set; }
+        public string CookiePolicyUrl { get; protected set; }
+        public IEnumerable<string> AuthenticationModes { get; protected set; }
 
 
-        public bool UseSessionCookie { get; set; }
-        public string LogoutUrl { get; set; }
-        public string AuthenticationProviderId { get; set; }
-        public string AuthenticationProviderUrl { get; set; }
-        public string TokenProviderAuthenticationEndpoint { get; set; }
-        public string TokenProviderUsername { get; set; }
-        public string TokenProviderPassword { get; set; }
+        public bool UseSessionCookie { get; protected set; }
+        public string LogoutUrl { get; protected set; }
+        public string AuthenticationProviderId { get; protected set; }
+        public string AuthenticationProviderUrl { get; protected set; }
+        public string TokenProviderUsername { get; protected set; }
+        public string TokenProviderPassword { get; protected set; }
 
-        public bool IsProvider { get; set; }
-        public string ExternalAuthenticationUrl { get; set; }
-        public string AuthenticationErrorUrl { get; set; }
+        public bool IsProvider { get; protected set; }
+        public string ExternalAuthenticationUrl { get; protected set; }
+        public string AuthenticationErrorUrl { get; protected set; }
 
         public FederatedApplicationSettingsConfig() : base() { }
-        public FederatedApplicationSettingsConfig(IDictionary<string, string> collection) : base() { Collection = collection; Init(); }
         
         protected override void Init()
         {
-            SiteId = GetValue(FederatedApplicationSettingsFields.SiteId, true);                        
-            SiteName = GetValue(FederatedApplicationSettingsFields.SiteName, true);
-            SiteVersion = GetValue(FederatedApplicationSettingsFields.SiteVersion, true);
-            SiteEnvironment = GetValue(FederatedApplicationSettingsFields.SiteEnvironment, true);
-            SiteNetwork = GetValue(FederatedApplicationSettingsFields.SiteNetwork, true);
-            SiteDescription = GetValue(FederatedApplicationSettingsFields.SiteDescription, true);
+            SiteId = GetValue(FederatedApplicationSettingsFields.SiteId, IsRequired());                        
+            SiteName = GetValue(FederatedApplicationSettingsFields.SiteName, IsRequired());
+            SiteVersion = GetValue(FederatedApplicationSettingsFields.SiteVersion, IsRequired());
+            SiteEnvironment = GetValue(FederatedApplicationSettingsFields.SiteEnvironment, IsRequired());
+            SiteNetwork = GetValue(FederatedApplicationSettingsFields.SiteNetwork, IsRequired());
+            SiteDescription = GetValue(FederatedApplicationSettingsFields.SiteDescription, IsRequired());
 
             if (bool.TryParse(GetValue(FederatedApplicationSettingsFields.IsProvider), out bool isProvider))
             {
@@ -243,16 +244,16 @@ namespace FederatedAuthNAuthZ.Configuration
             }
 
             if (IsProvider) {
-                ExternalAuthenticationUrl = GetValue(FederatedApplicationSettingsFields.ExternalAuthenticationUrl, true);
-                AuthenticationErrorUrl = GetValue(FederatedApplicationSettingsFields.AuthenticationErrorUrl, true);
+                ExternalAuthenticationUrl = GetValue(FederatedApplicationSettingsFields.ExternalAuthenticationUrl, IsRequired());
+                AuthenticationErrorUrl = GetValue(FederatedApplicationSettingsFields.AuthenticationErrorUrl, IsRequired());
             } 
             else
             {
                 SiteRealmId = GetValue(FederatedApplicationSettingsFields.SiteRealmId);
                 SiteNetworkDisplay = GetValue(FederatedApplicationSettingsFields.SiteNetworkDisplay);
                 SiteNetworkDescription = GetValue(FederatedApplicationSettingsFields.SiteNetworkDescription);
-                SiteReturnUrl = GetValue(FederatedApplicationSettingsFields.SiteReturnUrl, true);
-                ConsumerAuthenticationApiUrl = GetValue(FederatedApplicationSettingsFields.ConsumerAuthenticationApiUrl, true);
+                SiteReturnUrl = GetValue(FederatedApplicationSettingsFields.SiteReturnUrl, IsRequired());
+                ConsumerAuthenticationApiUrl = GetValue(FederatedApplicationSettingsFields.ConsumerAuthenticationApiUrl, IsRequired());
                 Theme = GetValue(FederatedApplicationSettingsFields.Theme);
                 DarkTheme = GetValue(FederatedApplicationSettingsFields.DarkTheme);
                 if (bool.TryParse(GetValue(FederatedApplicationSettingsFields.RequirePrivacyPolicy), out bool requirePrivacyPolicy))
@@ -260,19 +261,18 @@ namespace FederatedAuthNAuthZ.Configuration
                     RequirePrivacyPolicy = requirePrivacyPolicy;
                 }
                 PrivacyPolicyUrl = GetValue(FederatedApplicationSettingsFields.PrivacyPolicyUrl, RequirePrivacyPolicy);
-                CookiePolicyUrl = GetValue(FederatedApplicationSettingsFields.CookiePolicyUrl, true);
-                AuthenticationModes = GetValue(FederatedApplicationSettingsFields.AuthenticationModes, true).Split(',');
+                CookiePolicyUrl = GetValue(FederatedApplicationSettingsFields.CookiePolicyUrl, IsRequired());
+                AuthenticationModes = GetValue(FederatedApplicationSettingsFields.AuthenticationModes, IsRequired()).Split(',');
 
                 if (bool.TryParse(GetValue(FederatedApplicationSettingsFields.UseSessionCookie), out bool useSessionCookie))
                 {
                     UseSessionCookie = useSessionCookie;
                 }
-                LogoutUrl = GetValue(FederatedApplicationSettingsFields.LogoutUrl, true);
-                AuthenticationProviderId = GetValue(FederatedApplicationSettingsFields.AuthenticationProviderId, true);
-                AuthenticationProviderUrl = GetValue(FederatedApplicationSettingsFields.AuthenticationProviderUrl, true);
-                TokenProviderAuthenticationEndpoint = GetValue(FederatedApplicationSettingsFields.TokenProviderAuthenticationEndpoint,true);
-                TokenProviderUsername = GetValue(FederatedApplicationSettingsFields.TokenProviderUsername,true);
-                TokenProviderPassword = GetValue(FederatedApplicationSettingsFields.TokenProviderPassword,true);
+                LogoutUrl = GetValue(FederatedApplicationSettingsFields.LogoutUrl, IsRequired());
+                AuthenticationProviderId = GetValue(FederatedApplicationSettingsFields.AuthenticationProviderId, IsRequired());
+                AuthenticationProviderUrl = GetValue(FederatedApplicationSettingsFields.AuthenticationProviderUrl, IsRequired());
+                TokenProviderUsername = GetValue(FederatedApplicationSettingsFields.TokenProviderUsername, IsRequired());
+                TokenProviderPassword = GetValue(FederatedApplicationSettingsFields.TokenProviderPassword, IsRequired());
             }
             
         }

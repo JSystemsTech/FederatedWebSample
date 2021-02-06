@@ -15,7 +15,22 @@ namespace FederatedIPAPIConsumer.Services
         private IUserManagmentService UserManagmentService => Services.Get<IUserManagmentService>();
         public override IIdentity CreateAuthenticatedPrincipalIdentity(IDictionary<string, IEnumerable<string>> tokenClaims)
         {
-            if (tokenClaims.ContainsKey("UserId") && tokenClaims["UserId"].First() is string userId && UserManagmentService.GetUser(userId) is ApplicationUser user)
+            ApplicationUser user = null;
+            string userId = tokenClaims.First("UserId") is string id ? id : null;
+            string testUserId = tokenClaims.First("TestUserId") is string testId ? testId : null;
+            if (testUserId != null)
+            {
+                user = UserManagmentService.GetTestUser(testUserId);
+            }
+            else if (Guid.TryParse(userId, out Guid userGuid))
+            {
+                user = UserManagmentService.GetUser(userId);
+            }
+            else
+            {
+                user = UserManagmentService.ResolveUser(userId);
+            }
+            if (user != null)
             {
                 var name = user.Name.Split(' ');
 
@@ -31,7 +46,7 @@ namespace FederatedIPAPIConsumer.Services
         }
         public override IEnumerable<string> GetRoles(IDictionary<string, IEnumerable<string>> tokenClaims, IEnumerable<string> currentRoles)
         {
-            return tokenClaims.ContainsKey("UserId") && tokenClaims["UserId"].First() is string userId ? UserManagmentService.GetUserRoles(userId) : new string[0];
+            return tokenClaims.First("UserId") is string userId ? UserManagmentService.GetUserRoles(userId) : new string[0];
         }
     }
 }

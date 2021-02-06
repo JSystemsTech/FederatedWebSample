@@ -2,7 +2,6 @@
 using FederatedAuthNAuthZ.Extensions;
 using FederatedAuthNAuthZ.Principal;
 using FederatedAuthNAuthZ.Services;
-using FederatedAuthNAuthZ.Services;
 using ServiceProviderShared;
 using System;
 using System.Collections.Generic;
@@ -18,7 +17,6 @@ namespace FederatedAuthNAuthZ.Attributes
         private IFederatedApplicationSettings FederatedApplicationSettings => ServiceManager.GetService<IFederatedApplicationSettings>();
         private IFederatedApplicationIdentityService FederatedApplicationIdentityService => ServiceManager.GetService<IFederatedApplicationIdentityService>();
         private ITokenProvider TokenProvider => ServiceManager.GetService<ITokenProvider>();
-        private IEncryptionService EncryptionService => ServiceManager.GetService<IEncryptionService>();
         private Uri LogoutUri => GetUri(FederatedApplicationSettings.LogoutUrl);
         private bool IsLogoutRequest { get => Request.Url.GetLeftPart(UriPartial.Path) == LogoutUri.GetLeftPart(UriPartial.Path); }
         private string AuthenticationCookieName { get => $"{FederatedApplicationSettings.GetCookiePrefix()}{FederatedApplicationSettings.GetCookieSuffix()}"; }
@@ -56,7 +54,7 @@ namespace FederatedAuthNAuthZ.Attributes
         private void OnLogoutRequest(AuthenticationContext filterContext) 
         {
             string AuthenticationRequestTokenCookieSuffix = CreateAuthenticationRequestTokenCookieSuffix();
-            HttpContext.Session.Add("LogoutRedirectUrl", $"{FederatedApplicationSettings.AuthenticationProviderUrl}/{FederatedApplicationSettings.SiteId}?LoginRequestToken={Url.Encode(EncryptionService.DateSaltEncrypt(AuthenticationRequestTokenCookieSuffix))}");
+            HttpContext.Session.Add("LogoutRedirectUrl", $"{FederatedApplicationSettings.AuthenticationProviderUrl}/{FederatedApplicationSettings.SiteId}?LoginRequestToken={Url.Encode(AuthenticationRequestTokenCookieSuffix.Encrypt())}");
             
             
             RemoveAuthenticationCookie();

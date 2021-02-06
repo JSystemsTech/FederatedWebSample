@@ -11,6 +11,7 @@ using System.Web.Http;
 using System.Web.Mvc;
 using System.Web.Optimization;
 using System.Web.Routing;
+using FederatedAuthNAuthZ.Configuration;
 
 namespace FederatedIPAPIAuthenticationProviderWeb
 {
@@ -21,7 +22,7 @@ namespace FederatedIPAPIAuthenticationProviderWeb
             services.AddApplicationSettings();
             services.AddConnectionStringConfig();
             services.AddConfiguration<ITokenProviderServiceSettings, TokenProviderServiceSettings>();
-            services.ConfigureFederatedApplication<SelfContainedTokenProvider>();
+            services.ConfigureFederatedApplication<FederatedApplicationSettingsConfig, FederatedEncryptionServiceWithDateSalt, SelfContainedTokenProvider>();
             services.AddService<AuthenticationProviderDbConnectionConfigService>();
             services.AddService<IAuthenticationProviderDomainFacade, AuthenticationProviderDomainFacade>();
             services.AddProviderAuthenticationModeService<FederatedAuthenticationModeService>();

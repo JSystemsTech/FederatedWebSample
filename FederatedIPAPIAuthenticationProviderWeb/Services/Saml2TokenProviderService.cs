@@ -1,7 +1,6 @@
 ﻿using FederatedAuthNAuthZ.Models;
 using FederatedAuthNAuthZ.Services;
 using FederatedIPAPIAuthenticationProviderWeb.Configuration;
-using FederatedAuthNAuthZ.Services;
 using Microsoft.IdentityModel.Tokens.Saml2;
 using System;
 using System.Collections.Generic;
@@ -14,7 +13,6 @@ namespace FederatedIPAPIAuthenticationProviderWeb.Services
     internal class Saml2TokenHandlerService : TokenHandlerServiceBase
     {
         private ITokenProviderServiceSettings Settings => Services.Get<ITokenProviderServiceSettings>();
-        private IEncryptionService EncryptionService => Services.Get<IEncryptionService>();
 
         private static Saml2SecurityTokenHandler SamlTokenHandler = new Saml2SecurityTokenHandler();
         private static IEnumerable<TokenClaim> DefaultClaims = new TokenClaim[0];
@@ -100,13 +98,13 @@ namespace FederatedIPAPIAuthenticationProviderWeb.Services
             using (var xmlWriter = new System.Xml.XmlTextWriter(sw))
             {
                 SamlTokenHandler.WriteToken(xmlWriter, token);
-                return EncryptionService.DateSaltEncrypt(sw.ToString());
+                return sw.ToString().Encrypt();
             }
 
         }
         private Saml2SecurityToken Deserialize(string tokenStr)
         {
-            string decryptedValue = EncryptionService.DateSaltDecrypt(tokenStr,true);
+            string decryptedValue = tokenStr.Decrypt();
             return SamlTokenHandler.CanReadToken(decryptedValue) ? SamlTokenHandler.ReadSaml2Token(decryptedValue) : null;
         }
 

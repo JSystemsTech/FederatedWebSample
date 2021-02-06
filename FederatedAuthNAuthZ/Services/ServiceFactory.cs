@@ -19,30 +19,33 @@ namespace FederatedAuthNAuthZ.Services
         {
             services.AddService<ITokenProvider, TTokenProvider>();
         }
-        private static void AddTokenProvider(this IServiceCollection services)
-        {
-            services.AddTokenProvider<TokenProvider>();
-        }
         public static void AddMailService(this IServiceCollection services)
         {
             services.AddService<IMailService, MailService>();
         }
-        public static void ConfigureIndependantFederatedTokenProvider(this IServiceCollection services)
-        {
-            services.AddConfiguration<ITokenProviderSettings, TokenProviderSettings>();
-            services.AddTokenProvider();
-        }
-        public static void ConfigureFederatedApplication(this IServiceCollection services)
-        {
-            services.ConfigureFederatedApplication<TokenProvider>();
-        }
-        public static void ConfigureFederatedApplication<TTokenProvider>(this IServiceCollection services)
+        public static void AddStandaloneTokenProvider<TTokenProviderSettings, TEncryptionService, TTokenProvider>(this IServiceCollection services)
             where TTokenProvider : class, ITokenProvider, IService
+            where TEncryptionService : FederatedEncryptionService
+            where TTokenProviderSettings : TokenProviderSettings
         {
-            services.AddConfiguration<IFederatedApplicationSettings, FederatedApplicationSettingsConfig>();
-            services.AddService<IEncryptionService, FederatedApplicationBasicEncryptionService>();
+            services.AddConfiguration<ITokenProviderSettings, TTokenProviderSettings>();
+            services.AddService<IEncryptionService, TEncryptionService>();
             services.AddTokenProvider<TTokenProvider>();
-            
+        }
+        public static void ConfigureFederatedApplication<TFederatedApplicationSettingsConfig, TEncryptionService>(this IServiceCollection services)
+            where TFederatedApplicationSettingsConfig : FederatedApplicationSettingsConfig
+            where TEncryptionService : FederatedEncryptionService
+        {
+            services.ConfigureFederatedApplication<TFederatedApplicationSettingsConfig, TEncryptionService, TokenProvider>();
+        }
+        public static void ConfigureFederatedApplication<TFederatedApplicationSettingsConfig, TEncryptionService, TTokenProvider>(this IServiceCollection services)
+            where TTokenProvider : class, ITokenProvider, IService
+            where TFederatedApplicationSettingsConfig : FederatedApplicationSettingsConfig
+            where TEncryptionService : FederatedEncryptionService
+        {
+            services.AddConfiguration<IFederatedApplicationSettings, TFederatedApplicationSettingsConfig>();
+            services.AddService<IEncryptionService, TEncryptionService>();
+            services.AddTokenProvider<TTokenProvider>();
         }
         public static void AddAPIAuthenticationService<TAPIAuthenticationService>(this IServiceCollection services)
             where TAPIAuthenticationService : APIAuthenticationServiceBase

@@ -175,6 +175,7 @@
     <Compile Include="App_Start\FilterConfig.cs" />
     <Compile Include="App_Start\RouteConfig.cs" />
     <Compile Include="App_Start\WebApiConfig.cs" />
+    <Compile Include="Configuration\ConsumingApplicationSettings.cs" />
     <Compile Include="Controllers\AuthenticationApi\Api.cs" />
     <Compile Include="Controllers\BaseController.cs" />
     <Compile Include="Controllers\HomeController.cs" />
@@ -735,6 +736,8 @@
     <Content Include="Views\Home\PrivacyPolicy.cshtml" />
     <Content Include="Content\site-army.scss" />
     <Content Include="Views\Home\BootstrapComponents.cshtml" />
+    <Content Include="Views\Home\CookiePolicyPartial.cshtml" />
+    <Content Include="Views\Home\PrivacyPolicyPartial.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />
@@ -749,7 +752,7 @@
     <Service Include="{4A0DDDB5-7A95-4FBF-97CC-616D07737A77}" />
   </ItemGroup>
   <Import Project="..\HtmlExtensions\HtmlExtensions.projitems" Label="Shared" />
-  <Import Project="..\FederatedIPAuthenticationService\FederatedIPAuthenticationService.projitems" Label="Shared" />
+  <Import Project="..\FederatedAuthNAuthZ\FederatedAuthNAuthZ.projitems" Label="Shared" />
   <Import Project="..\ServiceLayer\ServiceLayer.projitems" Label="Shared" />
   <PropertyGroup>
     <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">10.0</VisualStudioVersion>

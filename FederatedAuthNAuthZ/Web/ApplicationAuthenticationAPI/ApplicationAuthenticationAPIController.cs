@@ -20,6 +20,7 @@ using System.Web.Http;
 using System.Web.Http.Controllers;
 using System.Web.Http.Filters;
 using System.Web.Mvc;
+using System.Web.Routing;
 
 namespace FederatedAuthNAuthZ.Web.ConsumerAPI
 {
@@ -28,12 +29,16 @@ namespace FederatedAuthNAuthZ.Web.ConsumerAPI
         IEnumerable<ApplicationUser> TestUsers { get; set; }
         FederatedApplicationSettings FederatedApplicationSettings { get; }
         string LogoImage { get; }
+        string CookiePolicy { get; }
+        string PrivacyPolicy { get; }
     }
     public class ApplicationAuthenticationAPIApplicationSettingsResponse : IApplicationAuthenticationAPIApplicationSettingsResponse
     {
         public IEnumerable<ApplicationUser> TestUsers { get; set; }
         public FederatedApplicationSettings FederatedApplicationSettings { get; set; }
         public string LogoImage { get; set; }
+        public string CookiePolicy { get; set; }
+        public string PrivacyPolicy { get; set; }
     }
     [ApplicationAuthenticationApi]
     public abstract class ApplicationAuthenticationAPIControllerBase : ApiControllerBase
@@ -44,8 +49,7 @@ namespace FederatedAuthNAuthZ.Web.ConsumerAPI
         private ApplicationAuthenticationApiAuthenticationResponse CreateConsumerAPISuccessResponse(ApplicationUser authenticatedUser)
         {
             var token = TokenProvider.CreateToken(authTokenClaims => {
-                authTokenClaims.AddUpdate("UserId", authenticatedUser.UserId);
-                FederatedApplicationSettings.UpdateConsumerTokenClaims(authTokenClaims);
+                FederatedApplicationSettings.UpdateConsumerTokenClaims(authTokenClaims, authenticatedUser.UserId);
             });
             return new ApplicationAuthenticationApiAuthenticationResponse()
             {
@@ -54,7 +58,7 @@ namespace FederatedAuthNAuthZ.Web.ConsumerAPI
                 AuthenticationTokenExpiration = TokenProvider.GetExpirationDate(token)
             };
         }
-        protected abstract ApplicationUser ResolveAuthenticatedUser(ProviderAuthenticationCredentials providerAuthenticationCredentials);
+        protected virtual ApplicationUser ResolveAuthenticatedUser(ProviderAuthenticationCredentials providerAuthenticationCredentials)=> null;
         [System.Web.Http.HttpPost]
         public HttpResponseMessage Authentication([FromBody] EncryptedPostBody body)
         {
@@ -82,10 +86,14 @@ namespace FederatedAuthNAuthZ.Web.ConsumerAPI
         {
             TestUsers = FederatedApplicationSettings.AuthenticationModes.Contains("Test") ? GetTestUsers() : EmptyTestUsers,
             FederatedApplicationSettings = new FederatedApplicationSettings(FederatedApplicationSettings),
-            LogoImage = GetLogoImage()
+            LogoImage = GetLogoImage(),
+            CookiePolicy = GetCookiePolicy(),
+            PrivacyPolicy = GetPrivacyPolicy()
         });
         protected virtual IEnumerable<ApplicationUser> GetTestUsers() => EmptyTestUsers;
         protected virtual string GetLogoImage() => null;
+        protected virtual string GetCookiePolicy() => null;
+        protected virtual string GetPrivacyPolicy() => null;
         protected string LoadImageFromFile(string path)
         {
             try
@@ -105,6 +113,7 @@ namespace FederatedAuthNAuthZ.Web.ConsumerAPI
             }
 
         }
+        
     }
 
     internal class ApplicationAuthenticationApiIdentity : IIdentity

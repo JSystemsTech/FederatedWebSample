@@ -1,15 +1,13 @@
 ﻿using FederatedAuthNAuthZ.Configuration;
+using FederatedAuthNAuthZ.Extensions;
+using FederatedAuthNAuthZ.Services;
 using FederatedAuthNAuthZ.Web.ConsumerAPI;
 using FederatedIPAPIAuthenticationProviderWeb.Models;
-using FederatedAuthNAuthZ.Services;
 using Newtonsoft.Json;
 using ServiceLayer.DomainLayer;
 using ServiceLayer.DomainLayer.Models.Data;
-using ServiceProvider.Configuration;
-using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Web;
 
 namespace FederatedIPAPIAuthenticationProviderWeb.Services
 {
@@ -17,12 +15,15 @@ namespace FederatedIPAPIAuthenticationProviderWeb.Services
     {
         protected IFederatedApplicationSettings FederatedApplicationSettings => Services.Get<IFederatedApplicationSettings>();
         private IAuthenticationProviderDomainFacade AuthenticationProviderDomainFacade => Services.Get<IAuthenticationProviderDomainFacade>();
+        private ITokenProvider TokenProvider => Services.Get<ITokenProvider>();
         protected override void RegisterAuthenticatonModes()
         {
             RegisterAuthenticationMethod("CAC", AuthenticateWithCACData);
+            RegisterAuthenticationMethod("CommonCAC", AuthenticateWithCACDataCommon);
             RegisterAuthenticationMethod("Test", AuthenticateWithTestUser);
 
             RegisterRedirectMode("CAC", FederatedApplicationSettings.ExternalAuthenticationUrl);
+            RegisterRedirectMode("CommonCAC", FederatedApplicationSettings.ExternalAuthenticationUrl);
             RegisterFormRedirectMode("CAC-Form", "CACForm",FederatedApplicationSettings.ExternalAuthenticationUrl);
             RegisterFormViewMode("Test", "TestUsersForm");
         }
@@ -32,16 +33,33 @@ namespace FederatedIPAPIAuthenticationProviderWeb.Services
                 applicationRequestedModes.Where(m=> m !="Test"): 
                 applicationRequestedModes;
         }
+        private ICACUser GetCACUserData(string cacRequestToken) => AuthenticationProviderDomainFacade.GetCACLoginRequestUser(cacRequestToken);
         private ApplicationAuthenticationApiAuthenticationResponse AuthenticateWithCACData(IApplicationAuthenticationAPI appAPI, object values)
         {
             ApplicationAuthenticationApiAuthenticationResponse response = null;
-            if (values is string token && !string.IsNullOrWhiteSpace(token))
+            if (values is string cacRequestToken && !string.IsNullOrWhiteSpace(cacRequestToken))
             {
-                ICACUser UserData = AuthenticationProviderDomainFacade.GetCACLoginRequestUser(token);
                 response = appAPI.Authenticate(new
                 {
-                    UserData = JsonConvert.SerializeObject(UserData)//presserialize before API serializes to keep it as a string
+                    UserData = JsonConvert.SerializeObject(GetCACUserData(cacRequestToken))//presserialize before API serializes to keep it as a string
                 });
+            }
+            return response;
+        }
+        private ApplicationAuthenticationApiAuthenticationResponse AuthenticateWithCACDataCommon(IApplicationAuthenticationAPI appAPI, object values)
+        {
+            ApplicationAuthenticationApiAuthenticationResponse response = null;
+            if (values is string cacRequestToken && !string.IsNullOrWhiteSpace(cacRequestToken))
+            {
+                ICACUser UserData = GetCACUserData(cacRequestToken);
+                string authToken = TokenProvider.CreateToken(claims => {
+                    appAPI.GetApplicationSettings().FederatedApplicationSettings.UpdateConsumerTokenClaims(claims, UserData.EDIPI);
+                });
+                response = new ApplicationAuthenticationApiAuthenticationResponse() { 
+                    AuthenticationToken=authToken,
+                    AuthenticationTokenExpiration= TokenProvider.GetExpirationDate(authToken),
+                    Message= $"{UserData.FirstName} {UserData.MiddleInitial} {UserData.LastName}"
+                };
             }
             return response;
         }
@@ -50,10 +68,17 @@ namespace FederatedIPAPIAuthenticationProviderWeb.Services
             ApplicationAuthenticationApiAuthenticationResponse response = null;
             if (values is TestUserVM model)
             {
-                response = appAPI.Authenticate(new
-                {
-                    TestUserId = model.TestUserId
+                string authToken = TokenProvider.CreateToken(claims => {
+                    claims.AddUpdate("TestUserId", model.TestUserId);
+                    appAPI.GetApplicationSettings().FederatedApplicationSettings.UpdateConsumerTokenClaims(claims);
                 });
+                var user = appAPI.GetApplicationSettings().TestUsers.First(m => m.UserId == model.TestUserId);
+                response = new ApplicationAuthenticationApiAuthenticationResponse()
+                {
+                    AuthenticationToken = authToken,
+                    AuthenticationTokenExpiration = TokenProvider.GetExpirationDate(authToken),
+                    Message = user.Name
+                };
             }
             return response;
         }

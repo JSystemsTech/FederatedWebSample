@@ -1,14 +1,10 @@
 ﻿using FederatedAuthNAuthZ.Extensions;
 using FederatedAuthNAuthZ.Models;
 using FederatedAuthNAuthZ.Web.ConsumerAPI;
-using Newtonsoft.Json;
 using ServiceLayer.DomainLayer.Models.Data;
 using ServiceLayer.Services;
 using ServiceProviderShared;
-using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Web;
 
 namespace FederatedIPAPIConsumer.Controllers.AuthenticationApi
 {
@@ -57,5 +53,11 @@ namespace FederatedIPAPIConsumer.Controllers.AuthenticationApi
 
         protected override IEnumerable<ApplicationUser> GetTestUsers() => UserManagmentService.GetTestUsers();
         protected override string GetLogoImage() => LoadImageFromFile("~/Content/Images/logo.png");
+        protected override string GetCookiePolicy() => ViewExtensions.RenderViewToString<HomeController>("CookiePolicyPartial",null,  viewBag=> {
+            viewBag.FederatedApplicationSettings = FederatedApplicationSettings;
+        });
+        protected override string GetPrivacyPolicy() => ViewExtensions.RenderViewToString<HomeController>("PrivacyPolicyPartial", null, viewBag => {
+            viewBag.FederatedApplicationSettings = FederatedApplicationSettings;
+        });
     }
 }

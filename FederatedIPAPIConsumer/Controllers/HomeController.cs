@@ -12,11 +12,20 @@ namespace FederatedIPAPIConsumer.Controllers
             return View();
         }
         [FederatedApplication(false)]
+        public PartialViewResult PrivacyPolicyPartial()
+        {
+            return PartialView();
+        }
+        [FederatedApplication(false)]
         public ActionResult CookiePolicy()
         {
             return View();
         }
-
+        [FederatedApplication(false)]
+        public PartialViewResult CookiePolicyPartial()
+        {
+            return PartialView();
+        }
         public ActionResult Index()
         {
             return View(FederatedApplicationSettings);

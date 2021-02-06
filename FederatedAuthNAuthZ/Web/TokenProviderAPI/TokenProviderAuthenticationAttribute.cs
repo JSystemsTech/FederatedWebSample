@@ -1,7 +1,6 @@
 ﻿using FederatedAuthNAuthZ.Configuration;
 using FederatedAuthNAuthZ.Models;
 using FederatedAuthNAuthZ.Services;
-using FederatedAuthNAuthZ.Services;
 using ServiceProviderShared;
 using System;
 using System.Linq;
@@ -42,7 +41,7 @@ namespace FederatedAuthNAuthZ.Web.TokenProviderAPI
         }
 
         private string GetAuthorizationHeader(HttpActionContext actionContext, string scheme)
-       => actionContext.Request.Headers.Authorization is AuthenticationHeaderValue auth && auth != null && auth.Scheme == scheme ? auth.Parameter : null;
+        => actionContext.Request.Headers.Authorization is AuthenticationHeaderValue auth && auth != null && auth.Scheme == scheme ? auth.Parameter : null;
         private string GetBasicAuthorizationHeader(HttpActionContext actionContext)
         => GetAuthorizationHeader(actionContext, "Basic");
         private string GetBearerAuthorizationHeader(HttpActionContext actionContext)
@@ -50,7 +49,6 @@ namespace FederatedAuthNAuthZ.Web.TokenProviderAPI
 
         private ITokenHandlerService TokenHandlerService => ServiceManager.GetService<ITokenHandlerService>();
         private IAPIAuthenticationService APIAuthenticationService => ServiceManager.GetService<IAPIAuthenticationService>();
-        private IEncryptionService EncryptionService => ServiceManager.GetService<IEncryptionService>();
         private IFederatedApplicationSettings FederatedApplicationSettings => ServiceManager.GetService<IFederatedApplicationSettings>();
 
         public override void OnAuthorization(HttpActionContext actionContext)
@@ -106,7 +104,7 @@ namespace FederatedAuthNAuthZ.Web.TokenProviderAPI
         }
         protected virtual (string username, string password) GetBasicCredentials(string authHeader)
         {
-            string authCredentialStr = EncryptionService.DateSaltDecrypt(authHeader, true);
+            string authCredentialStr = authHeader.Decrypt();
 
             var tokens = authCredentialStr.Split(new char[] { ':' }, StringSplitOptions.RemoveEmptyEntries);
             if (tokens.Length < 2)

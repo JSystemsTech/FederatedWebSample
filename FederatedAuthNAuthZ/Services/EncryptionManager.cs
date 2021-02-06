@@ -1,5 +1,6 @@
 ﻿using FederatedAuthNAuthZ.Configuration;
 using ServiceProvider.Services;
+using ServiceProviderShared;
 using System;
 using System.IO;
 using System.Security.Cryptography;
@@ -7,18 +8,11 @@ using System.Text;
 
 namespace FederatedAuthNAuthZ.Services
 {
-    public static class EncryotionServiceExtensions
+    public static class EncryptionServiceExtensions
     {
-        public static string DateSaltEncrypt(this IEncryptionService encryptionService, string str) => encryptionService.Encrypt(str,DateTime.UtcNow.Date.ToString());
-        public static string DateSaltDecrypt(this IEncryptionService encryptionService, string str, bool allowOldSaltCheck = false)
-        {
-            string value = encryptionService.Decrypt(str, DateTime.UtcNow.Date.ToString());
-            if (allowOldSaltCheck && value == null)
-            {
-                return encryptionService.Decrypt(str, DateTime.UtcNow.AddDays(-1).Date.ToString());
-            }
-            return value;
-        }
+        private static IEncryptionService EncryptionService => ServiceManager.GetService<IEncryptionService>();
+        public static string Encrypt(this string str, string salt = "") => EncryptionService != null ? EncryptionService.Encrypt(str, salt) : null;
+        public static string Decrypt(this string str, string salt = "") => EncryptionService != null ? EncryptionService.Decrypt(str, salt) : null;
     }
     public interface IEncryptionService
     {
@@ -30,6 +24,10 @@ namespace FederatedAuthNAuthZ.Services
         protected string EncryptionKey { get; set; }
         public EncryptionServiceBase():base(){}
         public EncryptionServiceBase(string encryptionKey){ EncryptionKey = encryptionKey; }
+        public void SetEncryptionKey<T>(T model, Func<T,string> getter)
+        {
+            EncryptionKey = getter(model);
+        }
         protected override void Init()
         {
             IEncryptionServiceSettings settings = Services.Get<IEncryptionServiceSettings>();
@@ -162,31 +160,43 @@ namespace FederatedAuthNAuthZ.Services
         }
     }
 
-    public sealed class EncryptionService : EncryptionServiceBase, IEncryptionService
-    {
-        public EncryptionService() : base() { }
-        public string Encrypt(string data, string salt = "")
-        => EncryptCore(data, salt);
-        public string Decrypt(string data, string salt = "") => DecryptCore(data, salt);
-    }
-    public sealed class FederatedApplicationBasicEncryptionService : EncryptionServiceBase, IEncryptionService
+    public class FederatedEncryptionService : EncryptionServiceBase, IEncryptionService
     {
         private static string GetKey(IFederatedApplicationSettings settings)=> settings.IsProvider ? 
             $"{settings.SiteId}{settings.SiteNetwork}" : 
             $"{settings.AuthenticationProviderId}{settings.SiteNetwork}";
-        public FederatedApplicationBasicEncryptionService() : base() { }
-        public FederatedApplicationBasicEncryptionService(IFederatedApplicationSettings settings) : 
-            base(GetKey(settings)) { }
-        public FederatedApplicationBasicEncryptionService(ITokenProviderSettings settings) :
-            base($"{settings.ProviderId}{settings.ProviderNetwork}")
-        { }
-        protected override void Init()
+        public FederatedEncryptionService() : base() { }
+        protected sealed override void Init()
         {
             IFederatedApplicationSettings settings = Services.Get<IFederatedApplicationSettings>();
-            EncryptionKey = GetKey(settings);
+            if (settings != null)
+            {
+                EncryptionKey = GetKey(settings);
+            }
+            else
+            {
+                ITokenProviderSettings tokenProviderSettings = Services.Get<ITokenProviderSettings>();
+                EncryptionKey = $"{tokenProviderSettings.ProviderId}{tokenProviderSettings.ProviderNetwork}";
+            }
+            
         }
-        public string Encrypt(string data, string salt = "")
+        public virtual string Encrypt(string data, string salt = "")
         => EncryptCore(data, salt);
-        public string Decrypt(string data, string salt = "") => DecryptCore(data, salt);
+        public virtual string Decrypt(string data, string salt = "") => DecryptCore(data, salt);
+    }
+
+    public sealed class FederatedEncryptionServiceWithDateSalt : FederatedEncryptionService
+    {
+        public FederatedEncryptionServiceWithDateSalt() : base() { }
+        public sealed override string Encrypt(string data, string salt = "") => EncryptCore(data, DateTime.UtcNow.Date.ToString() + salt);
+        public sealed override string Decrypt(string data, string salt = "")
+        {
+            string value = DecryptCore(data, DateTime.UtcNow.Date.ToString() + salt);
+            if (value == null)
+            {
+                return DecryptCore(data, DateTime.UtcNow.AddDays(-1).Date.ToString() + salt);
+            }
+            return value;
+        }
     }
 }

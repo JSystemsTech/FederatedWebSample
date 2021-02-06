@@ -190,7 +190,6 @@
     <Compile Include="Configuration\TokenProviderServiceSettings.cs" />
     <Compile Include="Controllers\ProviderController.cs" />
     <Compile Include="Controllers\TokenProviderAPI.cs" />
-    <Compile Include="Controllers\BaseController.cs" />
     <Compile Include="Controllers\HomeController.cs" />
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
@@ -776,7 +775,7 @@
     <Service Include="{4A0DDDB5-7A95-4FBF-97CC-616D07737A77}" />
   </ItemGroup>
   <Import Project="..\HtmlExtensions\HtmlExtensions.projitems" Label="Shared" />
-  <Import Project="..\FederatedIPAuthenticationService\FederatedIPAuthenticationService.projitems" Label="Shared" />
+  <Import Project="..\FederatedAuthNAuthZ\FederatedAuthNAuthZ.projitems" Label="Shared" />
   <Import Project="..\ServiceLayer\ServiceLayer.projitems" Label="Shared" />
   <PropertyGroup>
     <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">10.0</VisualStudioVersion>

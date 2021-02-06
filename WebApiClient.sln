@@ -5,7 +5,7 @@ VisualStudioVersion = 16.0.30114.105
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FederatedIPAPIConsumer", "FederatedIPAPIConsumer\FederatedIPAPIConsumer.csproj", "{6C215DF5-244E-4E05-851A-444B2ECAF728}"
 EndProject
-Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "FederatedAuthNAuthZ", "FederatedIPAuthenticationService\FederatedAuthNAuthZ.shproj", "{CF3B8EF4-F456-416C-9A78-9EB6FB4AE1E3}"
+Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "FederatedAuthNAuthZ", "FederatedAuthNAuthZ\FederatedAuthNAuthZ.shproj", "{CF3B8EF4-F456-416C-9A78-9EB6FB4AE1E3}"
 EndProject
 Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "HtmlExtensionsShared", "HtmlExtensions\HtmlExtensionsShared.shproj", "{2EB9252A-AB19-4111-9589-5F743C8B0564}"
 EndProject
@@ -15,15 +15,15 @@ Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "ServiceLayer", "ServiceLaye
 EndProject
 Global
 	GlobalSection(SharedMSBuildProjectFiles) = preSolution
-		FederatedIPAuthenticationService\FederatedIPAuthenticationService.projitems*{10c0726b-492d-45d4-bb27-188774b843ef}*SharedItemsImports = 4
+		FederatedAuthNAuthZ\FederatedAuthNAuthZ.projitems*{10c0726b-492d-45d4-bb27-188774b843ef}*SharedItemsImports = 4
 		HtmlExtensions\HtmlExtensions.projitems*{10c0726b-492d-45d4-bb27-188774b843ef}*SharedItemsImports = 4
 		ServiceLayer\ServiceLayer.projitems*{10c0726b-492d-45d4-bb27-188774b843ef}*SharedItemsImports = 4
 		ServiceLayer\ServiceLayer.projitems*{28d7054f-5557-494c-bf43-75dc36f29f7f}*SharedItemsImports = 13
 		HtmlExtensions\HtmlExtensions.projitems*{2eb9252a-ab19-4111-9589-5f743c8b0564}*SharedItemsImports = 13
-		FederatedIPAuthenticationService\FederatedIPAuthenticationService.projitems*{6c215df5-244e-4e05-851a-444b2ecaf728}*SharedItemsImports = 4
+		FederatedAuthNAuthZ\FederatedAuthNAuthZ.projitems*{6c215df5-244e-4e05-851a-444b2ecaf728}*SharedItemsImports = 4
 		HtmlExtensions\HtmlExtensions.projitems*{6c215df5-244e-4e05-851a-444b2ecaf728}*SharedItemsImports = 4
 		ServiceLayer\ServiceLayer.projitems*{6c215df5-244e-4e05-851a-444b2ecaf728}*SharedItemsImports = 4
-		FederatedIPAuthenticationService\FederatedIPAuthenticationService.projitems*{cf3b8ef4-f456-416c-9a78-9eb6fb4ae1e3}*SharedItemsImports = 13
+		FederatedAuthNAuthZ\FederatedAuthNAuthZ.projitems*{cf3b8ef4-f456-416c-9a78-9eb6fb4ae1e3}*SharedItemsImports = 13
 	EndGlobalSection
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU

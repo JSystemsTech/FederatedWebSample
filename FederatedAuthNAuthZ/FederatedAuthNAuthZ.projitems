@@ -6,15 +6,13 @@
     <SharedGUID>cf3b8ef4-f456-416c-9a78-9eb6fb4ae1e3</SharedGUID>
   </PropertyGroup>
   <PropertyGroup Label="Configuration">
-    <Import_RootNamespace>FederatedIPAuthenticationService</Import_RootNamespace>
+    <Import_RootNamespace>FederatedAuthNAuthZ</Import_RootNamespace>
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="$(MSBuildThisFileDirectory)Attributes\Common\CommonIdentity.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Attributes\Common\FederatedAuthAttribute.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Attributes\FederatedAuthenticationConsumer.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Attributes\FederatedAuthenticationFilter.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Attributes\FederatedAuthenticationProvider.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Attributes\FederatedExternalPostbackAttribute.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Attributes\NoCacheAttribute.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Configuration\EncryptionServiceSettings.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Configuration\FederatedSettings.cs" />
@@ -24,9 +22,10 @@
     <Compile Include="$(MSBuildThisFileDirectory)Enums\ProviderAuthenticationCredentialsOrdinal.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Extensions\DictionaryExtensions.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Extensions\EnumExtensions.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Extensions\HtmlExtensions.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Extensions\HttpConfigurationExtensions.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Extensions\HttpContextExtensions.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Extensions\StringExtensions.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Extensions\ViewExtensions.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Models\Collection\CollectionModel.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Models\ProviderAuthenticationCredentials.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Services\APIAuthenticationService.cs" />

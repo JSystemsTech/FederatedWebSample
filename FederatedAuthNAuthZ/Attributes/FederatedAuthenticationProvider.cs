@@ -2,39 +2,31 @@
 using FederatedAuthNAuthZ.Extensions;
 using FederatedAuthNAuthZ.Services;
 using FederatedAuthNAuthZ.Web.ConsumerAPI;
-using ServiceProvider.ServiceProvider;
-using ServiceProvider.Web;
 using ServiceProviderShared;
 using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Reflection;
 using System.Web;
 using System.Web.Mvc;
 using System.Web.Mvc.Filters;
 
 namespace FederatedAuthNAuthZ.Attributes
 {
-    public abstract class FederatedAuthenticationProvider : FederatedAuthenticationFilter
+    public sealed class FederatedAuthenticationProvider : FederatedAuthenticationFilter
     {
         
+        
         private ITokenProvider TokenProvider => ServiceManager.GetService<ITokenProvider>();
-        private IEncryptionService EncryptionService => ServiceManager.GetService<IEncryptionService>();
         private IFederatedApplicationSettings FederatedApplicationSettings => ServiceManager.GetService<IFederatedApplicationSettings>();
-        private string AuthenticationRequestCookieName { get => $"{FederatedApplicationSettings.GetAuthRequestCookieName()}{AuthenticationRequestTokenCookieSuffix}"; }
-        private string AuthenticationRequestTokenCookieSuffix => HttpContext.Session["AuthenticationRequestTokenCookieSuffix"].ToString();
-        private string AuthenticationRequestKey => Request.Form["AuthenticationRequest"];
+        private string AuthenticationRequestCookieName => $"{FederatedApplicationSettings.GetAuthRequestCookieName()}{HttpContext.GetAuthenticationRequestTokenCookieSuffix()}"; 
+        private string ConsumerAuthenticationApiFormParam => Request.Form["api"];
         private string  ConsumerAuthenticationApiUrl { get; set; }
-        private bool IsExternalAuthenticationPostbackRequest
-        {
-            get => AuthenticationContext.ActionDescriptor.GetCustomAttributes(typeof(FederatedExternalPostbackAttribute), true).Length>0  &&
-                IsPostRequest &&
-                AuthenticationRequestKey is string postToken &&
-                !string.IsNullOrWhiteSpace(postToken);
+        private bool IsPostback{ get; set; }
+        private bool IsValidPostback => IsPostback && ConsumerAuthenticationApiFormParam is string apiKey && !string.IsNullOrWhiteSpace(apiKey);
+        private string AuthenticationRequestFormParameter { get; set; }
+        public FederatedAuthenticationProvider(bool isAuthenticatedRoute = true, bool isPostback = false) : base(isAuthenticatedRoute) {
+            IsPostback = isPostback;
         }
-        protected abstract string GetSavedConsumerAuthenticationApiUrl(string key);
-
-        public FederatedAuthenticationProvider(bool isAuthenticatedRoute = true) : base(isAuthenticatedRoute) { }
+        
         private void OnAuthenticationError(AuthenticationContext filterContext, string error, string details)
         {
             if (!string.IsNullOrWhiteSpace(FederatedApplicationSettings.AuthenticationErrorUrl))
@@ -44,7 +36,6 @@ namespace FederatedAuthNAuthZ.Attributes
             else
             {
                 filterContext.Result = new HttpUnauthorizedResult(error);
-                HttpContext.Session.Add("HttpUnauthorizedResultDetails", details);
             }
         }
         private string RenewAuthenticationRequestToken(string token)
@@ -72,21 +63,21 @@ namespace FederatedAuthNAuthZ.Attributes
             base.OnAuthentication(filterContext);
             if (IsAuthenticatedRoute)
             {
-                if (IsExternalAuthenticationPostbackRequest)
+                if (IsPostback)
                 {
-                    if (string.IsNullOrWhiteSpace(AuthenticationRequestKey))
+
+                    if (!IsValidPostback)
                     {
-                        OnAuthenticationError(filterContext, "Postback missing AuthenticationRequest form value", "External Authentication failed to return the required AuthenticationRequest form field");
+                        OnAuthenticationError(filterContext, $"Postback missing {AuthenticationRequestFormParameter} form value", $"External Authentication failed to return the required {AuthenticationRequestFormParameter} form field");
                         return;
                     }
                     try
                     {
                         string authenticationRequestToken =  TokenProvider.CreateToken(claims => {
-                            claims.Add("ConsumerAuthenticationApiUrl", new string[] { GetSavedConsumerAuthenticationApiUrl(AuthenticationRequestKey) });
+                            claims.Add("ConsumerAuthenticationApiUrl", new string[] { ConsumerAuthenticationApiFormParam.Decrypt() });
                         });
 
-                        HttpContext.Session.Remove("AuthenticationRequestTokenCookieSuffix");
-                        HttpContext.Session.Add("AuthenticationRequestTokenCookieSuffix", CreateAuthenticationRequestTokenCookieSuffix());
+                        HttpContext.SetAuthenticationRequestTokenCookieSuffix(CreateAuthenticationRequestTokenCookieSuffix());
                         RenewAuthenticationRequestToken(authenticationRequestToken);
                         ValidateRequestingSite(filterContext);
                     }
@@ -99,7 +90,7 @@ namespace FederatedAuthNAuthZ.Attributes
                 {
                     if(Request.QueryString["LoginRequestToken"] is string loginRequestToken)
                     {
-                        if(EncryptionService.DateSaltDecrypt(loginRequestToken, true) is string authenticationRequestTokenCookieSuffix)
+                        if(loginRequestToken.Decrypt() is string authenticationRequestTokenCookieSuffix)
                         {
                             HttpContext.Session.Remove("AuthenticationRequestTokenCookieSuffix");
                             HttpContext.Session.Add("AuthenticationRequestTokenCookieSuffix", authenticationRequestTokenCookieSuffix);
@@ -125,22 +116,6 @@ namespace FederatedAuthNAuthZ.Attributes
             }            
         }
 
-
-        private string BuildUrl<T>(Uri uri, T query)
-        {
-            UriBuilder builder = new UriBuilder(uri);
-            List<string> queryParams = new List<string>();
-            (builder.Query.StartsWith("?") ? builder.Query.Remove(0, 1) : builder.Query).Split('&').Where(value=> !string.IsNullOrWhiteSpace(value)).ToList().ForEach(p =>
-            {
-                queryParams.Add(p);
-            });
-            foreach (var prop in query.GetType().GetProperties(BindingFlags.Instance | BindingFlags.Public))
-            {
-                queryParams.Add($"{prop.Name}={HttpUtility.UrlEncode(prop.GetValue(query).ToString())}");
-            }
-            builder.Query = string.Join("&", queryParams);
-            return builder.Uri.ToString();
-        }
         private string GetAuthenticationRequestCookieValue() => GetAuthenticationRequestCookie() is HttpCookie cookie ? cookie.Value : null;
         private HttpCookie GetAuthenticationRequestCookie() => HasValidHttpCookie(AuthenticationRequestCookieName) ? GetHttpCookie(AuthenticationRequestCookieName) : null;
         private void RemoveAuthenticationRequestCookie() => RemoveHttpCookie(GetAuthenticationRequestCookie(), true);

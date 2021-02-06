@@ -14,7 +14,6 @@ namespace FederatedAuthNAuthZ.Web
     }
     public abstract class ApiControllerBase : ApiController
     {
-        protected IEncryptionService EncryptionService => ServiceManager.GetService<IEncryptionService>();
         protected HttpResponseMessage TextResponse(string value)
         {
             var response = new HttpResponseMessage(HttpStatusCode.OK);
@@ -24,9 +23,9 @@ namespace FederatedAuthNAuthZ.Web
         }
         protected HttpResponseMessage EncryptedResponse<T>(T model)
         {
-            string value = EncryptionService.DateSaltEncrypt(model is string strModel ? strModel : JsonConvert.SerializeObject(model));
-            return TextResponse(value);
+            string value = model is string strModel ? strModel : JsonConvert.SerializeObject(model);
+            return TextResponse(value.Encrypt());
         }
-        protected string DecryptBody(string bodyValue) => EncryptionService.DateSaltDecrypt(bodyValue, true);
+        protected string DecryptBody(string bodyValue) => bodyValue.Decrypt();
     }
 }

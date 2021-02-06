@@ -1,5 +1,7 @@
 ﻿@using FederatedAuthNAuthZ.Configuration
+@using FederatedAuthNAuthZ.Web.ConsumerAPI
 @{
+    IApplicationAuthenticationAPIApplicationSettingsResponse TargetApplicationSettings = ViewBag.TargetApplicationSettings as IApplicationAuthenticationAPIApplicationSettingsResponse;
     IFederatedApplicationSettings ConsumingApplicationFederatedApplicationSettings = ViewBag.ConsumingApplicationFederatedApplicationSettings as IFederatedApplicationSettings;
 }
 @{
@@ -8,12 +10,21 @@
 <h2 class="lead mb-0">Cookie Policy</h2>
 
 <div class="card card-privacy-notice my-2">
-    <div class="card-body p-2">
-        @foreach (string paragraph in DefaultCookiePolicy.Split('\n'))
+    <div class="card-body p-2 overflow-auto" style="max-height:200px;">
+        @if (TargetApplicationSettings.CookiePolicy != null)
         {
-            <p class="card-text text-left">@paragraph</p>
+            <div class="text-left" style="font-size: 0.7em">@(new HtmlString(TargetApplicationSettings.CookiePolicy))</div>
         }
+        else
+        {
+            foreach (string paragraph in DefaultCookiePolicy.Split('\n'))
+            {
+                <p class="card-text text-left">@paragraph</p>
+            }
 
+        }
+    </div>
+    <div class="card-body px-2 py-0 border-top">
         <a href="@ConsumingApplicationFederatedApplicationSettings.CookiePolicyUrl" title="View Cookie Policy" class="card-link" target=”_blank” rel=”noopener noreferrer”>
             <small>
                 <i class="fa fa-info-circle"></i>

@@ -18,6 +18,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)DomainLayer\DomainFacadeBase.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)DomainLayer\Models\Data\CACUser.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)DomainLayer\Models\Data\AuthenticationProviderApiUser.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)DomainLayer\Models\Data\ApplicationSetting.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)DomainLayer\Models\Data\TestUser.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)DomainLayer\Models\Data\WebAuthenticationCacheRecord.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Services\UserManagmentService.cs" />

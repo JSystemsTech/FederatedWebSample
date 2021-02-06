@@ -1,5 +1,6 @@
 ﻿using FederatedAuthNAuthZ.Attributes;
 using FederatedAuthNAuthZ.Services;
+using FederatedAuthNAuthZ.Web;
 using Newtonsoft.Json;
 using ServiceLayer.WebHelpers.SiteMap;
 using System.Collections.Generic;
@@ -7,7 +8,6 @@ using System.Dynamic;
 using System.Linq;
 using System.Security.Principal;
 using System.Web.Mvc;
-using WebApiClientShared.Web;
 
 namespace FederatedIPAPIConsumer.Controllers
 {

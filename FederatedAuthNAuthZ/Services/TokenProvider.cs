@@ -32,21 +32,18 @@ namespace FederatedAuthNAuthZ.Services
         {
             
             IFederatedApplicationSettings FederatedApplicationSettings = Services.Get<IFederatedApplicationSettings>();
-            IEncryptionService encryptionService;
             string authenticationEndpointName = "Authentication".GetTokenProviderAPIEndpointName();
             if (FederatedApplicationSettings == null)
             {
                 ITokenProviderSettings standAloneConfig = Services.Get<ITokenProviderSettings>();
                 Client = ApiClientFactory.Create(standAloneConfig.Url, authenticationEndpointName, standAloneConfig.Username, standAloneConfig.Password);
-                encryptionService = new FederatedApplicationBasicEncryptionService(standAloneConfig);
             }
             else
             {
-                encryptionService = Services.Get<IEncryptionService>();
                 Client = ApiClientFactory.Create(FederatedApplicationSettings.AuthenticationProviderUrl, authenticationEndpointName, FederatedApplicationSettings.TokenProviderUsername, FederatedApplicationSettings.TokenProviderPassword);                
             }
-            Client.EncryptionHandler = str => encryptionService.DateSaltEncrypt(str);
-            Client.DecryptionHandler = str => encryptionService.DateSaltDecrypt(str, true);
+            Client.EncryptionHandler = str => str.Encrypt();
+            Client.DecryptionHandler = str => str.Decrypt();
 
             RequestEndpoint = Client.CreateEndpoint("Request".GetTokenProviderAPIEndpointName());
             RenewEndpoint = Client.CreateEndpoint("Renew".GetTokenProviderAPIEndpointName());

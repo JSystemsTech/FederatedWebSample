@@ -1,12 +1,23 @@
 ﻿@using FederatedAuthNAuthZ.Configuration
+@using FederatedAuthNAuthZ.Web.ConsumerAPI
 @{
+    IApplicationAuthenticationAPIApplicationSettingsResponse TargetApplicationSettings = ViewBag.TargetApplicationSettings as IApplicationAuthenticationAPIApplicationSettingsResponse;
     IFederatedApplicationSettings ConsumingApplicationFederatedApplicationSettings = ViewBag.ConsumingApplicationFederatedApplicationSettings as IFederatedApplicationSettings;
 }
 <h2 class="lead mb-0">Privacy Policy</h2>
 
 <div class="card card-privacy-notice my-2">
-    <div class="card-body p-2">
-        <p class="card-text text-left">@ConsumingApplicationFederatedApplicationSettings.SiteName has a privacy policy which must be acknowlaged before loging in.</p>
+    <div class="card-body p-2 overflow-auto" style="max-height:200px;">
+        @if (TargetApplicationSettings.PrivacyPolicy != null)
+        {
+            <div class="text-left" style="font-size: 0.7em">@(new HtmlString(TargetApplicationSettings.PrivacyPolicy))</div>
+        }
+        else
+        {
+            <p class="card-text text-left">@ConsumingApplicationFederatedApplicationSettings.SiteName has a privacy policy which must be acknowlaged before loging in.</p>
+        }
+    </div>
+    <div class="card-body px-2 py-0 border-top">
         <a href="@ConsumingApplicationFederatedApplicationSettings.PrivacyPolicyUrl" title="View Privacy Policy" class="card-link" target=”_blank” rel=”noopener noreferrer”>
             <small>
                 <i class="fa fa-info-circle"></i>

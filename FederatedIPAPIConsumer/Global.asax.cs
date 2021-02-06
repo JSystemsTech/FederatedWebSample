@@ -1,6 +1,7 @@
 ﻿using FederatedAuthNAuthZ.Services;
 using FederatedAuthNAuthZ.Web.ConsumerAPI;
 using FederatedIPAPIConsumer.App_Start;
+using FederatedIPAPIConsumer.Configuration;
 using FederatedIPAPIConsumer.Services;
 using ServiceLayer.DomainLayer;
 using ServiceLayer.DomainLayer.DbConnection;
@@ -21,9 +22,12 @@ namespace FederatedIPAPIConsumer
     {        
         public override void ConfigureServices(IServiceCollection services)
         {
+            
             services.AddApplicationSettings();
             services.AddConnectionStringConfig();
-            services.ConfigureFederatedApplication();
+            services.AddConfiguration<IDbStoredApplicationSettingsConfig, DbStoredApplicationSettingsConfig>();
+
+            services.ConfigureFederatedApplication<ConsumingApplicationSettings, FederatedEncryptionServiceWithDateSalt>();
             services.AddFederatedApplicationIdentityService<ConsumingApplicationIdentityService>();
             services.AddService<DbConnectionConfigService>();
             services.AddService<IDomainFacade, DomainFacade>();

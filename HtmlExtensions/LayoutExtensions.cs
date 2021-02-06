@@ -1,13 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Web;
-using System.Web.Mvc;
-using System.Web.Mvc.Html;
+﻿using System.Web.Mvc;
 
-namespace FederatedAuthNAuthZ.Extensions
+namespace HtmlExtensions
 {
-    public static class HtmlExtensions
+    public static class LayoutExtensions
     {
         public static MvcHtmlString AntiForgeryForm(this HtmlHelper helper, string id = "__AntiForgeryForm")
             => new MvcHtmlString($"<form id='{id}' class='d-none'>{helper.AntiForgeryToken()}</form>");

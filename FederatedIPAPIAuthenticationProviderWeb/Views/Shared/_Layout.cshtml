@@ -1,4 +1,4 @@
-﻿@using FederatedAuthNAuthZ.Extensions
+﻿@using HtmlExtensions
 @using FederatedAuthNAuthZ.Configuration
 @{
     IFederatedApplicationSettings FederatedApplicationSettings = ViewBag.FederatedApplicationSettings as IFederatedApplicationSettings;
@@ -58,11 +58,11 @@
                                     <p class="mb-0"><small class="badge badge-primary">@ConsumingApplicationFederatedApplicationSettings.VersionDisplay()</small></p>
                                 </div>
                             </div>
-                            <hr>
+                            <hr class="my-1 row">
                             @RenderBody()
-                            <hr>
+                            <hr class="my-1 row">
                             <div class="row">
-                                <div class="col">
+                                <div class="col" style="font-size: 0.8em">
                                     <p class="my-0">
                                         Powered By
                                     </p>

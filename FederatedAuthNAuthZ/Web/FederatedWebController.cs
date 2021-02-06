@@ -2,7 +2,6 @@
 using FederatedAuthNAuthZ.Configuration;
 using FederatedAuthNAuthZ.Principal;
 using FederatedAuthNAuthZ.Services;
-using FederatedAuthNAuthZ.Web;
 using FederatedAuthNAuthZ.Web.ConsumerAPI;
 using ServiceProvider.Web;
 using System;
@@ -14,7 +13,7 @@ using System.Web;
 using System.Web.Mvc;
 using System.Web.Routing;
 
-namespace WebApiClientShared.Web
+namespace FederatedAuthNAuthZ.Web
 {
     public abstract class FederatedWebController : ServiceProviderController,IRedirectToActionController
     {
@@ -57,7 +56,7 @@ namespace WebApiClientShared.Web
         
         private bool IsSecureRequest { get => Request.Url.Scheme.ToLower().Trim() == "https"; }
         
-        protected string BuildUrl<T>(string url, T query)
+        protected string BuildUrl(string url, IDictionary<string, object> query)
         {
             UriBuilder builder = new UriBuilder(url);
             List<string> queryParams = new List<string>();
@@ -65,14 +64,13 @@ namespace WebApiClientShared.Web
             {
                 queryParams.Add(p);
             });
-            foreach (var prop in query.GetType().GetProperties(BindingFlags.Instance | BindingFlags.Public))
+            foreach (var prop in query)
             {
-                queryParams.Add($"{prop.Name}={HttpUtility.UrlEncode(prop.GetValue(query).ToString())}");
+                queryParams.Add($"{prop.Key}={HttpUtility.UrlEncode(prop.Value.ToString())}");
             }
             builder.Query = string.Join("&", queryParams);
             return builder.Uri.ToString();
         }
-        
         protected PartialViewResult PartialFormView<T>(string formViewName, T model) => PartialView($"Forms/{formViewName}", model);
 
         protected override void OnAuthorization(AuthorizationContext filterContext)
@@ -101,6 +99,8 @@ namespace WebApiClientShared.Web
     }
     [FederatedApplication]
     public abstract class FederatedApplicationWebController : FederatedWebController { }
+    
+    [FederatedAuthenticationProvider]
     public abstract class FederatedProviderWebController : FederatedWebController
     {
         
@@ -109,7 +109,6 @@ namespace WebApiClientShared.Web
         protected IFederatedApplicationSettings ConsumingApplicationFederatedApplicationSettings => TargetApplicationSettings.FederatedApplicationSettings;
         protected IProviderAuthenticationModeService ProviderAuthenticationModeService => Services.Get<IProviderAuthenticationModeService>();
         protected IEnumerable<ApplicationUser> ConsumingApplicationTestUsers => TargetApplicationSettings.TestUsers;
-        private IEncryptionService EncryptionService => Services.Get<IEncryptionService>();
         private HttpCookie CreateAuthenticationCookie(string value, DateTime expires) => new HttpCookie(AuthenticationCookieName, value) { HttpOnly = true, Expires = expires, SameSite = SameSiteMode.Lax, Secure = IsSecureRequest };
 
 
@@ -138,9 +137,7 @@ namespace WebApiClientShared.Web
 
         private string AuthenticationCookieName { get => $"{ConsumingApplicationFederatedApplicationSettings.GetCookiePrefix()}{ConsumingApplicationFederatedApplicationSettings.GetCookieSuffix()}"; }
 
-        [HttpPost]
-        [FederatedExternalPostback]
-        public abstract ActionResult ExternalAuthenticationPostback(string token, string mode);
+        
 
         protected override void OnAuthorization(AuthorizationContext filterContext)
 
@@ -150,16 +147,19 @@ namespace WebApiClientShared.Web
             ApplicationAuthenticationAPI = new ApplicationAuthenticationAPI(ConsumerAuthenticationApiUrl);
 
             TargetApplicationSettings = ApplicationAuthenticationAPI.GetApplicationSettings();
+            ViewBag.TargetApplicationSettings = TargetApplicationSettings;
             ViewBag.ConsumingApplicationFederatedApplicationSettings = ConsumingApplicationFederatedApplicationSettings;
             ViewBag.LogoImage = TargetApplicationSettings.LogoImage;
         }
-        protected abstract string SaveAuthenticationRequest(string authenticationRequestToken);
-        //protected string BeginGetExternalAuthenticationPostbackUrl() => BeginGetExternalAuthenticationPostbackUrl(Url.Action("ExternalAuthenticationPostback"));
-        protected string BeginGetExternalAuthenticationPostbackUrl(string url, string mode)
+        private string GetRedirectUrl(string redirectUrl, string returnAction,IDictionary<string, object> returnQueryParams = null)
         {
-            string returnUrl = BuildUrl(GetUri(Url.Action("ExternalAuthenticationPostback")).AbsoluteUri, new { mode, AuthenticationRequest = SaveAuthenticationRequest(AuthenticationRequestToken) });
-            return BuildUrl(GetUri(url).AbsoluteUri, new { returnUrl = returnUrl });
+            IDictionary<string, object> queryParams = returnQueryParams != null ? returnQueryParams : new Dictionary<string, object>();
+            queryParams.Add("api", ConsumingApplicationFederatedApplicationSettings.ConsumerAuthenticationApiUrl.Encrypt());
+            string returnUrl = BuildUrl(GetUri(Url.Action(returnAction)).AbsoluteUri, queryParams);
+            return BuildUrl(GetUri(redirectUrl).AbsoluteUri, new Dictionary<string, object>() { { "returnUrl", returnUrl } });
         }
+        protected RedirectResult RedirectToUrl(string redirectUrl, string returnAction, IDictionary<string, object> returnQueryParams = null) 
+            => Redirect(GetRedirectUrl(redirectUrl, returnAction, returnQueryParams));
         private string AuthenticationRequestCookieName { get => $"{FederatedApplicationSettings.GetAuthRequestCookieName()}{AuthenticationRequestTokenCookieSuffix}"; }
         private string AuthenticationRequestTokenCookieSuffix => HttpContext.Session["AuthenticationRequestTokenCookieSuffix"].ToString();
         private bool IsSecureRequest { get => Request.Url.Scheme.ToLower().Trim() == "https"; }

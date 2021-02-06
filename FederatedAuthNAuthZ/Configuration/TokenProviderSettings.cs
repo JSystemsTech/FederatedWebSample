@@ -14,7 +14,7 @@ namespace FederatedAuthNAuthZ.Configuration
         string Username { get; }
         string Password { get; }
     }
-    public sealed class TokenProviderSettings : ConfigurationSectionConfig, ITokenProviderSettings
+    public class TokenProviderSettings : ConfigurationSectionConfig, ITokenProviderSettings
     {
         protected override string ConfiguationSection => FederatedSettings.TokenProviderSettings;
         public string Url { get; set; }
